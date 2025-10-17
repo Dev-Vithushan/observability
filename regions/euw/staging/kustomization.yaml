@@ -137,6 +137,7 @@ secretGenerator:
       - AZURE_ACCOUNT_KEY=changeme
       - AZURE_ACCOUNT_NAME=changeme
       - AZURE_CONTAINER_NAME=changeme
+      - .htpasswd=changeme
     options:
       disableNameSuffixHash: true
   - name: apm-server-prod-token
