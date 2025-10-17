@@ -1,0 +1,205 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helm-values-otel-collector-regional
+  namespace: oe-otel
+data:
+  values.yaml: |
+    config:
+      connectors:
+        spanmetrics:
+          histogram:
+            explicit:
+              buckets: [100us, 1ms, 2ms, 6ms, 10ms, 100ms, 250ms]
+          dimensions:
+            - name: http.method
+              default: GET
+            - name: http.status_code
+          dimensions_cache_size: 1000
+          aggregation_temporality: "AGGREGATION_TEMPORALITY_CUMULATIVE"
+          metrics_flush_interval: 15s
+      exporters:
+        debug: {}
+        otlphttp/loki:
+          endpoint:
+            http://loki-distributor.oe-loki.svc.cluster.local:3100/otlp
+          tls:
+            insecure: true
+        otlp/tempo:
+          endpoint:
+            http://tempo-distributor.oe-tempo.svc.cluster.local:4317
+          tls:
+            insecure: true
+        otlp:
+          endpoint: 'otel-collector:4317'
+          tls:
+            insecure: true
+        otlphttp/elastic:
+          endpoint: "https://apm-server-${env_type}-${region}.sitecorecloud.app:443"
+          tls:
+            insecure: false
+            insecure_skip_verify: false
+          sending_queue:
+            enabled: true
+            num_consumers: 100
+            queue_size: 10000
+          headers:
+            Authorization: "Bearer $${APM_SERVER_TOKEN}"
+        prometheus:
+          enable_open_metrics: true
+          resource_to_telemetry_conversion:
+            enabled: true
+          endpoint: ${env:MY_POD_IP}:8889
+          metric_expiration: 180m
+          add_metric_suffixes: false
+        prometheusremotewrite/prometheus:
+          endpoint: 'http://kube-prometheus-stack-prometheus.oe-prometheus.svc.cluster.local:9090/api/v1/write'
+          headers:
+            x-scope-orgid: "oe-metrics"
+          tls:
+            insecure: true
+      extensions:
+        # The health_check extension is mandatory for this chart.
+        # Without the health_check extension the collector will fail the readiness and liveliness probes.
+        # The health_check extension can be modified, but should never be removed.
+        health_check:
+          endpoint: ${env:MY_POD_IP}:13133
+        basicauth/server:
+          htpasswd:
+            inline: |
+              $${OTLP_USER}:$${OTLP_PASSWORD}
+      processors:
+        # Default memory limiter configuration for the collector based on k8s resource limits.
+        memory_limiter:
+          # check_interval is the time between measurements of memory usage.
+          check_interval: 5s
+          # By default limit_mib is set to 80% of ".Values.resources.limits.memory"
+          limit_percentage: 80
+          # By default spike_limit_mib is set to 25% of ".Values.resources.limits.memory"
+          spike_limit_percentage: 25
+        batch:
+          send_batch_size: 500
+          send_batch_max_size: 500
+        filter/prometheus:
+          metrics:
+            metric:
+              - 'resource.attributes["SERVICE_NAME"] == "remote_prometheus_write"'
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: ${env:MY_POD_IP}:4317
+            http:
+              endpoint: ${env:MY_POD_IP}:4318
+              auth:
+                authenticator: basicauth/server
+        prometheus:
+          config:
+            scrape_configs:
+              - job_name: opentelemetry-collector
+                scrape_interval: 10s
+                static_configs:
+                  - targets:
+                      - ${env:MY_POD_IP}:8888
+      service:
+        telemetry:
+          metrics:
+            readers:
+              - pull:
+                  exporter:
+                    prometheus:
+                      host: "${env:MY_POD_IP}"
+                      port: 8888
+        extensions:
+          - health_check
+          - basicauth/server
+        pipelines:
+          logs:
+            exporters:
+              - debug
+              - otlphttp/loki
+            processors:
+              - batch
+            receivers:
+              - otlp
+          metrics:
+            receivers:
+              - otlp
+              - spanmetrics
+            processors:
+              - memory_limiter
+              - batch
+            exporters:
+              - debug
+              - prometheusremotewrite/prometheus
+          traces:
+            exporters:
+              - debug
+              - otlp/tempo
+              - otlphttp/elastic
+              - spanmetrics
+    extraEnvs:
+      - name: OTLP_USER
+        valueFrom:
+          secretKeyRef:
+            name: otel-secret
+            key: OTLP_USER
+      - name: OTLP_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: otel-secret
+            key: OTLP_PASSWORD
+      - name: APM_SERVER_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: otel-secret
+            key: APM_SERVER_TOKEN
+    ports:
+      otlp:
+        enabled: true
+        containerPort: 4317
+        servicePort: 4317
+        hostPort: 4317
+        protocol: TCP
+        appProtocol: grpc
+      otlp-http:
+        enabled: true
+        containerPort: 4318
+        servicePort: 4318
+        hostPort: 4318
+        protocol: TCP
+      loki-http:
+        enabled: true
+        containerPort: 3500
+        servicePort: 3500
+        hostPort: 3500
+        protocol: TCP
+      metrics:
+        enabled: true
+        containerPort: 8888
+        servicePort: 8888
+        protocol: TCP
+    ingress:
+      enabled: true
+      annotations:
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: "GRPC,HTTP"
+        konghq.com/protocols: "grpc,grpcs,http,https"
+      ingressClassName: ${ingress_class}
+      hosts:
+        - host: otel-collector-g-${env_type}-${region}.sitecorecloud.app
+          paths:
+            - path: /
+              pathType: Prefix
+              port: 4317
+        - host: otel-collector-h-${env_type}-${region}.sitecorecloud.app
+          paths:
+            - path: /
+              pathType: Prefix
+              port: 4318
+        - host: otel-collector-${env_type}-${region}.sitecorecloud.io
+          paths:
+            - path: /
+              pathType: Prefix
+              port: 4318

@@ -1,0 +1,21 @@
+---
+- op: replace
+  path: /metadata/name
+  value: c255-hosted-redislabs-exporter
+- op: add
+  path: /spec/selector/matchLabels/cluster
+  value: c255
+- op: add
+  path: /spec/template/metadata/labels/cluster
+  value: c255
+- op: add
+  path: /spec/template/metadata/labels/app.kubernetes.io~1instance
+  value: c255-hosted-redislabs-exporter
+- op: replace
+  path: /spec/template/spec/containers/0/name
+  value: c255-hosted-redislabs-exporter
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: CLUSTER_SUB_ID
+    value: "1397421"

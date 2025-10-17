@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: jpe-e1-contenthub-aks-01-objstore-config-thanos
+type: Opaque
+data:
+    objstore.yml: ENC[AES256_GCM,data:3zacPcb7wsjjii76HBSdbjFNgt3hcO0Id0DMEDcd5dhSyCZ8KytQsLbO3KqBUSillsglBs70zqzJFHydLZfP27aFPC2L367afKEn/lwYejvdQoOWhmHQuuNrU8FrH73idfNQNNGqrPP8viKRjmgpn6isJHmtiJK74kcfas47MA3NArij4KeI5OgNbSG9UdreYsoT1KNAY6R8AGa3EEMJ6z1xO8wsfWZOhJbHd+H+U6qkAiGq+wNwiOeGMu/Q9Ef3UICdrSLL0lmFmkibiuAa+mPMq3cL2raPn1oBQn1MKI4qIwIU0/b2EYT8DfcOaNw/xMAyg+FcShkWSl7/aQxZLvVqAjPZFXLkI9ERvBLYPdChHODmjjq1RUL+mF7txgtoXlXPwkK8o6H9vORG4IvzfglG2Y+XKBO+0C5AGBjkZ65Bueqb+7Mud1Ab54c3JD+CZ2TQbw==,iv:5vJLuQhAu2Vz7EDUM0eY//cqaz66h6K2osHwTwiMdYM=,tag:VbBxE2NbeDIlkdzKdZ50EQ==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2024-02-20T11:55:21Z"
+          enc: u1zaQq03zijYZVCV8Y9RiSkQnPjf3znTJb17ZccJu27JeSwdYUxY6ciZmxUxaRnmJBz3u3S6HlWcdj58iHCqEGGa1RivunmDNpqfBbKnVFcBm7AcZo0HUngb9L_zijjV7rmuZ70UkzHZgB3OzX4i7xDntpSO8q9VwdsW-g18YmX9lGbFhJYG-ULBNx-ZpsqlDqi8Zwr4ZTPIcKOw-Mtq4LyqrXsZo3z6eepuJl70rdb-s0vCYH-pxSiaOlWFmk1kYKkCgtWUXVlklma_DAnlY9eqVAI7zaOTN1Wb0i9jTnluLVlo8zg3-IkGkoQBwZPp2cBAR4rjC4u2jWNSrYEVmbpJvptQR5VGUPq-ozOY7OJx9gzMryHKZdd6fxn15AWj1S7y3ou-EvMOiUVNW_WTyC-r5u-xq1UdOQqHm9AOYoIQ4QruNJSJZo4DXdqBzyh1x6slQJsIcIGvYhlAmmLXgLIu3BWz6Za6wSDQlkb1r397djJ4oTynGERwcRwO9gqsmcz5mQ0rzewXSHQfxv-JmHX-WdE57yGjnqBdk0PpY74QOJsNxx1yVNGgUcvLO0LTPY5MCMkaxf3ZQS7bsiaaR_kOn2dDrhdW5VcBTPIwmhN2aTt7MeB567FVqBTl7HZ9Cfei4dcBwARzc2HNGqXMxxjbLwCa6yt0kSuqeos6JSI
+    hc_vault: []
+    age: []
+    lastmodified: "2024-02-20T11:55:22Z"
+    mac: ENC[AES256_GCM,data:XzSrer1xMthdZbULc9LMjNWdeYCyhpWlOxrwrdzjQcNz78exjFBBE5PZfDZd8ShxTKcQhPdakkzlkaAVqq5csXwMcWe298heSr9pP7yhVuWtz/uhbgbUjd6KhTSNVYPLT1LgIqTsHcQtWPjwvcw6NjUqr/B5APdajIBIe+SOdGY=,iv:lNVzr260KUI1/g5T+h+gyoehQl4MisbShDKickc+ZvQ=,tag:TDIPLdKDRDWcLc3vJeFQQg==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: grafana-prometheus-alerts
+  namespace: oe-alerts
+spec:
+  groups:
+    - name: grafana
+      rules:
+        - alert: GrafanaRequestsFailing
+          for: 5m
+          expr: |
+            rate(grafana_http_request_duration_seconds_count{handler!~"/api/datasources/proxy/:id.*|/api/ds/query|/api/tsdb/query",status_code=~"5..", namespace=~"oe-.*"}[5m])
+            / rate(grafana_http_request_duration_seconds_count{handler!~"/api/datasources/proxy/:id.*|/api/ds/query|/api/tsdb/query", namespace=~"oe-.*"}[5m])
+          labels:
+            severity: P3
+            system: oe
+            component: grafana
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: '{{ $labels.namespace }}/{{ $labels.job }}/{{ $labels.handler }} is experiencing {{ $value | humanize }}% errors'

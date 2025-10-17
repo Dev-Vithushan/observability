@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: wus2-e1-xmcloud-cm-10-aks-objstore-config-thanos
+type: Opaque
+data:
+    objstore.yml: ENC[AES256_GCM,data:Dp4SJm5o4BKxPrD9w8fDZ55Tj/f3j3XqG0j2IoiPuuhFQjGD8HP0uweZ5hTFPIbccNjqvCFdgGYclxcMMOwfBcOZpHQzkPsNAAvKWGmQOklzlnIwYekZ4VoHSoM+puekWYUVzrfeCHUdZ7Fj/FzkYVCSujNxksaYhI3GwyWXlH2QhW76L7J3Hl/kZ+Hi6iBGJYR5Py2cLMWCnXsmFH8VeltLBDq5WyCwENjePAnbmT04u+oxtz2aLlCPEU1dHpUPsnF1FId6Dcq21xAwFGKU9LDibYrncLtuyrbakmLsPDLLQli/inCTIt6TC4Ukx/wZpcTummjAsYiEtVUi/ZgaNWct4nCYsTIrUgMM8PeKKsQfnkFPnG4TB36prTAbnClVLku+YImj6wGhcEcuZOkl4xFUT13N9ShP8Y8efKAQSZmSSC6b1E36T1MxXbWjcWKo,iv:3KGn6LCfdT59b0fxWKgljJVHVbzHbZvskci1lG71FQU=,tag:iUQzwhcuDdc6qKqj20Ft/g==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2024-09-02T08:51:50Z"
+          enc: FQyCkESfygPrmcmO0yX1gjiU_IlufUaFKQwX8_QppY84U5-x-aW0MonlnDdTvavQfKg9SYqex3vRGbiIv6abfndvTkfdiNq4KbwkeqLX3fAAfErFRrDmWuVYQpFoIL4uV8VcCKr80pF47OTajdP8rBUqG0GgVseDxDuhWvzFaUJW2sDOw4DeNyePmSxgAnERzzCRjLZjgku3Q6ayPw7AQKfsEbnvg0igepsrH6J6VFx3getqG56I7iwTjZ2A1Ms8H_WdUrtCl-q-_LbydNz_WIw0c8axFytre3PpKP8YoAfhp4JfguZeda-vHninX-8mEmBawA0Gyo5g2Kp2Lk1rRHOBSmKTv1uhv7l0j4hdVhxQbCJXYs2xpf0OUxcF5rRgZe6C_S3u07kb84tw1emfZix7hbhVKt5X9AjzWkfp7axGuUvDjR81mHqoARxT3ApRTcG4l2-0GGa9RxUBiO_DTxvyHf7gnH2y0lERTIIFLp8j0biVvXrnFnmzoUQXvKX9uiZ2hgt8HZSGEcJFMcHCu722zHP97_d6hGYqpUAuOe8iKqnc_nXfeWB-4uwmFRoHQYNyDETkw2jJ7U_z_8R3WcpZDR1Tvd6uu9a4-oTJeu1JapRjz6_p2qwdjebHSeuzPtdt4zs7K9-VWpRc9_euY3nWI6_lu6oNmzsVRtRHnXs
+    hc_vault: []
+    age: []
+    lastmodified: "2024-09-02T08:51:51Z"
+    mac: ENC[AES256_GCM,data:lkZsj2boFNdblyuqlVKiR5fdoVLKLt9XBdFQ+zqzV/FbaEjuJ04qhfwWkhKBHL84kO4xXNafrHFvfCMqoikhyJl1BWLImunOdbck+R9RbsGt088NpCYImVHh90WlDjsY9hqV87d3JHYK6hh9nH/acpnINXF00fF9LUy+FTWGddA=,iv:+/+MvhBsoAQ07GRZctDTh+alKy09WwQYkIQk1ztRHLg=,tag:iG5UB089OkTvCqhtar1FsQ==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

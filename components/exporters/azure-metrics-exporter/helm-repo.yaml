@@ -1,0 +1,9 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: azure-metrics-exporter
+  namespace: oe-azure-metrics-exporter
+spec:
+  interval: 1h0m0s
+  url: https://webdevops.github.io/helm-charts/

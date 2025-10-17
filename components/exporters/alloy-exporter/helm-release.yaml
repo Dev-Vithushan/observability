@@ -1,0 +1,24 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alloy-exporter
+  namespace: oe-alloy-exporter
+spec:
+  interval: 1h0m0s
+  chart:
+    spec:
+      version: 1.2.0
+      chart: alloy
+      sourceRef:
+        kind: HelmRepository
+        name: alloy
+        namespace: oe-alloy-exporter
+  valuesFrom:
+    - kind: ConfigMap
+      name: helm-values-alloy-exporter
+      valuesKey: values.yaml
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3

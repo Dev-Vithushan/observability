@@ -1,0 +1,118 @@
+---
+# Default values for dotnetsampleapp-service-provider.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: contenthub.azurecr.io/dev/oe-dotnetsampleapp
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "1.0.4"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: "oe-sample-app"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations:
+  logtype: json
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+azureAppConfiguration:
+  enabled: false
+  environment: ""
+  connectionString: ""
+  # Name of the existing secret with connection string.
+  existingSecret: ""
+
+sql:
+  connectionstring: ""
+  username: ""
+  password: ""
+  # Name of the existing secret with username and password keys.
+  existingSecret: ""
+
+## The name of a secret in the same kubernetes namespace which contain values to be added to the environment
+## This can be useful for auth tokens, etc.
+envExtraExistingSecret: ""
+
+## Environment variables that will be rendered as new configmap object
+## This can be useful for extra configuration options
+envExtraConfig: {}
+
+container:
+  port: 5000
+  prometheusPort: 9090
+
+service:
+  type: ClusterIP
+  port: 80
+  prometheusPort: 9090
+
+ingress:
+  enabled: true
+  className: ${ingress_class}
+  annotations:
+    konghq.com/protocols: https
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: oe-sample-app-${env_type}-${region}.sitecorecloud.app
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: oe-sample-app
+            port:
+              name: http
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  # https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-resource-requests-and-limits
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+livenessProbe:
+  enabled: false
+
+readinessProbe:
+  enabled: false
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

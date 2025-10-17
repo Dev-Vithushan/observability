@@ -1,0 +1,18 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: grafana-stack
+spec:
+  url: https://grafana.github.io/helm-charts
+  interval: 0h5m0s
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: grafana-dashboards
+spec:
+  interval: 0h5m0s
+  provider: azure
+  type: oci
+  url: oci://contenthub.azurecr.io/helm

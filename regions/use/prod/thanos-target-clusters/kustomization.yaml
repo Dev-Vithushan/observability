@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - use-e1-cs-aks-01/
+  - use-e1-shared-aks-01/
+  - use-e1-shared-aks-02/
+  - use-e1-contenthub-aks-01/
+  - use-e1-contenthub-sb-aks-01/
+  - eus-e1-xmcloud-cm-11-aks/
+  - use-e1-xmcloud-cm-12-aks/

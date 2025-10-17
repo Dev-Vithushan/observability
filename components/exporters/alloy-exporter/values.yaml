@@ -1,0 +1,274 @@
+alloy:
+  configMap:
+    content: |-
+      logging {
+        level = "info"
+        format = "json"
+      }
+
+      remote.kubernetes.configmap "endpoints" {
+        namespace = "oe-alloy-exporter"
+        name = "endpoints"
+      }
+
+      remote.kubernetes.secret "alloy_exporter_credentials" {
+        namespace = "oe-alloy-exporter"
+        name = "alloy-exporter"
+      }
+
+      prometheus.exporter.elasticsearch "oe_euw" {
+        address = remote.kubernetes.configmap.endpoints.data["es_oe_euw"]
+        basic_auth {
+          username = convert.nonsensitive(remote.kubernetes.secret.alloy_exporter_credentials.data["es_username"])
+          password = remote.kubernetes.secret.alloy_exporter_credentials.data["es_password"]
+        }
+        indices = true
+        shards = true
+        all = true
+      }
+
+      prometheus.scrape "oe_euw" {
+        targets    = prometheus.exporter.elasticsearch.oe_euw.targets
+        forward_to = [prometheus.remote_write.mimir.receiver]
+        clustering {
+          enabled = true
+        }
+      }
+
+      prometheus.exporter.elasticsearch "edge_use" {
+        address = remote.kubernetes.configmap.endpoints.data["es_edge_use"]
+        basic_auth {
+          username = convert.nonsensitive(remote.kubernetes.secret.alloy_exporter_credentials.data["es_username"])
+          password = remote.kubernetes.secret.alloy_exporter_credentials.data["es_password"]
+        }
+        indices = true
+        shards = true
+        all = true
+      }
+
+      prometheus.scrape "edge_use" {
+        targets    = prometheus.exporter.elasticsearch.edge_use.targets
+        forward_to = [prometheus.remote_write.mimir.receiver]
+        clustering {
+          enabled = true
+        }
+      }
+
+      prometheus.remote_write "mimir" {
+        endpoint {
+          url = remote.kubernetes.configmap.endpoints.data["mimir_endpoint"]
+          headers = {
+            "X-Scope-OrgID" = "oe-metrics",
+          }
+        }
+      }
+
+      loki.source.azure_event_hubs "jpe_azure_event_logs" {
+        fully_qualified_namespace = remote.kubernetes.configmap.endpoints.data["jpe_hub_ns"]
+        event_hubs                = ["jpe-security-eventhub-prod"]
+        forward_to                = [loki.process.azure_event_logs.receiver]
+
+        authentication {
+          mechanism         = "connection_string"
+          connection_string = remote.kubernetes.secret.alloy_exporter_credentials.data["jpe_hub_conn_string"]
+        }
+
+        use_incoming_timestamp  = true
+        labels = {
+          job = "azure-eventhubs-logs",
+          region = "jpe",
+        }
+      }
+
+      loki.source.azure_event_hubs "euw_azure_event_logs" {
+        fully_qualified_namespace = remote.kubernetes.configmap.endpoints.data["euw_hub_ns"]
+        event_hubs                = ["euw-security-eventhub-prod"]
+        forward_to                = [loki.process.azure_event_logs.receiver]
+
+        authentication {
+          mechanism         = "connection_string"
+          connection_string = remote.kubernetes.secret.alloy_exporter_credentials.data["euw_hub_conn_string"]
+        }
+
+        use_incoming_timestamp  = true
+        labels = {
+          job = "azure-eventhubs-logs",
+          region = "euw",
+        }
+      }
+
+      loki.process "azure_event_logs" {
+        stage.drop {
+          older_than = "2h"
+          drop_counter_reason = "Event rejected: entry too far behind"
+        }
+
+        stage.json {
+          expressions = {
+            category    = "category",
+            resourceid  = "resourceId",
+            action      = "properties.Action",
+            policy      = "properties.Policy",
+            rule        = "properties.Rule",
+          }
+        }
+
+        stage.regex {
+          source = "resourceid"
+          expression = "/(?P<resname>[^/]+)$"
+        }
+
+        stage.labels {
+          values = {
+            category   = "category",
+            resourceid = "resname",
+            policy     = "policy",
+            rule       = "rule",
+            action     = "action",
+          }
+        }
+
+        stage.match {
+          selector = "{category!~\"^AZFW.*\"}"
+          action   = "drop"
+          // drop_counter_reason = "No matching AZFW category"
+        }
+
+        stage.static_labels {
+          values = {
+            job = "azure-firewall-logs",
+          }
+        }
+        forward_to = [loki.write.logs.receiver]
+      }
+
+      loki.write "logs" {
+      	endpoint {
+      		url        = "http://loki-distributor.oe-loki.svc.cluster.local:3100/loki/api/v1/push"
+      		batch_wait = "10s"
+      		batch_size = "1024KiB"
+      	}
+      }
+
+  clustering:
+    enabled: true
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "100Mi"
+    limits:
+      cpu: "2048m"
+      memory: "4096Mi"
+  enableReporting: false
+  stabilityLevel: "generally-available"
+  #extraEnv:
+  #  - name: JPE_HUB_CONN_STRING
+  #    valueFrom:
+  #      secretKeyRef:
+  #        key: jpe_hub_conn_string
+  #        name: alloy-exporter
+  #  - name: EUW_HUB_CONN_STRING
+  #    valueFrom:
+  #      secretKeyRef:
+  #        key: euw_hub_conn_string
+  #        name: alloy-exporter
+
+controller:
+  # -- Type of controller to use for deploying Grafana Alloy in the cluster.
+  # Must be one of 'daemonset', 'deployment', or 'statefulset'.
+  type: 'statefulset'
+
+  # -- Number of pods to deploy. Ignored when controller.type is 'daemonset'.
+  replicas: 1
+
+  # -- Annotations to add to controller.
+  extraAnnotations: {}
+
+  # -- Whether to deploy pods in parallel. Only used when controller.type is
+  # 'statefulset'.
+  parallelRollout: true
+
+  # -- Configures Pods to use the host network. When set to true, the ports that will be used must be specified.
+  hostNetwork: false
+
+  # -- Configures Pods to use the host PID namespace.
+  hostPID: false
+
+  # -- Configures the DNS policy for the pod. https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+  dnsPolicy: ClusterFirst
+
+  # -- Update strategy for updating deployed Pods.
+  updateStrategy: {}
+
+  # -- nodeSelector to apply to Grafana Alloy pods.
+  nodeSelector: {}
+
+  # -- Tolerations to apply to Grafana Alloy pods.
+  tolerations: []
+
+  # -- Topology Spread Constraints to apply to Grafana Alloy pods.
+  topologySpreadConstraints: []
+
+  # -- priorityClassName to apply to Grafana Alloy pods.
+  priorityClassName: ''
+
+  # -- Extra pod annotations to add.
+  podAnnotations: {}
+
+  # -- Extra pod labels to add.
+  podLabels: {}
+
+  # -- Whether to enable automatic deletion of stale PVCs due to a scale down operation, when controller.type is 'statefulset'.
+  enableStatefulSetAutoDeletePVC: false
+
+  autoscaling:
+    # -- Creates a HorizontalPodAutoscaler for controller type deployment.
+    enabled: true
+    # -- The lower limit for the number of replicas to which the autoscaler can scale down.
+    minReplicas: 1
+    # -- The upper limit for the number of replicas to which the autoscaler can scale up.
+    maxReplicas: 10
+    # -- Average CPU utilization across all relevant pods, a percentage of the requested value of the resource for the pods. Setting `targetCPUUtilizationPercentage` to 0 will disable CPU scaling.
+    targetCPUUtilizationPercentage: 80
+    # -- Average Memory utilization across all relevant pods, a percentage of the requested value of the resource for the pods. Setting `targetMemoryUtilizationPercentage` to 0 will disable Memory scaling.
+    targetMemoryUtilizationPercentage: 0
+
+    scaleDown:
+      # -- List of policies to determine the scale-down behavior.
+      policies: []
+        # - type: Pods
+        #   value: 4
+        #   periodSeconds: 60
+      # -- Determines which of the provided scaling-down policies to apply if multiple are specified.
+      selectPolicy: Max
+      # -- The duration that the autoscaling mechanism should look back on to make decisions about scaling down.
+      stabilizationWindowSeconds: 300
+
+    scaleUp:
+      # -- List of policies to determine the scale-up behavior.
+      policies: []
+        # - type: Pods
+        #   value: 4
+        #   periodSeconds: 60
+      # -- Determines which of the provided scaling-up policies to apply if multiple are specified.
+      selectPolicy: Max
+      # -- The duration that the autoscaling mechanism should look back on to make decisions about scaling up.
+      stabilizationWindowSeconds: 0
+
+  # -- Affinity configuration for pods.
+  affinity: {}
+
+  volumes:
+    # -- Extra volumes to add to the Grafana Alloy pod.
+    extra: []
+
+  # -- volumeClaimTemplates to add when controller.type is 'statefulset'.
+  volumeClaimTemplates: []
+
+  ## -- Additional init containers to run.
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ##
+  initContainers: []
+
+  # -- Additional containers to run alongside the Alloy container and initContainers.
+  extraContainers: []

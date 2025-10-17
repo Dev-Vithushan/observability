@@ -1,0 +1,10 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: sample-app
+spec:
+  interval: 1h0m0s
+  provider: azure
+  type: oci
+  url: oci://contenthub.azurecr.io/helm/oe-dotnetsampleapp-service-provider

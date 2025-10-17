@@ -1,0 +1,144 @@
+[
+    {
+        "comment": "Memory usage alerts for my-otel-demo.* pod",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "ContainerCriticalMemoryUsage|ContainerHighMemoryUsage"
+            },
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "pod",
+                "value": "my-otel-demo.*"
+            }
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    },
+    {
+        "comment": "KubeJob alerts",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "KubeJobFailed|KubeJobCompletion"
+            },
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "job_name",
+                "value": "devlake-transfer.*|github-metrics.*"
+            }
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    },
+    {
+        "comment": "CPU Throttling alerts",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "CPUThrottlingHigh"
+            },
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "container",
+                "value": "kube-prometheus-stack|node-exporter|alloy"
+            }
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    },
+    {
+        "comment": "Thanos alerts",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "ThanosCompactHalted|ThanosCompactHasNotRun|ThanosQuerierGrpcClientErrorRate"
+            }
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    },
+    {
+        "comment": "Alloy alerts",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "AlloyClusterNodeCountMismatch|AlloyClusterNodeUnhealthy|AlloyClusterNotConverging|AlloyWriteToLokiDroppedEntries"
+            }
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    },
+    {
+        "comment": "Memory usage alerts for prometheus|alloy|retina|config-reloader containers",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "ContainerCriticalMemoryUsage|ContainerHighMemoryUsage"
+            },
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "container",
+                "value": "prometheus|alloy|retina|config-reloader"
+            }
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    },
+    {
+        "comment": "ReconciliationFailure alerts for mimir-stack|retina",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "ReconciliationFailure"
+            },
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "name",
+                "value": "mimir-stack|retina"
+            }
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    },
+    {
+        "comment": "Prometheus alerts",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "ThanosSidecarGrpcErrorRate"
+            }
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    }
+]

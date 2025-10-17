@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: site24x7-poller
+  name: site24x7-poller
+  namespace: oe-site247poller
+spec:
+  clusterIP: None
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+      # Prefix with an unique ID specific to the cluster.
+    - name: 8bd6ebdf06de40c28f4dba33c8240058-s247poller-deploy
+      port: 80
+  # publishNotReadyAddresses: true
+  selector:
+    app: site24x7-poller
+  sessionAffinity: None
+  type: ClusterIP
+

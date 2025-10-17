@@ -1,0 +1,25 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helm-values-sampleapp-stack-regional
+  namespace: oe-sample-app
+data:
+  values.yaml: |
+    elasticApm:
+      enabled: true
+      environment: "OE-Sample-App-Dev"
+      serverUrl: "https://apm-server-dev-internal-euw.sitecorecloud.app:443"
+      secretToken: ""
+      # Name of the existing secret with token key.
+      existingSecret: "apm-server-dev-token"
+    env:
+      # The value can have following values depending on the deployment environment:
+      # dev, qa, poc, staging, pre-production, production (and debug or local for local deployment)
+      name: dev
+      appEnvironment: Development
+      defaultApiVersion: 2
+      otel_exporter_otlp_endpoint: "https://otel-collector-${env_type}-${region}.sitecorecloud.app:443"
+    tags:
+      region: euw
+      type: internal

@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: oe-alerts
+  labels:
+    #Following variable is commented out until we rollout to use new clusters
+    alertmanagerconfig: enabled
+    sc_system: ${sc_system}
+    sc_domain: ${sc_domain}
+    sc_component: ${sc_system}-oe_alertmanagerconfig
+    sc_env: ${sc_env}
+    sc_region: ${sc_region}
+    sc_provider: ${sc_provider}
+    sc_createdby: ${sc_createdby}
+    sc_type: ${sc_type}
+    sc_owner: ${sc_owner}

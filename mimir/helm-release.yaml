@@ -1,0 +1,23 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: mimir-stack
+spec:
+  interval: 1h0m0s
+  chart:
+    spec:
+      version: 5.7.0
+      chart: mimir-distributed
+      sourceRef:
+        kind: HelmRepository
+        name: mimir
+        namespace: oe-mimir
+  valuesFrom:
+    - kind: ConfigMap
+      name: helm-values-mimir-stack-base
+      valuesKey: values.yaml
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: endpoints
+  namespace: oe-alloy-exporter
+data:
+  mimir_endpoint: "http://mimir-distributor.oe-mimir.svc.cluster.local:8080/api/v1/push"
+  es_oe_euw: "https://oe-ess-euw-shared-prod-01.es.westeurope.azure.elastic-cloud.com"
+  es_edge_use: "https://edge-use-shared-prod.es.eastus.azure.elastic-cloud.com"
+  jpe_hub_ns: "jpe-security-eventhub-ns-prod.servicebus.windows.net:9093"
+  euw_hub_ns: "euw-security-eventhub-ns-prod.servicebus.windows.net:9093"

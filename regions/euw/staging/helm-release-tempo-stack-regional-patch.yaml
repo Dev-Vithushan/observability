@@ -1,0 +1,19 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tempo-stack
+  namespace: oe-tempo
+spec:
+  valuesFrom:
+    - kind: ConfigMap
+      name: helm-values-tempo-stack-base
+      valuesKey: values.yaml
+    - kind: ConfigMap
+      name: helm-values-tempo-stack-regional
+      valuesKey: values.yaml
+  upgrade:
+    timeout: 10m
+    remediation:
+      strategy: rollback
+      retries: 3

@@ -1,0 +1,35 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kafka-metric-api
+  namespace: oe-kafka-metrics
+  labels:
+    app: kafka-metric-api
+    release: kube-prometheus-stack
+spec:
+  endpoints:
+  - port: kafka-metrics
+    path: /v2/metrics/cloud/export
+    relabelings:
+      - sourceLabels: [__address__]
+        targetLabel: __address__
+        regex: (.*)
+        replacement: "api.telemetry.confluent.cloud:443"
+        action: replace
+    interval: 240s
+    scheme: https
+    params:
+      resource.kafka.id:
+        - kafka_id
+    basicAuth:
+      password:
+        name: kafka-basic-auth
+        key: password
+      username:
+        name: kafka-basic-auth
+        key: username
+  selector:
+    matchLabels:
+      app: kafka-metric-api
+      release: kube-prometheus-stack
+

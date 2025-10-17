@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  grafana-silences-creation-image:
+    container_name: grafana-silences-creation-image
+    image: ${DOCKER_REGISTRY}/grafana-silences-creation-image:${TAG}
+    build:
+      context: .
+      dockerfile: ./Dockerfile

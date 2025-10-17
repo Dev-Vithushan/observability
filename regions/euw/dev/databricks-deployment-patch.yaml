@@ -1,0 +1,5 @@
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: DATABRICKS_API_URI
+    value: "https://adb-4239305447012127.7.azuredatabricks.net"

@@ -1,0 +1,5 @@
+---
+- op: replace
+  path: "/spec/endpoints/0/params/resource.kafka.id"
+  value:
+    - lkc-8dgdm

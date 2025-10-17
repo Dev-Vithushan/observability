@@ -1,0 +1,69 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  labels:
+    alertmanager: kube-prometheus-stack-alertmanager
+  name: alert-manager-config
+  namespace: oe-alerts
+spec:
+  route:
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 4h
+    groupBy:
+      - alertname
+      - severity
+      - component
+      - namespace
+    receiver: observability-team
+    continue: true
+  receivers:
+  - name: observability-team
+    msteamsConfigs:
+    - webhookUrl:
+        key: msteamsWebhookUrl
+        name: alert-manager-secrets
+        optional: false
+      sendResolved: true
+      title: "{{ .Status | toUpper }} | {{ .CommonLabels.alertname }} | {{ .CommonLabels.cluster }} | {{ .CommonLabels.component }}"
+      text: |
+        **{{ .Alerts.Firing | len }}x Alerts Firing**
+
+        {{ range .Alerts.Firing }}
+
+        {{ if .Labels.severity }}`{{ .Labels.severity }}` - {{ end }}**Alert:** {{ .Annotations.message }}
+
+        {{ if .Annotations.description }}**Description:** {{ .Annotations.description }}
+        {{ end }}
+
+        {{ if .Annotations.runbook_url }}**Runbook:** {{ .Annotations.runbook_url }}
+        {{ end }}
+
+
+        **Labels:**
+        {{ range .Labels.SortedPairs }}  - {{ .Name }} = `{{ .Value }}`
+        {{ end }}
+        **Annotations:**
+        {{ range .Annotations.SortedPairs }}  - {{ .Name }} = {{ .Value }}
+        {{ end }}
+        {{ end }}
+    opsgenieConfigs:
+    - apiURL: https://api.eu.opsgenie.com
+      apiKey:
+        key: opsgenieApiKey
+        name: alert-manager-secrets
+      sendResolved: true
+      message: "{{ .CommonAnnotations.message }} {{ .CommonAnnotations.summary }}"
+      tags: "cluster: {{ .CommonLabels.cluster }}, region: {{ .CommonLabels.location }}, {{ if .CommonLabels.component }} component: {{.CommonLabels.component}} {{ end }}, {{ if .CommonLabels.namespace }}, tenant: {{.CommonLabels.namespace}} {{ end }} {{ if .CommonLabels.environment }}, environment: {{ .CommonLabels.environment }} {{ end }}"
+      description: >-
+        {{ range .Alerts -}}
+        *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
+        {{- if .Annotations.description }}  *Description:* {{ .Annotations.description }} {{ end }}
+        {{- if .Annotations.message }}  *Message:* {{ .Annotations.message }} {{ end }}
+        *Labels*:
+          {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+          {{ end }}
+        {{ end }}
+      responders:
+        - type: "team"
+          name: "Observability Enablement"

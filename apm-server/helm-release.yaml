@@ -1,0 +1,23 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: apm-server
+spec:
+  interval: 1h0m0s
+  chart:
+    spec:
+      version: 8.5.1
+      chart: apm-server
+      sourceRef:
+        kind: HelmRepository
+        name: elastic
+        namespace: oe-apm-server
+  valuesFrom:
+    - kind: ConfigMap
+      name: helm-values-apm-server-base
+      valuesKey: values.yaml
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3

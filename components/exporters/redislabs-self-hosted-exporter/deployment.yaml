@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selfhosted-redislabs-exporter
+  namespace: oe-redis-exporter-self-hosted
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: selfhosted-redislabs-exporter
+  template:
+    metadata:
+      labels:
+        app: selfhosted-redislabs-exporter
+        release: kube-prometheus-stack
+        monitoring: prometheus
+        sc_system: ${sc_system}
+        sc_domain: ${sc_domain}
+        sc_component: ${sc_system}-redislabs_selfhosted_exporter
+        sc_env: ${sc_env}
+        sc_region: ${sc_region}
+        sc_provider: ${sc_provider}
+        sc_createdby: ${sc_createdby}
+        sc_type: ${sc_type}
+        sc_owner: ${sc_owner}
+    spec:
+        containers:
+          - name: selfhosted-redislabs-exporter
+            image: contenthub.azurecr.io/monitoring/selfhosted-redislabs-exporter:1.0.3
+            env:
+            - name: EXPORTER_METRICS_PORT
+              value: "8070"
+            imagePullPolicy: Always
+            resources:
+              requests:
+                memory: "0.25Gi"
+                cpu: "0.25"
+              limits:
+                memory: "0.5Gi"
+                cpu: "0.5"

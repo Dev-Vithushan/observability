@@ -1,0 +1,9 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - hosted/c255/
+  - hosted/c287/
+  - hosted/c319/
+  - hosted/c343/

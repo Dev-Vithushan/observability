@@ -1,0 +1,56 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: flux-prometheus-alerts
+  namespace: oe-alerts
+spec:
+  groups:
+    - name: fluxcd
+      rules:
+        - alert: ReconciliationFailure
+          for: 10m
+          expr: max(gotk_resource_info{ready="False"}) by (exported_namespace, name, customresource_kind) == 1
+          labels:
+            severity: P3
+            system: oe
+            component: fluxcd
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: '{{ $labels.customresource_kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} reconciliation has been failing for more than ten minutes.'
+        - alert: ReconciliationDuration
+          for: 5m
+          expr: rate(gotk_reconcile_duration_seconds_sum[5m]) >= 1.05
+          labels:
+            severity: P3
+            system: oe
+            component: fluxcd
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: '{{ $labels.customresource_kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} reconciliation is taking too long'
+        - alert: ReconciliationFailedDependencies
+          for: 10m
+          expr: rate(gotk_resource_info{ready!="True", reason="DependencyNotReady"}[10m])  >= 1
+          labels:
+            severity: P3
+            system: oe
+            component: fluxcd
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: '{{ $labels.customresource_kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} reconciliations failed due to unavailable dependencies for 10m'
+        - alert: ReconciliationFailedNotDependencies
+          for: 10m
+          expr: rate(gotk_resource_info{ready="Unknown", reason!="DependencyNotReady"}[10m])  >= 1
+          labels:
+            severity: P3
+            system: oe
+            component: fluxcd
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: '{{ $labels.customresource_kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} in unknown state for 10m'

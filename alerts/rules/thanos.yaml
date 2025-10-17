@@ -1,0 +1,230 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: thanos-prometheus-alerts
+  namespace: oe-alerts
+spec:
+  groups:
+    - name: thanos-store-gateway
+      rules:
+        - alert: ThanosStoreGrpcErrorRate
+          annotations:
+            description: Thanos Store {{$labels.job}} is failing to handle {{ $value | humanize }}% of requests
+            runbook_url: https://github.com/thanos-io/thanos/tree/main/mixin/runbook.md#alert-name-thanosstoregrpcerrorrate
+            message: Thanos Store is failing to handle requests.
+          expr: |
+            (
+              sum by (job) (rate(grpc_server_handled_total{grpc_code=~"Unknown|ResourceExhausted|Internal|Unavailable|DataLoss|DeadlineExceeded", job=~"thanos-store.*"}[5m]))
+            /
+              sum by (job) (rate(grpc_server_started_total{job=~"thanos-store.*"}[5m]))
+            * 100 > 5
+            )
+          for: 5m
+          labels:
+            severity: P2
+            system: oe
+            component: thanos-store-gateway
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: ThanosStoreSeriesGateLatencyHigh
+          annotations:
+            description: Thanos Store {{$labels.job}} has a 99th percentile latency of {{ $value }} seconds for store series gate requests
+            message: Thanos Store has high request latency.
+          expr: |
+            (
+              histogram_quantile(0.9, sum by (job, le) (thanos_bucket_store_series_gate_duration_seconds_bucket{job=~"thanos-store.*"})) > 2
+            and
+              sum by (job) (rate(thanos_bucket_store_series_gate_duration_seconds_count{job=~"thanos-store.*"}[5m])) > 0
+            )
+          for: 10m
+          labels:
+            severity: P3
+            system: oe
+            component: thanos-store-gateway
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: ThanosStoreBucketHighOperationFailures
+          annotations:
+            description: Thanos Store {{$labels.job}} Bucket is failing to execute {{ $value | humanize }}% of operations
+            message: Thanos Store is hitting errors trying to do operations on a bucket.
+          expr: |
+            (
+              sum by (job) (rate(thanos_objstore_bucket_operation_failures_total{job=~"thanos-store.*"}[5m]))
+            /
+              sum by (job) (rate(thanos_objstore_bucket_operations_total{job=~"thanos-store.*"}[5m]))
+            * 100 > 5
+            )
+          for: 15m
+          labels:
+            severity: P2
+            system: oe
+            component: thanos-store-gateway
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: ThanosStoreObjstoreOperationLatencyHigh
+          annotations:
+            description: Thanos Store {{$labels.job}} Bucket has a 99th percentile latency of {{ $value }} seconds for the bucket operations
+            message: Thanos store has high request latency when trying to access a bucket.
+          expr: |
+            (
+              histogram_quantile(0.9, sum by (job, le) (thanos_objstore_bucket_operation_duration_seconds_bucket{job=~"thanos-store.*"})) > 15
+            and
+              sum by (job) (rate(thanos_objstore_bucket_operation_duration_seconds_count{job=~"thanos-store.*"}[5m])) > 0
+            )
+          for: 10m
+          labels:
+            severity: P3
+            system: oe
+            component: thanos-store-gateway
+            owner: observability-team
+            namespace: oe-alerts
+    - name: thanos-compactor
+      rules:
+        - alert: ThanosCompactMultipleRunning
+          annotations:
+            description: No more than one Thanos Compact instance should be running at once. There are {{$value}} instances running.
+            message: Thanos Compactor has multiple instances running.
+          expr: sum by (job) (up{job=~".*thanos.*-compact.*"}) > 1
+          for: 5m
+          labels:
+            severity: P3
+            system: oe
+            component: thanos-compactor
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: ThanosCompactHalted
+          annotations:
+            description: Thanos Compact {{$labels.job}} has failed to run and now is halted.
+            message: Thanos Compact has failed to run and is now halted.
+          expr: thanos_compact_halted{job=~".*thanos.*-compact.*"} == 1
+          for: 5m
+          labels:
+            severity: P2
+            system: oe
+            component: thanos-compactor
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: ThanosCompactHighCompactionFailures
+          annotations:
+            description: Thanos Compact {{$labels.job}} is failing to execute {{$value | humanize}}% of compactions.
+            message: Thanos Compact is failing to execute compactions.
+          expr: |
+            (
+              sum by (job) (rate(thanos_compact_group_compactions_failures_total{job=~".*thanos.*-compact.*"}[5m]))
+            /
+              sum by (job) (rate(thanos_compact_group_compactions_total{job=~".*thanos.*-compact.*"}[5m]))
+            * 100 > 5
+            )
+          for: 5m
+          labels:
+            severity: P3
+            system: oe
+            component: thanos-compactor
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: ThanosCompactBucketHighOperationFailures
+          annotations:
+            description: Thanos Compact {{$labels.job}} Bucket is failing to execute {{$value | humanize}}% of operations.
+            message: Thanos Compact Bucket is having a high number of operation failures.
+          expr: |
+            (
+              sum by (job) (rate(thanos_objstore_bucket_operation_failures_total{job=~".*thanos.*-compact.*"}[5m]))
+            /
+              sum by (job) (rate(thanos_objstore_bucket_operations_total{job=~".*thanos.*-compact.*"}[5m]))
+            * 100 > 10
+            )
+          for: 5m
+          labels:
+            severity: P3
+            system: oe
+            component: thanos-compactor
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: ThanosCompactHasNotRun
+          annotations:
+            description: Thanos Compact {{$labels.job}} has not uploaded anything for 24 hours.
+            message: Thanos Compact has not uploaded anything for last 24 hours.
+          expr: (time() - max by (job) (max_over_time(thanos_objstore_bucket_last_successful_upload_time{job=~".*thanos.*-compact.*"}[24h])))/ 60 / 60 > 24
+          for: 5m
+          labels:
+            severity: P2
+            system: oe
+            component: thanos-compactor
+            owner: observability-team
+            namespace: oe-alerts
+    - name: thanos-query
+      rules:
+        - alert: ThanosQuerierGrpcServerErrorRate
+          annotations:
+            description: Thanos Query {{$labels.job}} is failing to handle {{ $value | humanize }}% of requests
+            message: Thanos Query is failing to handle GRPC requests.
+          expr: |
+            (
+              sum by (job) (rate(grpc_server_handled_total{grpc_code=~"Unknown|ResourceExhausted|Internal|Unavailable|DataLoss|DeadlineExceeded", job=~"thanos-query.*"}[5m]))
+            /
+              sum by (job) (rate(grpc_server_started_total{job=~"thanos-query.*"}[5m]))
+            * 100 > 5
+            )
+          for: 5m
+          labels:
+            severity: P2
+            system: oe
+            component: thanos-query
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: ThanosQuerierGrpcClientErrorRate
+          annotations:
+            description: Thanos Query {{$labels.job}} is failing to send {{ $value | humanize }}% of requests
+            message: Thanos Query is failing to send GRPC requests.
+          expr: |
+            (
+              sum by (job) (rate(grpc_client_handled_total{grpc_code!="OK", job=~"thanos-query.*"}[5m]))
+            /
+              sum by (job) (rate(grpc_client_started_total{job=~"thanos-query.*"}[5m]))
+            * 100 > 10
+            )
+          for: 5m
+          labels:
+            severity: P2
+            system: oe
+            component: thanos-query
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: ThanosQuerierHighDNSFailures
+          annotations:
+            description: Thanos Query's {{$labels.job}} have {{ $value }} of failing DNS queries
+            message: Thanos Query is failing DNS lookups.
+          expr: |
+            (
+              sum by (job) (rate(thanos_query_store_apis_dns_failures_total{job=~"thanos-query.*"}[5m]))
+            /
+              sum by (job) (rate(thanos_query_store_apis_dns_lookups_total{job=~"thanos-query.*"}[5m]))
+            > 1
+            )
+          for: 15m
+          labels:
+            severity: P2
+            system: oe
+            component: thanos-query
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: ThanosQuerierInstantLatencyHigh
+          annotations:
+            description: Thanos Query {{$labels.job}} has a 99th percentile latency of {{ $value }} seconds for queries
+            message: Thanos Query has high query latency.
+          expr: |
+            (
+              histogram_quantile(0.99, sum by (job, le) (http_request_duration_seconds_bucket{job=~"thanos-query.*"})) > 300
+            and
+              sum by (job) (rate(http_request_duration_seconds_bucket{job=~"thanos-query.*"}[5m])) > 0
+            )
+          for: 10m
+          labels:
+            severity: P3
+            system: oe
+            component: thanos-query
+            owner: observability-team
+            namespace: oe-alerts

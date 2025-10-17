@@ -1,0 +1,463 @@
+# Default values for pyroscope.
+
+pyroscope:
+  # Global replica count (used when components are not specified)
+  replicaCount: 2
+
+  # -- Kubernetes cluster domain suffix for DNS discovery
+  cluster_domain: .cluster.local.
+
+  image:
+    repository: grafana/pyroscope
+    pullPolicy: IfNotPresent
+    # Allows to override the image tag, which defaults to the appVersion in the chart metadata
+    tag: ""
+
+  extraArgs:
+    log.level: info
+    config.expand-env: true
+    # Microservices mode specific args
+    store-gateway.sharding-ring.replication-factor: "3"
+
+  extraLabels: {}
+
+  extraEnvVars:
+    []
+  
+  # -- Environment variables from secrets or configmaps to add to the pods
+  extraEnvFrom:
+    - secretRef:
+        name: pyroscope-secret
+
+  imagePullSecrets: []
+  dnsPolicy: ClusterFirst
+  initContainers: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  podAnnotations:
+    # Scrapes itself see https://grafana.com/docs/pyroscope/latest/deploy-kubernetes/helm/#optional-scrape-your-own-workloads-profiles
+    profiles.grafana.com/memory.scrape: "true"
+    profiles.grafana.com/memory.port_name: http2
+    profiles.grafana.com/cpu.scrape: "true"
+    profiles.grafana.com/cpu.port_name: http2
+    profiles.grafana.com/goroutine.scrape: "true"
+    profiles.grafana.com/goroutine.port_name: http2
+    # profiles.grafana.com/block.scrape: "true"
+    # profiles.grafana.com/mutex.scrape: "true"
+
+  podSecurityContext:
+    fsGroup: 10001
+    runAsUser: 10001
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+
+  podDisruptionBudget:
+    enabled: true
+    maxUnavailable: 1
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+    runAsUser: 10001
+
+  service:
+    type: ClusterIP
+    port: 4040
+    port_name: http2
+    scheme: HTTP
+    annotations: {}
+
+  memberlist:
+    port: 7946
+    port_name: memberlist
+
+  # Global resource settings (can be overridden per component)
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      memory: 512Mi
+
+  nodeSelector: {}
+
+  # -- Topology Spread Constraints
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: pyroscope
+
+  ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+  ## If you set enabled as "True", you need :
+  ## - create a pv which above 10Gi and has same namespace with pyroscope
+  ## - keep storageClassName same with below setting
+  ## Global storage disabled - only enabled per component where needed
+  persistence:
+    enabled: false # Disabled globally - enabled per component as needed
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi # Default size (overridden per component)
+    storageClass: default
+    annotations: {}
+    # selector:
+    #   matchLabels:
+    #     app.kubernetes.io/name: pyroscope
+    # subPath: ""
+    # existingClaim:
+
+  extraVolumes:
+    []
+    # - name: backup-volume
+    #   emptydir: {}
+
+  extraVolumeMounts:
+    []
+    # - name: testing
+    #   mountPath: /var/lib/testing
+    #   readOnly: false
+    # - name: test-volume
+    #   mountPath: /var/tmp/test-volume
+    #   existingClaim: test-volume
+    #   readOnly: false
+
+  tolerations: []
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: pyroscope
+            topologyKey: kubernetes.io/hostname
+
+  # Microservices mode - run specific components separately
+  components:
+    querier:
+      kind: Deployment
+      replicaCount: 3
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 6
+        targetMemoryUtilizationPercentage: 60
+        targetCPUUtilizationPercentage: null
+        behavior:
+          enabled: true
+          scaleDown:
+            stabilizationWindowSeconds: 60
+      persistence:
+        enabled: false # Stateless component - no persistence needed
+      # resources:
+      #   limits:
+      #     memory: 1Gi
+      #   requests:
+      #     memory: 256Mi
+      #     cpu: 1
+    query-frontend:
+      kind: Deployment
+      replicaCount: 2
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 4
+        targetMemoryUtilizationPercentage: 60
+        targetCPUUtilizationPercentage: null
+      persistence:
+        enabled: false # Stateless component - no persistence needed
+      # resources:
+      #   limits:
+      #     memory: 1Gi
+      #   requests:
+      #     memory: 256Mi
+      #     cpu: 100m
+    query-scheduler:
+      kind: Deployment
+      replicaCount: 2
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 4
+        targetCPUUtilizationPercentage: 40
+        targetMemoryUtilizationPercentage: null
+      persistence:
+        enabled: false # Stateless component - no persistence needed
+      # resources:
+      #   limits:
+      #     memory: 1Gi
+      #   requests:
+      #     memory: 256Mi
+      #     cpu: 100m
+    distributor:
+      kind: Deployment
+      replicaCount: 2
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 5
+        targetMemoryUtilizationPercentage: 60
+        targetCPUUtilizationPercentage: null
+      persistence:
+        enabled: false # Stateless component - no persistence needed
+      # resources:
+      #   limits:
+      #     memory: 1Gi
+      #   requests:
+      #     memory: 256Mi
+      #     cpu: 500m
+    ingester:
+      kind: StatefulSet
+      replicaCount: 3
+      terminationGracePeriodSeconds: 600
+      persistence:
+        enabled: true # Critical: WAL for data safety and block storage
+        size: 20Gi # Adequate space for WAL and temporary block storage
+    compactor:
+      kind: StatefulSet
+      replicaCount: 3
+      terminationGracePeriodSeconds: 1200
+      persistence:
+        enabled: true # Enable persistence for compactor - needs temp space for index processing
+        size: 10Gi # Temporary storage for index file processing
+      # resources:
+      #   limits:
+      #     memory: 16Gi
+      #   requests:
+      #     memory: 8Gi
+      #     cpu: 1
+    store-gateway:
+      kind: StatefulSet
+      replicaCount: 3
+      persistence:
+        # Enable persistence for store-gateway to cache index-headers and improve query performance
+        # This avoids re-downloading index-headers on restart, reducing startup time
+        enabled: true
+        size: 5Gi # Storage for index-header cache
+      # resources:
+      #   limits:
+      #     memory: 16Gi
+      #   requests:
+      #     memory: 8Gi
+      #     cpu: 1
+      readinessProbe:
+        # The store gateway can be configured to wait on startup for ring stability to be reached before it becomes
+        # ready. See the `store-gateway.sharding-ring.wait-stability-min-duration` server argument for more information.
+        #
+        # Depending on this flag and the number of tenants + blocks that need to be synced on startup, pods can take
+        # some time to become ready. This value can be used to ensure Kubernetes waits long enough and reduce errors.
+        initialDelaySeconds: 60
+    tenant-settings:
+      kind: Deployment
+      replicaCount: 1 # Disabled - not needed for single-tenant setup
+      autoscaling:
+        enabled: false # Disable autoscaling when replicaCount is 0
+        minReplicas: 1
+        maxReplicas: 2
+        targetMemoryUtilizationPercentage: 70
+        targetCPUUtilizationPercentage: null
+      persistence:
+        enabled: false # Disabled component - no persistence needed
+      # resources:
+      #   limits:
+      #     memory: 4Gi
+      #   requests:
+      #     memory: 16Mi
+      #     cpu: 0.1
+    ad-hoc-profiles:
+      kind: Deployment
+      replicaCount: 0 # Disabled - not needed for continuous profiling setup
+      autoscaling:
+        enabled: false # Disable autoscaling when replicaCount is 0
+        minReplicas: 1
+        maxReplicas: 2
+        targetMemoryUtilizationPercentage: 70
+        targetCPUUtilizationPercentage: null
+      persistence:
+        enabled: false # Disabled component - no persistence needed
+      # resources:
+      #   limits:
+      #     memory: 4Gi
+      #   requests:
+      #     memory: 16Mi
+      #     cpu: 0.1
+
+  # -- Allows to override Pyroscope's configuration using structured format.
+  structuredConfig: {}
+
+  # -- Contains Pyroscope's configuration as a string.
+  # @default -- The config depends on other values been set, details can be found in [`values.yaml`](./values.yaml)
+  config: |
+    storage:
+      backend: azure
+      azure:
+        account_name: $${AZURE_ACCOUNT_NAME}
+        account_key: $${AZURE_ACCOUNT_KEY}
+        container_name: $${AZURE_CONTAINER_NAME}
+        endpoint_suffix: "blob.core.windows.net"
+    memberlist:
+      join_members:
+        - pyroscope-memberlist:7946
+    server:
+      http_listen_port: 4040
+      log_level: info
+
+    # Compactor configuration for data retention
+    compactor:
+      deletion_delay: 168h # 1 week
+      compaction_interval: 2h
+
+    # Global limits configuration  
+    limits:
+      ingestion_rate_mb: 50
+      ingestion_burst_size_mb: 100
+      max_query_lookback: 672h # 1 month
+      max_query_parallelism: 32
+      max_query_length: 672h # 1 month
+
+  # -- Allows to add tenant specific overrides to the default limit configuration.
+  tenantOverrides:
+    {}
+    # Use this section only if you need different limits for specific tenants
+    # Example:
+    # "tenant-heavy-usage":
+    #   ingestion_rate_mb: 100
+    #   ingestion_burst_size_mb: 200
+  # -- Grafana Agent Configuration.
+
+# -------------------------------------
+# Configuration for `alloy` child chart
+# -------------------------------------
+alloy:
+  enabled: false
+  controller:
+    type: "statefulset"
+    replicas: 1
+    podAnnotations:
+      profiles.grafana.com/memory.scrape: "true"
+      profiles.grafana.com/memory.port_name: "http-metrics"
+      profiles.grafana.com/cpu.scrape: "true"
+      profiles.grafana.com/cpu.port_name: "http-metrics"
+      profiles.grafana.com/goroutine.scrape: "true"
+      profiles.grafana.com/goroutine.port_name: "http-metrics"
+      profiles.grafana.com/service_repository: "https://github.com/grafana/alloy"
+      profiles.grafana.com/service_git_ref: "v1.8.1"
+
+  alloy:
+    stabilityLevel: "public-preview" # This needs to be set for some of our resources until verison v1.2 is released
+    configMap:
+      create: false
+      name: alloy-config-pyroscope
+    clustering:
+      enabled: true
+
+# -------------------------------------
+# Configuration for `grafana-agent` child chart
+# -------------------------------------
+agent:
+  enabled: false
+  controller:
+    type: "statefulset"
+    replicas: 1
+    podAnnotations:
+      profiles.grafana.com/memory.scrape: "true"
+      profiles.grafana.com/memory.port_name: "http-metrics"
+      profiles.grafana.com/cpu.scrape: "true"
+      profiles.grafana.com/cpu.port_name: "http-metrics"
+      profiles.grafana.com/goroutine.scrape: "true"
+      profiles.grafana.com/goroutine.port_name: "http-metrics"
+  agent:
+    configMap:
+      create: false
+      name: grafana-agent-config-pyroscope
+    clustering:
+      enabled: true
+
+# -------------------------------------
+# Configuration for `minio` child chart
+# -------------------------------------
+minio:
+  enabled: false # Disabled because we're using Azure storage
+  replicas: 1
+  # Minio requires 2 to 16 drives for erasure code (drivesPerNode * replicas)
+  # https://docs.min.io/docs/minio-erasure-code-quickstart-guide
+  # Since we only have 1 replica, that means 2 drives must be used.
+  drivesPerNode: 2
+  rootUser: grafana-pyroscope
+  rootPassword: supersecret
+  buckets:
+    - name: grafana-pyroscope-data
+      policy: none
+      purge: false
+  persistence:
+    size: 1Gi
+  # resources:
+  #   requests:
+  #     cpu: 100m
+  #     memory: 128Mi
+  podAnnotations: {}
+
+ingress:
+  enabled: true
+  className: "kong"
+  annotations:
+    konghq.com/https-redirect-status-code: "301"
+    konghq.com/protocols: https
+  hosts:
+    - pyroscope-${env_type}-${region}.sitecorecloud.app
+    - pyroscope-${env_type}-${region}.sitecorecloud.io
+  tls: []
+
+# ServiceMonitor configuration
+serviceMonitor:
+  # -- If enabled, ServiceMonitor resources for Prometheus Operator are created
+  enabled: true
+  # -- Namespace selector for ServiceMonitor resources
+  namespaceSelector: {}
+  # -- Optional expressions to match on
+  matchExpressions:
+    []
+    # - key: prometheus.io/service-monitor
+    #   operator: NotIn
+    #   values:
+    #     - "false"
+  # -- ServiceMonitor annotations
+  annotations: {}
+  # -- Additional ServiceMonitor labels
+  labels:
+    release: kube-prometheus-stack
+  # -- ServiceMonitor scrape interval
+  interval: 30s
+  # -- ServiceMonitor scrape timeout in Go duration format (e.g. 15s)
+  scrapeTimeout: null
+  # -- ServiceMonitor relabel configs to apply to samples before scraping
+  # https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
+  relabelings: []
+  # -- ServiceMonitor metric relabel configs to apply to samples before ingestion
+  # https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#endpoint
+  metricRelabelings: []
+  # --ServiceMonitor will add labels from the service to the Prometheus metric
+  # https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#servicemonitorspec
+  targetLabels: []
+  # -- ServiceMonitor will use http by default, but you can pick https as well
+  scheme: http
+  # -- ServiceMonitor will use these tlsConfig settings to make the health check requests
+  tlsConfig: null

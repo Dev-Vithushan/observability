@@ -1,0 +1,18 @@
+---
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+
+secretGenerator:
+  - name: databricks-exporter-credentials
+    namespace: oe-databricks-exporter
+    literals:
+      - DATABRICKS_API_TOKEN=changeme
+    options:
+      disableNameSuffixHash: true
+
+patchesStrategicMerge:
+- secret.yaml

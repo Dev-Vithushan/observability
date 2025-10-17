@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: sg-e1-shared-aks-01-objstore-config-thanos
+type: Opaque
+data:
+    objstore.yml: ENC[AES256_GCM,data:YY9IwrgmOeaS7pxRoEzwaYTaNweqHXkaZWJjx2RvdakFm0KSKufH/GFonko4N+XWhQbCjFPsrR/X57jBuEQhtBxbCrdmOU3K8Z4z84xxg7lbr7Q+JZHrzK7vReiCfU0IXYCqeC6KWRfyCL1n+0p6rd6UODQyeaqFekAnXihzjdnMwMK8NMfdqwYPly/QipF5iuJv2KDDEiP05UTRj6k7nYaQx+tNG4OBznyv+/dcPFnnaYsOUNdZ9D7hBdsfi7swXPMeYkt4ws8kTMNqoZT8bfMktw9AhuwwlleYzCSa2/pU/ExfsXJnjhQwLIfboINIjUAlDtm7ojbhZfMVtu6RUS2jVaKhH9GIT5P8ukSTmrFWlqdQ5kHji1zhIwIQpAnC9dEBOTyQqtpAp2vqWZolTjdmh+mH4Slq,iv:0WL5qdphsGa+3jK/bPgd5qRumJRfY0cv6A6p+lFlJSI=,tag:IBcqF6QMLwRZWG+XRW6rUQ==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2025-08-01T06:58:15Z"
+          enc: Oht_eFkUmCo8ayQZA1ELPRIf4LMkEOXuc9gJkQe0yhqiBf5Ys4iUQnbOoNRk6I5zTjDcIrY6-KkTBfc-9w1Y7Z-sJDeUUbpgHplGbXw9_ktznLlnh_Zs1ei_K-wCi7I_wPJJdrr4O3QHIghQ5UIZ73MmlAcLxpK7CTmXUKSZcoMnBY0SZ9OrURHdTrT5cxWOW1uit_LO3Qz-QGXqJFCyn53A92jABDZCN9FiR1pBrbRH3k12XsgLADGMLkiTy5oi96WFSZaq1dJjHMnIm3C6xaUm0ONvzTpexWH1cZihPqZjJTeAA0BonpKdEtTuJBACNzCgvN_UzmjDL1yi4Eup9ZdpSZWD_LqtJ9-7uL6tykah2UxuGke0WRzqhUYeWSvQuIWEfFfhT8b4k76MyVxZgo2R_NsA2qcPuExQljOfyf2fqImN-sEOaag9HFUi2jPuvqslZQBRB6aYSNttWK0qey3EepsZwhxJj0xbxl3wSc-NIFlzGxtYwZIRV_CmzTlZoeOClDK_IzqI0TzX0VzpIWysc2ka_Nj1cXofl-e542tSen6SL04fAMv6pnEJgRTXx9thTAFRlTNgRCW26o69RafqM_44ohS2aId8P-3ebaUKlu8T6M8BN5QSXc8_9c3a1CYCvg1qIkyBZBo-XE7z44x9hEv-vx4TWQeBx5T3ccs
+    hc_vault: []
+    age: []
+    lastmodified: "2025-08-01T06:58:18Z"
+    mac: ENC[AES256_GCM,data:yZUdr6BU0WW1ErAfsuWg+3M0M3Z3kv/7Wet8cij1bSCgzq9OFljd1SEeMiCE1aytxT0yTBP39ZUdoiks+UpEvmffrQtaNt1+Lyq6qJ9yDAHbCo3pFSBThRHwTQ1TNz1A0mFYD99NX6P2i+qFbwkmSBVxUVkXKhKO+jRofVC2Mo8=,iv:UPpkm/PEZSwaxwKkqK8pGgmYJ/L6tnNF4HuiN4zx4/Q=,tag:W6K6zlav2QDe8FzBlssr0Q==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

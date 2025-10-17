@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: euw-i1-oe-aks-02-objstore-config-thanos
+type: Opaque
+data:
+    objstore.yml: ENC[AES256_GCM,data:6ZWKCn9wbTihtVCpdzfnMClZdbAAW46/2Swqp8+1lFUXDVIJrhUpOiClZziqDMqE2zxGU/59RmnY0WW/nXR20+8X2AXotHQbgY3xVtiQ6G2siUEe7h12FIZH9I6wrPQEDBDTVu9+Tfi+51ZI0bMdl9qC3RB/nCmE0xFekFk/pE6yn3OUZkUSJb8UYaN97rpm685WlbkLLIq10FapM6EtTXMZV5kjbNiJlPduYKTV4R+Nou5PIPvFuLzji2e/iVPvM6cSfLYOKH4sZkqcq7Bim0FU1gl9eMaDPAyM/TRa8qVtjuhWXziZVaHQgSeUKtgEcyFpQqWVtZD1+9bQKnlv370IsMuljkDRJiSzXA8x0CWPA0trnDjSXOc3r1uO16ZZfsHCp0EgwSgbYPZq8BZI9qQEs48odBoQ0isZkJfMyvDL7NxgcgoDuvDypWR39LadpWZESA==,iv:09y1H0Aulz75MB1NaGx5tHro3R7XpLVWfaFkH+kztxg=,tag:Ic3l9spUTJg73VmyVhq2Tg==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2024-10-24T11:56:02Z"
+          enc: g8SFd9ozD7dvsbVVg9PeH36xnOUnLihECmMhQ5mvoeF_ALwqyfpjQZMAeZZZTvSFcK3w4BTeIapIKnghdGxQ3lPAU9lQO_VlgweCnFhNLyLaOJn7tb5GP53lcj1lbpM0k1sGfLN1z6_EdQwbA6WaWL8ahotJtYR-k2-NV2jCxtl1YESdpnSQPx8PF-dNCWyk0dQUXukPvnvvhYUxKN7YRvXbzpzqCEnpicPYSo-CmWKwr8xLD5Q2KLQNe9-tASmMXUuNOqLOstii5KVvFHxj1nf3WBgWInzUCmLjlbHH8wakLzN2PyuPl1CHFiUnToCV1NZx75B-XS9ToMNWVUQ0kPU-QnSDfbPjmCeVbpY8xLHTgO-mu4KQe8RZeayYjK8LEp6tgnYrQdbUSMePSdHikNpPlB1PLhbP0q1aTLTSlgqyFtk7jqo5hxOe782xDcZp_7KJglKsyMzGYv1kGoZ6Od6bDFW3nZtXaWr4jyDEMr1IKGZ_E5vG5w1qL-r4ImAs1CZlo7RvdoMm5GoNX7jwxNKVXaEqb3crWBAcKMHNgKPK3QMTlRHNhQKot-6q8LmXBVcYXLajMYRYkxWKqybH0iHxMkDjxnboJ_Y7JFje6ahKSrUCBHOXsG4MhQXJPDa16XVaPco3PRRvXPJWh9vLmQp7bBqKEtC43misbGZFz2E
+    hc_vault: []
+    age: []
+    lastmodified: "2024-10-24T11:56:03Z"
+    mac: ENC[AES256_GCM,data:lLWucEONat2vrsuMuDe1wmYQgkYkVMk5aTljnqK7LLsSlyTTLC1DPrtHjFAFOOLa9ENUb6DneLLx9cjfEA/AVrTteeMC9pVGnjYMiMHZCSM4jZT3BrNm7wrYPYx9LyACPAza1myKaUGznO9rpHkaReaKTz+0Cle8PbyXYs/8O9g=,iv:DFwtDqRc4eZ0jNzeKytd4Oa+qVl+oZpCRt4tnEcOSPc=,tag:tToznmVY2w9ImDHEWxTZGg==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

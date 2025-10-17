@@ -1,0 +1,13 @@
+---
+- op: add
+  path: /metadata/labels/cluster
+  value: c231
+- op: add
+  path: /metadata/labels/app.kubernetes.io~1instance
+  value: c231-hosted-redislabs-exporter
+- op: replace
+  path: /metadata/name
+  value: c231-hosted-redislabs-exporter
+- op: add
+  path: /spec/selector/cluster
+  value: c231

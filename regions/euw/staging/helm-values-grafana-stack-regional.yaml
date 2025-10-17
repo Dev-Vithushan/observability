@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helm-values-grafana-stack-regional
+  namespace: oe-grafana
+data:
+  values.yaml: |
+    rbac:
+      extraRoleRules:
+      - apiGroups: [""]
+        resources: ["pods"]
+        verbs: ["list", "get", "watch"]
+      extraClusterRoleRules:
+      - apiGroups: [""]
+        resources: ["pods"]
+        verbs: ["list", "get", "watch"]
+    extraContainers: |
+      - name: sidecar-create-silences
+        image: weui1heimdal01acr.azurecr.io/grafana/grafana-silences-creation-image:1.0.0
+        command: ["sh", "-c", "while true; do sh /scripts/create-silences.sh; inotifywait -e modify -e create -e delete /etc/config; done"]
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: script-volume
+            mountPath: /scripts
+          - name: creds-volume
+            mountPath: /etc/creds
+            readOnly: true
+          - name: config-volume
+            mountPath: /etc/config
+            readOnly: true
+    extraContainerVolumes:
+      - name: script-volume
+        configMap:
+          name: silences-creation-script
+      - name: creds-volume
+        secret:
+          secretName: grafana-secrets
+      - name: config-volume
+        configMap:
+          name: grafana-silences
+    grafana.ini:
+      feature_toggles:
+        enable: grafanaManagedRecordingRules,lokiQuerySplitting, traceqlMetrics, dashgpt, traceqlSearch

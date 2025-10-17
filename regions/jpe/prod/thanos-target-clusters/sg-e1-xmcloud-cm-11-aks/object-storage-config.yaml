@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: sg-e1-xmcloud-cm-11-aks-objstore-config-thanos
+type: Opaque
+data:
+    objstore.yml: ENC[AES256_GCM,data:VpyqW9bW05+o2IO5azvQ9rNwnXCxgse9Vs2ehM94UbnOXwGGZYaodrIeHrFtSDibLFRKWMXtvharMuQcswNgmSuW3q2l/YbxGeBeVTiXGyYS5Zj94ZsY1oZZYsbGBJWqDdYjkNTBzfOpZuhPKHMQSLNnCYCpq+bpbZuO22+CQhf0H6qDyHckFuLgV3gLviq83xiwBl5R79R7Pq0al2IMw+z1AS/LB4YYtb7Yz46vvjh+bjUnalSYmwmd88eGYFRaBbIsXmbOlQ7j4wQ4e0t+Gf0HlHjLCAZ+yQhbMT/U4fIBh+RH2eD3L43/8em2l1htg1dwnGig/FPW83Rkwov0QzIbZ6Cd8PxNszm2LwQcbtLHdX+P86pczTGvL/0QD9opF+ItIPQ+rAo+le+dIFMwMR54BPAEcMh1L/e3t3NBPhL1uVnd,iv:vgm6EdqZ1KzgyG/xLGpO1NAdUrOWHX6IDL6FLd0NF1U=,tag:LhGW2HeltVnn2otmNROovw==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2025-08-01T08:07:59Z"
+          enc: 1pEf6pjwmMdeR4-r3GrKJiL0CeDHiRnBfHb-vztZbgKVEDizYDgRU3u52n-mPr6rj4oDgxhl-HKhwkIS5QNJ_-iEVVN0gWDgLJE-ktIDhEYP_2J_j38oXAyurZKa0o9dG_GGdJqFfXX5UJkRJoQdpdTJyz6LLwi5O2pe1cABpBtTMCFgOh3KwYhiCncg4_lbcZWM7hhKN_T6XPNwy_tqnaY9evGVG3mHXfb_8T37NBRFvE5H6ciha_04Yus8670fMTSfy1L4W9ueJqFRP1vwU93nRHFFUU_MyM0Gqk5hfmgDkW-zrnx9jyQAs3L80lK5sAMSO4ppnnNyISRE6cY9pWZ8sDiwCBGcACEMt2orixLW4HzhBc4Yo_xATZlhtxxDA9g1SYFZIPB_IVKBQZ1YCR-cs3DiLIBtJGKKDy0eT-h4lfLCQkOMSiZlpnxFE0AgQEXjPgJ_H-nFS4oG1NdqCI04HjJUAO0NqWYjQLR0Wj1LDX2_7jfNfoxQ-veZXW6zZjElhAPmoGH3-_Jr60T4GJbSV4CARuOLBWJCvDeUE4dKt6-F-wcjYv8b2_wL4fbXkQ-oksT8ZFmEoOjWr91iUVFovZMrQ4wbSh0ejwSa_6UryjAFGDShNaulcKL9U4BpJSkVz04VRFdJkqIoaFerJwk9qznm6t755WscQe-xp_Q
+    hc_vault: []
+    age: []
+    lastmodified: "2025-08-01T08:08:01Z"
+    mac: ENC[AES256_GCM,data:Imq2eRg8IkfxbQdADUlB/87GIi2/3qp+a0D5SZ0m9JDYOsgfv3G0S20nRKIg5MilACtR9CXbJf5o1UwqyycGiysv+iiXZmuwdfXAK9fuS9rPvSgX8tUtCB238tNRZqSrrmgM4Wxwm61bCZWqFjm7P8+bpDezBb1lZOCJrZbCKC4=,iv:nyuISPMepUDDN3gBsMIbUCNgdpld231dnxI/VYzdPFk=,tag:lVYtjrTqhn5MLayWMXa3CQ==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

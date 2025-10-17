@@ -1,0 +1,22 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: oe-observability
+  title: Observability Layer
+  description: This is the Observability Layer of AKSO clusters.
+  annotations:
+    backstage.io/view-url: url:https://github.com/Sitecore-PD/sitecore.oe.observability/blob/main/catalog-info.yaml
+    backstage.io/source-location: url:https://github.com/Sitecore-PD/sitecore.oe.observability/tree/main
+  tags:
+    - observability
+    - akso
+    - grafana
+  links:
+    - url: https://grafana.sitecorecloud.app/d/global/global-health?orgId=1
+      title: Global ASKO Dashboard
+      icon: dashboard
+spec:
+  owner: group:default/grp_-_isre_observability
+  lifecycle: production
+  type: service
+  system: oe

@@ -1,0 +1,2011 @@
+---
+apiVersion: v1
+data:
+  jpe-dash.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "iteration": 1631879520161,
+      "links": [],
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "hiddenSeries": false,
+          "id": 43,
+          "interval": "",
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 2,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "8.0.6",
+          "pointradius": 0.5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "avg(node_load15{location=\"japaneast\"}) by (cluster)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "{{ cluster }}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Cluster Load Average",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "datasource": null,
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 6
+          },
+          "id": 67,
+          "options": {
+            "content": "\n## Production Clusters\n---\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "8.0.6",
+          "timeFrom": null,
+          "timeShift": null,
+          "transparent": true,
+          "type": "text"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "targetBlank": true,
+                  "title": "",
+                  "url": "/d/cluster/kubernetes-cluster-deep-dive?$__url_time_range&var-location=japaneast&var-cluster=sl-aksm-jpe-01"
+                }
+              ],
+              "mappings": [
+                {
+                  "options": {
+                    "from": 0,
+                    "result": {
+                      "text": "Media Processing"
+                    },
+                    "to": 0
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 0.01,
+                    "result": {
+                      "text": "Media Processing"
+                    },
+                    "to": 0.99
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 1,
+                    "result": {
+                      "text": "Media Processing"
+                    },
+                    "to": 1
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 0
+                  },
+                  {
+                    "color": "#73BF69",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 0,
+            "y": 8
+          },
+          "id": 76,
+          "interval": null,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Kubernetes Cluster Deep Dive",
+              "url": "/d/cluster/kubernetes-cluster-deep-dive?$__url_time_range&var-location=japaneast&var-cluster=sl-aksm-jpe-01"
+            }
+          ],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "sum(up{job=\"node-exporter\", location=\"japaneast\", cluster=\"sl-aksm-jpe-01\"}) / sum(kube_node_info{location=\"japaneast\", cluster=\"sl-aksm-jpe-01\"})",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Production",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "targetBlank": true,
+                  "title": "Kubernetes Cluster Deep Dive",
+                  "url": "/d/cluster/kubernetes-cluster-deep-dive?$__url_time_range&var-location=japaneast&var-cluster=sl-aksd-jpe-01"
+                }
+              ],
+              "mappings": [
+                {
+                  "options": {
+                    "from": 0,
+                    "result": {
+                      "text": "Data Processing"
+                    },
+                    "to": 0
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 0.01,
+                    "result": {
+                      "text": "Data Processing"
+                    },
+                    "to": 0.99
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 1,
+                    "result": {
+                      "text": "Data Processing"
+                    },
+                    "to": 1
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 0
+                  },
+                  {
+                    "color": "#73BF69",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 3,
+            "y": 8
+          },
+          "id": 74,
+          "interval": null,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Kubernetes Cluster Deep Dive",
+              "url": "/d/cluster/kubernetes-cluster-deep-dive?$__url_time_range&var-location=japaneast&var-cluster=sl-aksd-jpe-01"
+            }
+          ],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "sum(up{job=\"node-exporter\", location=\"japaneast\", cluster=\"sl-aksd-jpe-01\"}) / sum(kube_node_info{location=\"japaneast\", cluster=\"sl-aksd-jpe-01\"})",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Production",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "targetBlank": true,
+                  "title": "Kubernetes Cluster Deep Dive",
+                  "url": "/d/cluster/kubernetes-cluster-deep-dive?$__url_time_range&var-location=japaneast&var-cluster=sl-aksw-jpe-01"
+                }
+              ],
+              "mappings": [
+                {
+                  "options": {
+                    "from": 0,
+                    "result": {
+                      "text": "Web"
+                    },
+                    "to": 0
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 0.01,
+                    "result": {
+                      "text": "Web"
+                    },
+                    "to": 0.99
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 1,
+                    "result": {
+                      "text": "Web"
+                    },
+                    "to": 1
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 0
+                  },
+                  {
+                    "color": "#73BF69",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 6,
+            "y": 8
+          },
+          "id": 90,
+          "interval": null,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Kubernetes Cluster Deep Dive",
+              "url": "/d/cluster/kubernetes-cluster-deep-dive?$__url_time_range&var-location=japaneast&var-cluster=sl-aksw-jpe-01"
+            }
+          ],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "exemplar": true,
+              "expr": "sum(up{job=\"node-exporter\", location=\"japaneast\", cluster=\"sl-aksw-jpe-01\"}) / sum(kube_node_info{location=\"japaneast\", cluster=\"sl-aksw-jpe-01\"})",
+              "format": "time_series",
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Production",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "targetBlank": true,
+                  "title": "",
+                  "url": "/d/wefs4es/ECE?orgId=1&from=now-24h&to=now&var-cluster=ece-01-jpe&var-location=japaneast&var-node=All"
+                }
+              ],
+              "mappings": [
+                {
+                  "options": {
+                    "from": 0,
+                    "result": {
+                      "text": "Elastic Cloud Enterprise"
+                    },
+                    "to": 0
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 0.01,
+                    "result": {
+                      "text": "Elastic Cloud Enterprise"
+                    },
+                    "to": 0.99
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 1,
+                    "result": {
+                      "text": "Elastic Cloud Enterprise"
+                    },
+                    "to": 2
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 0
+                  },
+                  {
+                    "color": "#73BF69",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 9,
+            "y": 8
+          },
+          "id": 70,
+          "interval": null,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Explore ECE",
+              "url": "/d/wefs4es/ECE?orgId=1&from=now-24h&to=now&var-cluster=ece-01-jpe&var-location=japaneast&var-node=All"
+            }
+          ],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "sum(ece_deployment_status_elasticsearch_health{location=\"japaneast\", cluster_name=~\".*-p-.*\"}) / sum(ece_deployment_status_elasticsearch_health{location=\"japaneast\", cluster_name=~\".*-p-.*\"} == 1)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Production ECE",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "targetBlank": true,
+                  "title": "",
+                  "url": "/d/k0RHgTYWk/?orgId=1&from=now-24h&to=now&var-location=japaneast"
+                }
+              ],
+              "mappings": [
+                {
+                  "options": {
+                    "from": 0,
+                    "result": {
+                      "text": "Redislabs"
+                    },
+                    "to": 0
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 0.01,
+                    "result": {
+                      "text": "Redislabs"
+                    },
+                    "to": 0.99
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 1,
+                    "result": {
+                      "text": "Redislabs"
+                    },
+                    "to": 2
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 0
+                  },
+                  {
+                    "color": "#73BF69",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 12,
+            "y": 8
+          },
+          "id": 79,
+          "interval": null,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Explore Redis",
+              "url": "/d/k0RHgTYWk/?orgId=1&from=now-24h&to=now&var-location=japaneast"
+            }
+          ],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "sum(redis_exporter_build_info{tenant=~\".*-p-.*\"}) / sum(redis_up{tenant=~\".*-p-.*\"})",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Production",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 3,
+            "x": 0,
+            "y": 14
+          },
+          "id": 77,
+          "interval": null,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "count(up{job=\"node-exporter\", location=\"japaneast\", cluster=\"sl-aksm-jpe-01\"} == 0)",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Machines Unavailable",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 3,
+            "x": 3,
+            "y": 14
+          },
+          "id": 89,
+          "interval": null,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "count(up{job=\"node-exporter\", location=\"japaneast\", cluster=\"sl-aksm-jpe-01\"} == 0)",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Machines Unavailable",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 3,
+            "x": 6,
+            "y": 14
+          },
+          "id": 91,
+          "interval": null,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "exemplar": true,
+              "expr": "count(up{job=\"node-exporter\", location=\"japaneast\", cluster=\"sl-aksw-jpe-01\"} == 0)",
+              "format": "time_series",
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Machines Unavailable",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 3,
+            "x": 9,
+            "y": 14
+          },
+          "id": 71,
+          "interval": null,
+          "links": [
+            {
+              "title": "Explore Instances",
+              "url": "/d/zBDI2L_Wz/virtual-machine-stats?orgId=1&?$__url_time_range&refresh=1m&var-location=japaneast&var-cluster=ece-01-jpe"
+            }
+          ],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "sum(ece_deployment_status_elasticsearch_health{location=\"japaneast\", cluster_name=~\".*-p-.*\"})",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Instance",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 3,
+            "x": 12,
+            "y": 14
+          },
+          "id": 81,
+          "interval": null,
+          "links": [
+            {
+              "targetBlank": false,
+              "title": "Explore Instances",
+              "url": "/d/zBDI2L_Wz/virtual-machine-stats?orgId=1&from=now-24h&to=now&var-cluster=ece-01-weu&var-location=westeurope&var-node=All"
+            }
+          ],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "sum(redis_up{tenant=~\".*-p-.*\"})",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Instances",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "targetBlank": true,
+                  "title": "",
+                  "url": "/d/cluster/kubernetes-cluster-deep-dive?$__url_time_range&var-location=japaneast&var-cluster=sl-aksp-jpe-01"
+                }
+              ],
+              "mappings": [
+                {
+                  "options": {
+                    "from": 0,
+                    "result": {
+                      "text": "Sandbox Portal"
+                    },
+                    "to": 0
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 0.01,
+                    "result": {
+                      "text": "Sandbox Portal"
+                    },
+                    "to": 0.99
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 1,
+                    "result": {
+                      "text": "Sandbox Portal"
+                    },
+                    "to": 1
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 0
+                  },
+                  {
+                    "color": "#73BF69",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 0,
+            "y": 17
+          },
+          "id": 88,
+          "interval": null,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Kubernetes Cluster Deep Dive",
+              "url": "/d/cluster/kubernetes-cluster-deep-dive?$__url_time_range&var-location=japaneast&var-cluster=sl-aksm-jpe-01"
+            }
+          ],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "sum(up{job=\"node-exporter\", location=\"japaneast\", cluster=\"sl-aksp-jpe-01\"}) / sum(kube_node_info{location=\"japaneast\", cluster=\"sl-aksp-jpe-01\"})",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Production",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "targetBlank": true,
+                  "title": "",
+                  "url": "/d/cluster/kubernetes-cluster-deep-dive?$__url_time_range&var-location=japaneast&var-cluster=jpe-e1-aks-01"
+                }
+              ],
+              "mappings": [
+                {
+                  "options": {
+                    "from": 0,
+                    "result": {
+                      "text": "e1"
+                    },
+                    "to": 0
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 0.01,
+                    "result": {
+                      "text": "e1"
+                    },
+                    "to": 0.99
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 1,
+                    "result": {
+                      "text": "e1"
+                    },
+                    "to": 1
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 0
+                  },
+                  {
+                    "color": "#73BF69",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 3,
+            "y": 17
+          },
+          "id": 86,
+          "interval": null,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Kubernetes Cluster Deep Dive",
+              "url": "/d/cluster/kubernetes-cluster-deep-dive?$__url_time_range&var-location=japaneast&var-cluster=jpe-e1-aks-01"
+            }
+          ],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "sum(up{job=\"node-exporter\", location=\"japaneast\", cluster=\"jpe-e1-aks-01\"}) / sum(kube_node_info{location=\"japaneast\", cluster=\"jpe-e1-aks-01\"})",
+              "format": "time_series",
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Production",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 3,
+            "x": 0,
+            "y": 23
+          },
+          "id": 75,
+          "interval": null,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "exemplar": true,
+              "expr": "count(up{job=\"node-exporter\", location=\"japaneast\", cluster=\"sl-aksp-jpe-01\"} == 0)",
+              "format": "time_series",
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Machines Unavailable",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 3,
+            "x": 3,
+            "y": 23
+          },
+          "id": 87,
+          "interval": null,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "count(up{job=\"node-exporter\", location=\"japaneast\", cluster=\"jpe-e1-aks-01\"} == 0)",
+              "format": "time_series",
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Machines Unavailable",
+          "type": "stat"
+        },
+        {
+          "datasource": null,
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 26
+          },
+          "id": 58,
+          "options": {
+            "content": "\n## Non-Production Clusters\n---\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "8.0.6",
+          "timeFrom": null,
+          "timeShift": null,
+          "transparent": true,
+          "type": "text"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "targetBlank": true,
+                  "title": "",
+                  "url": "/d/wefs4es/ECE?orgId=1&from=now-24h&to=now&var-cluster=ece-01-jpe&var-location=japaneast&var-node=All"
+                }
+              ],
+              "mappings": [
+                {
+                  "options": {
+                    "from": 0,
+                    "result": {
+                      "text": "Elastic Cloud Enterprise"
+                    },
+                    "to": 0
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 0.01,
+                    "result": {
+                      "text": "Elastic Cloud Enterprise"
+                    },
+                    "to": 0.99
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 1,
+                    "result": {
+                      "text": "Elastic Cloud Enterprise"
+                    },
+                    "to": 2
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 0
+                  },
+                  {
+                    "color": "#73BF69",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 0,
+            "y": 28
+          },
+          "id": 72,
+          "interval": null,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Explore ECE",
+              "url": "/d/wefs4es/ECE?orgId=1&from=now-24h&to=now&var-cluster=ece-01-jpe&var-location=japaneast&var-node=All"
+            }
+          ],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "sum(ece_deployment_status_elasticsearch_health{location=\"japaneast\", cluster_name=~\".*-(q|d)-.*\"}) / sum(ece_deployment_status_elasticsearch_health{location=\"japaneast\", cluster_name=~\".*-(q|d)-.*\"} == 1)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Internal",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "targetBlank": true,
+                  "title": "",
+                  "url": "/d/k0RHgTYWk/?orgId=1&from=now-24h&to=now&var-location=japaneast"
+                }
+              ],
+              "mappings": [
+                {
+                  "options": {
+                    "from": 0,
+                    "result": {
+                      "text": "Redislabs"
+                    },
+                    "to": 0
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 0.01,
+                    "result": {
+                      "text": "Redislabs"
+                    },
+                    "to": 0.99
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 1,
+                    "result": {
+                      "text": "Redislabs"
+                    },
+                    "to": 2
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 0
+                  },
+                  {
+                    "color": "#73BF69",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 3,
+            "y": 28
+          },
+          "id": 83,
+          "interval": null,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Explore Redislabs",
+              "url": "/d/k0RHgTYWk/?orgId=1&from=now-24h&to=now&var-location=japaneast"
+            }
+          ],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "sum(redis_exporter_build_info{tenant=~\".*-(q|d)-.*\"}) / sum(redis_up{tenant=~\".*-(q|d)-.*\"})",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Internal",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 3,
+            "x": 0,
+            "y": 34
+          },
+          "id": 73,
+          "interval": null,
+          "links": [
+            {
+              "title": "Explore Instances",
+              "url": "/d/zBDI2L_Wz/virtual-machine-stats?orgId=1&?$__url_time_range&refresh=1m&var-location=japaneast&var-cluster=ece-01-jpe"
+            }
+          ],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "sum(ece_deployment_status_elasticsearch_health{location=\"japaneast\", cluster_name=~\".*-(q|d)-.*\"})",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Instance",
+          "type": "stat"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "Prometheus-Thanos",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 3,
+            "x": 3,
+            "y": 34
+          },
+          "id": 85,
+          "interval": null,
+          "links": [
+            {
+              "title": "Explore Instances",
+              "url": "/d/zBDI2L_Wz/virtual-machine-stats?orgId=1&from=now-24h&to=now&var-cluster=ece-01-weu&var-location=westeurope&var-node=All"
+            }
+          ],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.6",
+          "targets": [
+            {
+              "expr": "sum(redis_up{tenant=~\".*-(q|d)-.*\"})",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Instances",
+          "type": "stat"
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 30,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "allValue": null,
+            "current": {
+              "selected": false,
+              "text": "japaneast",
+              "value": "japaneast"
+            },
+            "datasource": "Prometheus-Thanos",
+            "definition": "label_values(kube_node_labels, location)",
+            "description": null,
+            "error": null,
+            "hide": 2,
+            "includeAll": false,
+            "label": "SU Locale",
+            "multi": false,
+            "name": "location",
+            "options": [],
+            "query": {
+              "query": "label_values(kube_node_labels, location)",
+              "refId": "Prometheus-Thanos-location-Variable-Query"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "allValue": "All",
+            "current": {
+              "selected": true,
+              "text": [
+                "All"
+              ],
+              "value": [
+                "$__all"
+              ]
+            },
+            "datasource": "Prometheus-Thanos",
+            "definition": "label_values(up{job=\"node-exporter\",location=\"$location\"}, cluster)",
+            "description": null,
+            "error": null,
+            "hide": 2,
+            "includeAll": true,
+            "label": "Cluster",
+            "multi": true,
+            "name": "cluster",
+            "options": [],
+            "query": {
+              "query": "label_values(up{job=\"node-exporter\",location=\"$location\"}, cluster)",
+              "refId": "Prometheus-Thanos-cluster-Variable-Query"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          }
+        ]
+      },
+      "time": {
+        "from": "now-24h",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m",
+          "5m",
+          "15m",
+          "30m",
+          "1h",
+          "2h",
+          "1d"
+        ],
+        "time_options": [
+          "5m",
+          "15m",
+          "1h",
+          "6h",
+          "12h",
+          "24h",
+          "2d",
+          "7d",
+          "30d"
+        ]
+      },
+      "timezone": "",
+      "title": "East Japan Scale Unit",
+      "uid": "su",
+      "version": 1
+    }
+kind: ConfigMap
+metadata:
+  labels:
+    app: grafana
+    type: grafana-dashboards
+  name: dashboard-jpe
+  namespace: oe-grafana

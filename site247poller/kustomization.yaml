@@ -1,0 +1,19 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - service.yaml
+  - statefulset.yaml
+
+secretGenerator:
+  - name: site24x7-agent
+    namespace: oe-site247poller
+    literals:
+      - s247_device_key=changeme
+    options:
+      disableNameSuffixHash: true
+
+patchesStrategicMerge:
+- secret.yaml

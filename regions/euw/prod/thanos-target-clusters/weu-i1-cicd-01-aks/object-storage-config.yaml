@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: weu-i1-cicd-01-aks-objstore-config-thanos
+type: Opaque
+data:
+    objstore.yml: ENC[AES256_GCM,data:agNGw5eGdhH7lkarj7886L9OcBZgtQwd09h/6J84Y1RMlMK0oRItdAjUyVpsPpBYM5bJGhkB+WrvOG32tjKLnPq9jRDt0bo7xTefyLUBO/olQk+/j7lwB7NUDEUcePCaQ26faqS0/c3d1mkNL+ZbEkuAQhGkv0E5CmuuyZyCqjalp74kVr1JvoYS4No+jHzI6DfKaKv0Uso/Oary1xvWQ0YqJTJZKShNMkojbaXFDoUNMBRULmTziNvqzA3/IU4vQz9cMpiJ3oiKDOAK+dNhbrHMvLo6vTK6H1xMpnCguC7B3emnWBxh6TiMmefUt0e+hURBNLh+SXqRePtjsGV6Y7bXu/nGQp8tyTAZJHV5095J4JDjsN/eblA8elWAuUQVoMl6dLO1s2YBp3nerWlgEGvmfOVwB3m+iuvRmaG2+tQZEyLZZeYIUw==,iv:iIqF6mqDhTzmi9CFDyf/Oh1R2+tPPpq2y0mYb75T6Tc=,tag:vEO06fh8Jo1rYXes56P96Q==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2023-10-09T13:27:49Z"
+          enc: uIBIg2UiXqdx8D_16iyebdagg40YL8cXELUEP3RGoCzhXZKk_qNcHZ1frLIyDscUj2dlVDM3gba6amN2rrWpniOKueNaOwmAzITJEKf8dIEAVNV6zASxynvLCgC44YcyEp7Bex6VCtRxGmkpQiWHSo02OicLtOocGS9e-unYpOmn6zXmH4xcvqbijrKSEJIjLZsqd5aCigUuEUA7Z24TXC5sypm4Ryb64eS22y9tUtM4nlm0lI4OPqrdUv5cZDt3dNBbcPA487gM5hShFD-xexqCNhtujpwjXdiTE704AzH2v9WIEVx0SRhKHyBVkKRltcgxJRS3NY8r7Ak6TgF8_71o6cPsl8dEyyifenBT7LifyJ8SIyF8qCWLsZD_zWqPKBgcq3QAe81l3hQjcXeEsjFm8TfBDozayhiO8xD-ydYdjdFEB3BinSVr4bdjsQb5trrn3vM40KsVbw3YjiYJpiAKl1dhYc-yq6cC1VeW16FLwYMNXN1GKCK4d-lXhhY6SMcIWCYbzGOuLgy9TZTIWDx0XQokCBmmp_spcr2B2N3y3AvQE8to6dXf5NX3E7ljKjgIDN12meC_-TOn4spff45hQlAshQKANrdGe78NpF4flIBQO_kyoKj2-At-05w1vgeLmvmQKP5WoI_Zni_obTr5kGUCZo_zmczuCKTpnf4
+    hc_vault: []
+    age: []
+    lastmodified: "2023-10-09T13:27:51Z"
+    mac: ENC[AES256_GCM,data:NcgCxcfC8xHyORYAaL1VoYVH/WI9upSG4oGG0fFRvLs+NjMa5laVMAeYGp2OvhZRCPt7ojBWVx6dTEr6+dS7VNxLCzvnaA83gXtKyPZ6TpTwLG/3RckSe5Nz7VfBSwSumMxQTSFB13B2+7Vr63WRe7A/KkaSaUMHk7gMNenznU0=,iv:+0MbxVyEPjuvb85xXCPI7m6L0mOm6jptl1Q+0sYIpH8=,tag:wNRS3yBSs2t6cl74ghXZlw==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

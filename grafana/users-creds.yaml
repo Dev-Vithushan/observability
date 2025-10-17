@@ -1,0 +1,23 @@
+apiVersion: v1
+data:
+    creds: ENC[AES256_GCM,data:yNXfhqtuZj6kd8OVpHpI09WnEHf2so8Pi2rFFbMZmI8OtUrGANhWz8+SqVYWaKjFn6whODtc9Oe6P5GUaoIgwfr6NsV9V+q8yqtK715bRhXqgISdHkpHDP0N/L6tcEyMfJB9nuQCJB1mHQKdhAKvf4p7cUFmp4mWvztIxSwiN/3Om7hetlgF1A0JqAAkKy1IaVjGMQ1ZB2kwR25TN7wzl4XNwWhvtT1qFwKfiFmdgOb3Yz/XWWocTL+0bEF4gMKOhMCHupjvIQY9wFMtkiLqH/P2dti1lN3Is+QfcUfPUoaT/wF6QNeByJ1x3pFmxjdSrzzjhOfFZoTG4rCwMfatyiSqngHg03utPwQSZvGjVlIy9bS0lJ9KCGwGlp1FzVeiqa1YzvA4/54Q1U5eF7JFCCDnzUV1DpCMiiCB0YXeNv4zv9lvkscpCU/YCsc9Zsot+s8tLRvTyFOQ6W+MxUNgPxJ1mVPa4arebEmPg7jUJDuS+aR13E8p5S5xk/ghNElJ4envSu4iAjFz2tGUFDUsTrY3kdwFQE+GfLRLTKeidtUpEDslSG6Xs/HJULGpwwCZuor9ag2wz/fYCAShnjmvCDubHdG9Vd+QpK0TwBDtmXlxf8VkdetotArDGV35nkGAkJWu2FWpY/KBXGC6g4PqUz9YeuHDjXAYAGUsSELks+Y1Drs0,iv:7Lqm1SAnhHTdM1qKdIg7V66N+99GAqwlTizVR6oI4Ls=,tag:NzQx+dY6xciQSFl7EbmkfA==,type:str]
+kind: Secret
+metadata:
+    name: users-credentials
+type: Opaque
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2024-06-17T12:11:23Z"
+          enc: LlitmoMHoD8WRPpWI3Ykiht4srl9Rz5uqTCk5oulojRgETaz6ynPcrAD2v-rDQgsoOqyJW1p7t9zcEhLSbr41sQcMGBSpjU-eObvETo9Z4HhVd-_o-LdTTov_DkvYmZCX2vi-tvJ1M9zlhtW6av6xDELU0kkJPkTeWPP02pKXCoSGtvzZ2OhFLMHZzqHHTKhheGQNRhp0KFIn9ZgVT2pyVG2eAVRcgBbx9bFegodnLp1c759bt92ozSYAEB3dm5i2OFH3-gXM4gh1HMl_hWxEWCoLaFix-b-W1fbM09L2MGyeAaQbSfeu8tZ9iV1E930pUjGa597xdVRhb_DuZdE4SihvxMxR9NLHrCKIOqFwlmiobWzuLX7AXVKCV8Qc-o8qiNb9fKL8mnaNqjiqRd3ocJB0ZgDSolpeTmiVqZQVzWSgFuKuHVlGTJDjY5uKDwV4ORPXOf3wG1XwL4m_GueKuYDtMBewqZ3-rTd1ibBm8Ky12E6_pTiIjAAO7ui8Bbb7-AcZBjrPQbqRIuUT4JS661XsssSnmxUat2aEGxum32Euyva8ng1M-q6YkSfEaK08Gv2pia1aUtAbkWqDuTLY2tnMxIqumvc5ARYgm0g5eFRgQ9IwHaVwJtgIWm2FTyOxVEofMrvi_QdChQgIkE6nqUTtTECERmRZzN9HM6ljQ0
+    hc_vault: []
+    age: []
+    lastmodified: "2024-06-17T12:11:25Z"
+    mac: ENC[AES256_GCM,data:sjDm9tYOw1mIhS63JfQwEgXdB+TU3lBNiltAZhGOtq0My8Z9Fq4fNYHFJ/Uufbm7/fEqWGY6Qp/L1IeglTRTu6YwOgR0LR0ypYFa4+IkTACE7jFHYiFhetjeyY6VcWyTIU/FAHSfDymX7luY2aX6MaqrsdtJANqZaCq/Aw0nJKs=,iv:sAejnUlpuAf8u7R0mE0/DH6rwzln6Z5Fr6c9zqaMNRA=,tag:Ui1mbAWhGXINa5XQ08HHSA==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

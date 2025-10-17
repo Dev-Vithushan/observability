@@ -1,0 +1,23 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kafka-lag-exporter
+spec:
+  interval: 1h0m0s
+  chart:
+    spec:
+      version: 0.8.2
+      chart: kafka-lag-exporter
+      sourceRef:
+        kind: HelmRepository
+        name: kafka-lag-exporter
+        namespace: oe-kafka-lag-exporter
+  valuesFrom:
+    - kind: ConfigMap
+      name: kafka-lag-exporter-values
+      valuesKey: values.yaml
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3

@@ -1,0 +1,181 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: alloy-prometheus-alerts
+  namespace: oe-alerts
+spec:
+  groups:
+    - name: alloy
+      rules:
+        - alert: AlloySlowComponentEvaluations
+          for: 15m
+          expr: |
+            sum by (cluster, namespace, job, component_path, component_id) (rate(alloy_component_evaluation_slow_seconds[10m])) > 0
+          labels:
+            severity: P3
+            system: oe
+            component: alloy
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: 'Component evaluations are taking too long under job {{ $labels.job }}, component_path {{ $labels.component_path }}, component_id {{ $labels.component_id }}.'
+        - alert: AlloyUnhealthyComponents
+          for: 15m
+          expr: |
+            sum by (cluster, namespace, job) (alloy_component_controller_running_components{health_type!="healthy"}) > 0
+          labels:
+            severity: P3
+            system: oe
+            component: alloy
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: 'Unhealthy components detected under job {{ $labels.job }}'
+        - alert: AlloyClusterNotConverging
+          for: 10m
+          expr: |
+            stddev by (cluster, namespace, job, cluster_name) (sum without (state) (cluster_node_peers)) != 0
+          labels:
+            severity: P3
+            system: oe
+            component: alloy
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: 'Cluster is not converging: nodes report different number of peers in the cluster. Job is {{ $labels.job }}'
+        - alert: AlloyClusterNodeCountMismatch
+          for: 15m
+          expr: |
+            sum without (state) (cluster_node_peers) != on (cluster, namespace, job, cluster_name) group_left count by (cluster, namespace, job, cluster_name) (cluster_node_info)
+          labels:
+            severity: P3
+            system: oe
+            component: alloy
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: 'Nodes report different number of peers vs. the count of observed Alloy metrics. Some Alloy metrics may be missing or the cluster is in a split brain state. Job is {{ $labels.job }}'
+        - alert: AlloyClusterNodeUnhealthy
+          for: 10m
+          expr: |
+            cluster_node_gossip_health_score > 0
+          labels:
+            severity: P3
+            system: oe
+            component: alloy
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: 'Cluster node is reporting a gossip protocol health score > 0. Job is {{ $labels.job }}'
+        - alert: AlloyClusterNodeNameConflict
+          for: 10m
+          expr: |
+            sum by (cluster, namespace, job, cluster_name) (rate(cluster_node_gossip_received_events_total{event="node_conflict"}[2m])) > 0
+          labels:
+            severity: P3
+            system: oe
+            component: alloy
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: 'A node tried to join the cluster with a name conflicting with an existing peer. Job is {{ $labels.job }}'
+        - alert: AlloyClusterNodeStuckTerminating
+          for: 10m
+          expr: |
+            sum by (cluster, namespace, job, instance, cluster_name) (cluster_node_peers{state="terminating"}) > 0
+          labels:
+            severity: P3
+            system: oe
+            component: alloy
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: 'There is a node within the cluster that is stuck in Terminating state. Job is {{ $labels.job }}'
+        - alert: AlloyClusterConfigurationDrift
+          for: 5m
+          expr: |
+            count without (sha256) (max by (cluster, namespace, sha256, job, cluster_name) (alloy_config_hash and on(cluster, namespace, job, cluster_name) cluster_node_info))>1
+          labels:
+            severity: P3
+            system: oe
+            component: alloy
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: 'Cluster nodes are not using the same configuration file. Job is {{ $labels.job }}'
+        - alert: AlloyOtelcolReceiverRefusedSpans
+          for: 10m
+          expr: |
+            1 - (sum by (cluster, namespace,job) (rate(otelcol_receiver_refused_spans_total{}[1m]))/sum by (cluster, namespace,job) (rate(otelcol_receiver_refused_spans_total{}[1m]) + rate(otelcol_receiver_accepted_spans_total{}[1m]))) < 0.95
+          labels:
+            severity: P3
+            system: oe
+            component: alloy
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: 'The receiver could not push some spans to the pipeline under job {{ $labels.job }}. This could be due to reaching a limit such as the ones imposed by otelcol.processor.memory_limiter.'
+        - alert: AlloyOtelcolExporterFailedSpans
+          for: 10m
+          expr: |
+            1 - (sum by (cluster, namespace,job) (rate(otelcol_exporter_send_failed_spans_total{}[1m]))/sum by (cluster, namespace,job) (rate(otelcol_exporter_send_failed_spans_total{}[1m]) + rate(otelcol_exporter_sent_spans_total{}[1m]))) < 0.95
+          labels:
+            severity: P3
+            system: oe
+            component: alloy
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: 'The exporter failed to send spans to their destination under job {{ $labels.job }}. There could be an issue with the payload or with the destination endpoint.'
+        - alert: AlloyWriteToLokiThrottled
+          for: 5m
+          expr: |
+            sum by (cluster, host, reason) (rate(loki_write_dropped_entries_total{namespace="oe-alloy", reason=~"rate_limited|stream_limited"}[1m])) > 0
+          labels:
+            severity: P3
+            system: oe
+            component: alloy
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: 'Loki at {{ $labels.host }} throttled alloy, reason: {{ $labels.reason }}'
+        - alert: AlloyWriteToLokiDroppedEntries
+          for: 5m
+          expr: |
+            sum by (cluster, host, reason) (rate(loki_write_dropped_entries_total{namespace="oe-alloy", reason!~"rate_limited|stream_limited"}[5m])) > 0
+          labels:
+            severity: P3
+            system: oe
+            component: alloy
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: 'Loki at {{ $labels.host }} dropped entries from alloy, reason: {{ $labels.reason }}.'
+        - alert: AlloyLokiProcessDroppedLines
+          for: 5m
+          expr: |
+            sum by (cluster, component_id, reason) (rate(loki_process_dropped_lines_total{namespace="oe-alloy"}[5m])) > 0
+          labels:
+            severity: P3
+            system: oe
+            component: alloy
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            message: 'Alloy dropped lines, reason: {{ $labels.reason }}, component: {{ $labels.component_id }}'
+        - alert: AlloyPodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total{job="kube-state-metrics", namespace=~"oe-alloy.*"}[15m]) * 60 * 5 > 0
+          for: 15m
+          labels:
+            severity: P1
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+          annotations:
+            description: Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is restarting {{ printf "%.2f" $value }} times / 15 minutes.
+            message: An alloy pod is restarting often.

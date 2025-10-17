@@ -1,0 +1,80 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azure-resourcemanager-exporter
+  namespace: azure-resourcemanager-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: azure-resourcemanager-exporter
+  template:
+    metadata:
+      labels:
+        app: azure-resourcemanager-exporter
+        release: kube-prometheus-stack
+        app.kubernetes.io/instance: azure-resourcemanager-exporter
+        monitoring: prometheus 
+    spec: 
+        containers: 
+          - name: azure-resourcemanager-exporter
+            image: webdevops/azure-resourcemanager-exporter
+            env:
+            - name: AZURE_CLIENT_ID
+              value: "0239a0d0-6630-484e-baef-f55a6728336f"
+            - name: AZURE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: azure-client-secret
+                  key: azure-client-secret
+                  optional: false
+            - name: AZURE_TENANT_ID
+              value: "2c03f75f-06e4-46f7-86f5-d8d70bef1cf3"
+            - name: SCRAPE_TIME_QUOTA
+              value: "60m"
+            - name: AZURE_LOCATION
+              value: "westeurope westus2 japaneast australiaeast eastus"
+            - name:  SCRAPE_TIME
+              value: "0" 
+            - name:  SCRAPE_RATELIMIT_READ
+              value: "60m"
+            - name:  SCRAPE_RATELIMIT_WRITE
+              value: "60m"              
+            resources: 
+              requests:
+                memory: "1Gi"
+                cpu: "0.5"
+              limits:
+                memory: "2Gi"
+                cpu: "1"  
+        volumes:
+        - name: foo
+          secret:
+            secretName: mysecret
+            optional: false
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: azure-resourcemanager-exporter
+    app.kubernetes.io/instance: azure-resourcemanager-exporter
+    monitoring: prometheus 
+  name: azure-resourcemanager-exporter
+  namespace: azure-resourcemanager-exporter
+spec:
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  publishNotReadyAddresses: true
+  selector:
+    app: azure-resourcemanager-exporter
+  sessionAffinity: None
+  type: ClusterIP

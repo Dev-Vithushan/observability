@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: oe-apm-server
+  labels:
+    sc_system: ${sc_system}
+    sc_domain: ${sc_domain}
+    sc_component: ${sc_system}-apm
+    sc_env: ${sc_env}
+    sc_region: ${sc_region}
+    sc_provider: ${sc_provider}
+    sc_createdby: ${sc_createdby}
+    sc_type: ${sc_type}
+    sc_owner: ${sc_owner}

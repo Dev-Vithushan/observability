@@ -1,0 +1,129 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # - ../../../base/
+  # Section to deploy base & regional thanos resources
+  - ../../../thanos/
+  - helm-values-thanos-stack-regional.yaml
+  - thanos-secret.yaml
+  - thanos-target-clusters/euw-i1-oe-aks-02/
+  # Section to deploy base & regional grafana resources
+  - ../../../grafana
+  # temporary name of the global dashboard
+  - grafana-dashboard-global-enet-and-out.yaml
+  - helm-release-grafana-dashboards.yaml
+  - grafana-secret-datasources.yaml
+  - oe-dev-sku-dashboard.yaml
+  # Section to deploy RedisLab exporters
+  - redis-target-clusters/
+  # Section to deploy apm-server
+  - ../../../apm-server
+  - helm-values-apm-server-regional.yaml
+  # Section to deploy oTel resources
+  - ../../../otel-collector/
+  # Section to deploy Loki resources
+  - ../../../loki/
+  # Section to deploy Mimir resources
+  - ../../../mimir/
+  # Section to deploy Tempo resources
+  - ../../../tempo/
+  # Section to deploy Pyroscope resources
+  - ../../../pyroscope/
+  - helm-values-pyroscope-stack-regional.yaml
+  # Section to deploy Sample App resources
+  - ../../../sample-app/
+  - helm-values-sample-app-regional.yaml
+  # Section to deploy Kafka lag exporter
+  #- ../../../components/exporters/kafka-lag-exporter
+  #- helm-values-kafka-lag-exporter-secrets.yaml
+  # Section to deploy Dora Platform resources
+  - ../../../dora-platform/
+  # Section to deploy alertmanagerconfig
+  # - ../../../alerts/dev/
+
+components:
+#  - ../../../components/exporters/kafka-metrics
+  - ../../../components/exporters/databricks-exporter
+#  - ../../../components/exporters/cloudflare-exporter
+  - ../../../components/exporters/azure-metrics-exporter
+
+patchesStrategicMerge:
+  - helm-release-thanos-stack-regional-patch.yaml
+  - helm-release-apm-server-regional-patch.yaml
+  - helm-release-sample-app-regional-patch.yaml
+  - helm-release-pyroscope-stack-regional-patch.yaml
+  - apm-envs.yaml
+  - loki-secret.yaml
+  - tempo-secret.yaml
+  - mimir-secret.yaml
+  - pyroscope-secret.yaml
+  - sample-app-apm-secret.yaml
+  #- helm-release-kafka-lag-exporter-patch.yaml
+
+patches:
+  #- path: kafka-service-monitor-patch.yaml
+  #  target:
+  #    kind: ServiceMonitor
+  #    name: kafka-metric-api
+  #    namespace: oe-kafka-metrics
+  - path: databricks-deployment-patch.yaml
+    target:
+      kind: Deployment
+      name: databricks-exporter
+      namespace: oe-databricks-exporter
+
+secretGenerator:
+  - name: apm-server-elasticsearch
+    namespace: oe-apm-server
+    literals:
+      - host=changeme
+      - kibana_host=changeme
+      - username=changeme
+      - password=changeme
+      - apm_token=changeme
+      - metric_username=changeme
+      - metric_password=changeme
+      - metric_host=changeme
+      - cluster_uuid=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: tempo-secret
+    namespace: oe-tempo
+    literals:
+      - AZURE_ACCOUNT_KEY=changeme
+      - AZURE_ACCOUNT_NAME=changeme
+      - AZURE_CONTAINER_NAME=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: loki-secret
+    namespace: oe-loki
+    literals:
+      - AZURE_ACCOUNT_KEY=changeme
+      - AZURE_ACCOUNT_NAME=changeme
+      - AZURE_CONTAINER_NAME=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: mimir-secret
+    namespace: oe-mimir
+    literals:
+      - AZURE_ACCOUNT_KEY=changeme
+      - AZURE_ACCOUNT_NAME=changeme
+      - AZURE_CONTAINER_NAME_BLOCKS=changeme
+      - AZURE_CONTAINER_NAME_ALERTMANAGER=changeme
+      - AZURE_CONTAINER_NAME_RULER=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: pyroscope-secret
+    namespace: oe-pyroscope
+    literals:
+      - AZURE_ACCOUNT_KEY=changeme
+      - AZURE_ACCOUNT_NAME=changeme
+      - AZURE_CONTAINER_NAME=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: apm-server-dev-token
+    namespace: oe-sample-app
+    literals:
+      - token=changeme
+    options:
+      disableNameSuffixHash: true

@@ -1,0 +1,31 @@
+---
+- op: replace
+  path: "/spec/endpoints/0/params/resource.kafka.id"
+  value:
+    - lkc-57w72z
+    - lkc-nvyqrd
+    - lkc-057qv2
+    - lkc-35gvq2
+    - lkc-3vwx0
+    - lkc-6jwr8
+    - lkc-d2vn1
+    - lkc-g1ym81
+    - lkc-nnxj6
+    - lkc-nr3ndv
+    - lkc-qz7oxp
+    - lkc-z2pdy
+    - lkc-7k9rd2
+    - lkc-jzyk78
+    - lkc-w38x5
+    - lkc-18ndz
+    - lkc-3v2zm
+    - lkc-598rz
+    - lkc-6jd26
+    - lkc-82z8m
+    - lkc-d2kqz
+    - lkc-k5qr6
+    - lkc-nno83
+    - lkc-w9ogj
+    - lkc-yzqv6
+    - lkc-z2qxz
+    - lkc-x177x

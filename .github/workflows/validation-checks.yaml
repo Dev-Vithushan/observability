@@ -1,0 +1,123 @@
+name: Validation-checks
+
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  pull_request:
+    branches: [main]
+
+jobs:
+  yaml-lint:
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ vars.BUILD_TASK_REGISTRY }}/github/jobimage/oeactions:1.0.1
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # Check the YAML file validity 
+    - name: Run yq
+      shell: bash
+      run: |
+        echo "## INFO - Checking YAML validity" >> $GITHUB_STEP_SUMMARY
+        failure_file=$(mktemp)
+        echo 0 > "$failure_file"
+        find . -type f \( -name '*.yaml' -o -name '*.yml' \) -print0 | while IFS= read -r -d $'\0' file; do
+            if ! yq e . "$file" > /dev/null; then
+                echo "ERROR - Invalid YAML file: $file :red_circle:" >> $GITHUB_STEP_SUMMARY
+                echo 1 > "$failure_file"
+            fi
+        done
+        failure=$(cat "$failure_file")
+        rm "$failure_file"
+
+        if [[ $failure -ne 0 ]]; then
+            exit 1
+        else
+            echo "All YAML files are valid syntax-wise. :white_check_mark:" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  validate-k8s-manifests:
+    needs: yaml-lint
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ vars.BUILD_TASK_REGISTRY }}/github/jobimage/oeactions:1.0.1
+    steps:
+    - uses: actions/checkout@v4
+
+    # Step to validate the k8s and flux objects
+    - name: Validate the k8s and flux objects
+      shell: bash
+      run: |
+        failure_file=$(mktemp)
+        echo 0 > "$failure_file"
+
+        # config kubeconform
+        kubeconform_config=("-n" "16" "-strict" "-ignore-missing-schemas"
+                            "-schema-location" "default"
+                            "-schema-location" "/tmp/flux-crd-schemas"
+                            "-schema-location" "/tmp/prometheus-crd-schemas/master-standalone-strict/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
+                            "-exit-on-error" "-verbose")
+
+        echo "## INFO - Validating Kubernetes and Flux Manifests" >> $GITHUB_STEP_SUMMARY
+
+        find . \( -type d -name '.github' -prune \) -o \( -type f -name '*.yaml' ! -name '*values.yaml' ! -name '*patch.yaml' -print0 \) | while IFS= read -r -d $'\0' file;
+          do
+            if ! cat "${file}" | yq "del(.sops)" | kubeconform "${kubeconform_config[@]}"; then
+              echo "ERROR - Invalid Kustomization file: ${file} :red_circle:" >> $GITHUB_STEP_SUMMARY
+              echo 1 > "$failure_file"
+            fi
+        done
+
+        failure=$(cat "$failure_file")
+        if [[ $failure -ne 0 ]]; then
+            exit 1
+        else
+            echo "All YAML files are valid syntax-wise. :white_check_mark:" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  validate-kustomization-build-overlays:
+    needs: yaml-lint
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ vars.BUILD_TASK_REGISTRY }}/github/jobimage/oeactions:1.0.1
+    steps:
+    - uses: actions/checkout@v4
+    
+    # Step to validate kustomization build overlays
+    - name: Validate kustomization build overlays
+      shell: bash
+      run: |
+
+        failure_file=$(mktemp)
+        echo 0 > "$failure_file"
+
+        # config kubeconform
+        kubeconform_config=("-n" "16" "-strict" "-ignore-missing-schemas"
+                            "-schema-location" "default"
+                            "-schema-location" "/tmp/flux-crd-schemas"
+                            "-schema-location" "/tmp/prometheus-crd-schemas/master-standalone-strict/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
+                            "-exit-on-error" "-verbose")
+
+        kustomize_flags=("--load-restrictor=LoadRestrictionsNone")
+        kustomize_config="kustomization.yaml"
+
+        echo "## INFO - Validating kustomize overlays" >> $GITHUB_STEP_SUMMARY
+        find . -type d -name alerts -prune -o -type f -name $kustomize_config -print0 | while IFS= read -r -d $'\0' file;
+          do
+            echo "INFO - Validating kustomization build ${file/%$kustomize_config}"
+            kustomize build "${file/%$kustomize_config}" "${kustomize_flags[@]}" | \
+            yq "del(.sops)" | \
+            kubeconform "${kubeconform_config[@]}"
+            if [[ ${PIPESTATUS[0]} != 0 ]]; then
+              echo "ERROR - Invalid Kustomization file: ${file} :red_circle:" >> $GITHUB_STEP_SUMMARY
+              echo 1 > "$failure_file"
+            fi
+        done
+
+        failure=$(cat "$failure_file")
+        if [[ $failure -ne 0 ]]; then
+            exit 1
+        else
+            echo "All YAML files are valid syntax-wise. :white_check_mark:" >> $GITHUB_STEP_SUMMARY
+        fi
+

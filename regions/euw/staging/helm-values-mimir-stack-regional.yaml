@@ -1,0 +1,100 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helm-values-mimir-stack-regional
+  namespace: oe-mimir
+data:
+  values.yaml: |
+    fullnameOverride: "mimir"
+    mimir:
+      structuredConfig:
+        limits:
+          out_of_order_time_window: 2h
+          ingestion_rate: 5000000
+          ingestion_burst_size: 8000000
+          max_global_series_per_user: 300000000
+          max_global_series_per_metric: 2000000
+          max_query_lookback: "720h"
+          max_query_parallelism: 32
+          results_cache_ttl: "1w"
+        blocks_storage:
+          backend: azure
+          azure:
+            account_key: $${AZURE_ACCOUNT_KEY}
+            account_name: $${AZURE_ACCOUNT_NAME}
+            container_name: $${AZURE_CONTAINER_NAME_BLOCKS}
+            endpoint_suffix: "blob.core.windows.net"
+          tsdb:
+            retention_period: 2160h
+        ruler_storage:
+          backend: azure
+          azure:
+            account_key: $${AZURE_ACCOUNT_KEY}
+            account_name: $${AZURE_ACCOUNT_NAME}
+            container_name: $${AZURE_CONTAINER_NAME_RULER}
+            endpoint_suffix: "blob.core.windows.net"
+        alertmanager_storage:
+          backend: azure
+          azure:
+            account_key: $${AZURE_ACCOUNT_KEY}
+            account_name: $${AZURE_ACCOUNT_NAME}
+            container_name: $${AZURE_CONTAINER_NAME_ALERTMANAGER}
+            endpoint_suffix: "blob.core.windows.net"
+
+    ingester:
+      replicas: 8
+      zoneAwareReplication:
+        enabled: false
+      resources:
+        requests:
+          cpu: 2
+          memory: 8Gi
+        limits:
+          memory: 16Gi
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: mimir-ingester
+      persistentVolume:
+        enabled: true
+        size: 50Gi
+
+    distributor:
+      replicas: 3
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+        limits:
+          memory: 4Gi
+    store_gateway:
+      replicas: 3
+      zoneAwareReplication:
+        enabled: false
+      resources:
+        requests:
+          cpu: 200m
+          memory: 8Gi
+        limits:
+          memory: 16Gi
+      persistentVolume:
+        enabled: true
+        size: 50Gi
+    index-cache:
+      enabled: true
+      replicas: 2
+    metadata-cache:
+      enabled: true
+      replicas: 1
+    query_frontend:
+      replicas: 2
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+        limits:
+          memory: 2Gi

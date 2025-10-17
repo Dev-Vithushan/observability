@@ -1,0 +1,3022 @@
+global:
+  ## Global image registry to use if it needs to be overriden for some specific use cases (e.g local registries, custom images, ...)
+  ##
+  imageRegistry: ""
+
+restartPolicy: Always
+
+kind: Deployment
+
+## Override the namespace
+##
+namespaceOverride: ""
+
+# Override Kubernetes version if your distribution does not follow semver v2
+kubeVersionOverride: ""
+
+## set to true to add the release label so scraping of the servicemonitor with kube-prometheus-stack works out of the box
+releaseLabel: false
+
+podDisruptionBudget: {}
+  # maxUnavailable: 0
+
+## Allow automount the serviceaccount token for sidecar container (eg: oauthproxy)
+automountServiceAccountToken: false
+
+## Additional blackbox-exporter container environment variables
+## For instance to add a http_proxy
+##
+## extraEnv:
+##   HTTP_PROXY: "http://superproxy.com:3128"
+##   NO_PROXY: "localhost,127.0.0.1"
+extraEnv: {}
+
+## Additional blackbox-exporter container environment variables for secret
+## extraEnvFromSecret:
+##   - secretOne
+##   - secretTwo
+extraEnvFromSecret: ""
+
+extraVolumes: []
+  # - name: secret-blackbox-oauth-htpasswd
+  #   secret:
+  #     defaultMode: 420
+  #     secretName: blackbox-oauth-htpasswd
+  # - name: storage-volume
+  #   persistentVolumeClaim:
+  #     claimName: example
+
+## Additional volumes that will be attached to the blackbox-exporter container
+extraVolumeMounts:
+  # - name: ca-certs
+  #   mountPath: /etc/ssl/certs/ca-certificates.crt
+
+## Additional InitContainers to initialize the pod
+## This supports either a structured array or a templatable string
+extraInitContainers: []
+
+## This supports either a structured array or a templatable string
+
+# Array mode
+extraContainers: []
+  # - name: oAuth2-proxy
+  #   args:
+  #     - -https-address=:9116
+  #     - -upstream=http://localhost:9115
+  #     - -skip-auth-regex=^/metrics
+  #     - -openshift-delegate-urls={"/":{"group":"monitoring.coreos.com","resource":"prometheuses","verb":"get"}}
+  #   image: openshift/oauth-proxy:v1.1.0
+  #   ports:
+  #       - containerPort: 9116
+  #         name: proxy
+  #   resources:
+  #       limits:
+  #         memory: 16Mi
+  #       requests:
+  #         memory: 4Mi
+  #         cpu: 20m
+  #   volumeMounts:
+  #     - mountPath: /etc/prometheus/secrets/blackbox-tls
+  #       name: secret-blackbox-tls
+
+# String mode
+# extraContainers: |-
+#   - name: oAuth2-proxy
+#     args:
+#       - -https-address=:9116
+#       - -upstream=http://localhost:9115
+#       - -skip-auth-regex=^/metrics
+#       - -openshift-delegate-urls={"/":{"group":"monitoring.coreos.com","resource":"prometheuses","verb":"get"}}
+#     image: {{ .Values.global.imageRegistry }}/openshift/oauth-proxy:v1.1.0
+
+
+hostNetwork: false
+
+strategy:
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+  type: RollingUpdate
+
+image:
+  registry: quay.io
+  repository: prometheus/blackbox-exporter
+  # Overrides the image tag whose default is {{ printf "v%s" .Chart.AppVersion }}
+  tag: ""
+  pullPolicy: IfNotPresent
+  digest: ""
+
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ##
+  # pullSecrets:
+  #   - myRegistrKeySecretName
+
+podSecurityContext: {}
+# fsGroup: 1000
+
+## User and Group to run blackbox-exporter container as
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+# Add NET_RAW to enable ICMP
+#    add: ["NET_RAW"]
+
+livenessProbe:
+  httpGet:
+    path: /-/healthy
+    port: http
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /-/healthy
+    port: http
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+## Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in.
+## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+topologySpreadConstraints: []
+  # - maxSkew: 1
+  #   topologyKey: failure-domain.beta.kubernetes.io/zone
+  #   whenUnsatisfiable: DoNotSchedule
+  #   labelSelector:
+  #     matchLabels:
+#       app.kubernetes.io/instance: jiralert
+
+# if the configuration is managed as secret outside the chart, using SealedSecret for example,
+# provide the name of the secret here. If secretConfig is set to true, configExistingSecretName will be ignored
+# in favor of the config value.
+configExistingSecretName: ""
+# Store the configuration as a `Secret` instead of a `ConfigMap`, useful in case it contains sensitive data
+secretConfig: false
+config:
+  modules:
+    http_2xx:
+      prober: http
+      timeout: 5s
+      http:
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        follow_redirects: true
+        preferred_ip_protocol: "ip4"
+    http_4xx:
+      prober: http
+      timeout: 5s
+      http:
+        valid_status_codes: [400, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 421, 422, 423, 424, 426, 428, 429, 431, 451]
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        follow_redirects: true
+        preferred_ip_protocol: "ip4"
+    grpc_2xx_hello:
+      prober: grpc
+      timeout: 5s
+      grpc:
+        tls: true
+        service: Hello
+        preferred_ip_protocol: "ipv4"
+    grpc_2xx_fqdn:
+      prober: grpc
+      timeout: 5s
+      grpc:
+        tls: true
+        service: Sitecore.Edge.Grpc.Diagnostic.Messages.Hello
+        preferred_ip_protocol: "ipv4"
+    status_healthy:
+      prober: http
+      http:
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        preferred_ip_protocol: "ipv4"
+        fail_if_body_not_matches_regexp:
+          - "^{\"status\":\"Healthy\""
+    status_ok:
+      prober: http
+      http:
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        preferred_ip_protocol: "ipv4"
+        fail_if_body_not_matches_regexp:
+          - "^{\"status\":\"OK\""
+    weu_healthy:
+      prober: http
+      http:
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        preferred_ip_protocol: "ipv4"
+        fail_if_body_not_matches_regexp:
+          - "\"weu-e1-01\":\"up\""
+    eus_healthy:
+      prober: http
+      http:
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        preferred_ip_protocol: "ipv4"
+        fail_if_body_not_matches_regexp:
+          - "\"eus-e1-01\":\"up\""
+    aue_healthy:
+      prober: http
+      http:
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        preferred_ip_protocol: "ipv4"
+        fail_if_body_not_matches_regexp:
+          - "\"aue-e1-01\":\"up\""
+    wus_healthy:
+      prober: http
+      http:
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        preferred_ip_protocol: "ipv4"
+        fail_if_body_not_matches_regexp:
+          - "\"wus2-e1-01\":\"up\""
+    jpe_healthy:
+      prober: http
+      http:
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        preferred_ip_protocol: "ipv4"
+        fail_if_body_not_matches_regexp:
+          - "\"jpe-e1-01\":\"up\""
+    healthy:
+      prober: http
+      http:
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        preferred_ip_protocol: "ipv4"
+        fail_if_body_not_matches_regexp:
+          - "^Healthy$"
+# Set custom config path, other than default /config/blackbox.yaml. If let empty, path will be "/config/blackbox.yaml"
+# configPath: "/foo/bar"
+
+extraConfigmapMounts: []
+  # - name: certs-configmap
+  #   mountPath: /etc/secrets/ssl/
+  #   subPath: certificates.crt # (optional)
+  #   configMap: certs-configmap
+  #   readOnly: true
+  #   defaultMode: 420
+
+## Additional secret mounts
+# Defines additional mounts with secrets. Secrets must be manually created in the namespace.
+extraSecretMounts: []
+  # - name: secret-files
+  #   mountPath: /etc/secrets
+  #   secretName: blackbox-secret-files
+  #   readOnly: true
+  #   defaultMode: 420
+
+resources: {}
+  # limits:
+  #   memory: 300Mi
+  # requests:
+  #   memory: 50Mi
+
+priorityClassName: ""
+
+service:
+  annotations: {}
+  labels: {}
+  type: ClusterIP
+  port: 9115
+  ipDualStack:
+    enabled: false
+    ipFamilies: ["IPv6", "IPv4"]
+    ipFamilyPolicy: "PreferDualStack"
+
+# Only changes container port. Application port can be changed with extraArgs (--web.listen-address=:9115)
+# https://github.com/prometheus/blackbox_exporter/blob/998037b5b40c1de5fee348ffdea8820509d85171/main.go#L55
+containerPort: 9115
+
+serviceAccount:
+  # Specifies whether a ServiceAccount should be created
+  create: true
+  # The name of the ServiceAccount to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+  annotations: {}
+
+## An Ingress resource can provide name-based virtual hosting and TLS
+## termination among other things for CouchDB deployments which are accessed
+## from outside the Kubernetes cluster.
+## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  enabled: false
+  className: ""
+  labels: {}
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    ## The host property on hosts and tls is passed through helm tpl function.
+    ## ref: https://helm.sh/docs/developing_charts/#using-the-tpl-function
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+podAnnotations: {}
+
+# Annotations for the Deployment
+deploymentAnnotations: {}
+
+# Annotations for the Secret
+secretAnnotations: {}
+
+# Hostaliases allow to add additional DNS entries to be injected directly into pods.
+# This will take precedence over your implemented DNS solution
+hostAliases: []
+#  - ip: 192.168.1.1
+#    hostNames:
+#      - test.example.com
+#      - another.example.net
+
+pod:
+  labels: {}
+
+extraArgs:
+  - --log.prober=error
+  # - --history.limit=1000
+
+replicas: 1
+
+serviceMonitor:
+  ## If true, a ServiceMonitor CRD is created for a prometheus operator
+  ## https://github.com/coreos/prometheus-operator for blackbox-exporter itself
+  ##
+  selfMonitor:
+    enabled: false
+    additionalMetricsRelabels: {}
+    additionalRelabeling: []
+    labels: {}
+    path: /metrics
+    scheme: http
+    tlsConfig: {}
+    interval: 30s
+    scrapeTimeout: 30s
+    ## Port can be defined by assigning a value for the port key below
+    ## port:
+
+  ## If true, a ServiceMonitor CRD is created for a prometheus operator
+  ## https://github.com/coreos/prometheus-operator for each target
+  ##
+  enabled: true
+
+  # Default values that will be used for all ServiceMonitors created by `targets`
+  defaults:
+    additionalMetricsRelabels: {}
+    additionalRelabeling: []
+    labels: {}
+    interval: 30s
+    scrapeTimeout: 30s
+    module: http_2xx
+  ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
+  scheme: http
+  ## path: HTTP path. Needs to be adjusted, if web.route-prefix is set
+  path: "/probe"
+  ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
+  ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
+  tlsConfig: {}
+  bearerTokenFile:
+
+  targets:
+    - name: wus2-e1-aks-01-publishing
+      url: https://wus2-e1-aks-01-publishing.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'publishing'
+      module: status_healthy
+    - name: jpe-e1-aks-01-publishing
+      url: https://jpe-e1-aks-01-publishing.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'publishing'
+      module: status_healthy
+    - name: aue-e1-aks-01-publishing
+      url: https://aue-e1-aks-01-publishing.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'publishing'
+      module: status_healthy
+    - name: eus-e1-aks-01-publishing
+      url: https://eus-e1-aks-01-publishing.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'publishing'
+      module: status_healthy
+    - name: weu-e1-aks-01-publishing
+      url: https://weu-e1-aks-01-publishing.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'publishing'
+      module: status_healthy
+    - name: xmclouddeploy-api
+      url: https://xmclouddeploy-api.sitecorecloud.app/health/live
+      additionalMetricsRelabels:
+        component: 'deploy'
+      module: status_healthy
+    - name: edge-weu
+      url: https://edge.sitecorecloud.io/api/status
+      additionalMetricsRelabels:
+        component: 'content_delivery'
+      module: weu_healthy
+    - name: edge-eus
+      url: https://edge.sitecorecloud.io/api/status
+      additionalMetricsRelabels:
+        component: 'content_delivery'
+      module: eus_healthy
+    - name: edge-aue
+      url: https://edge.sitecorecloud.io/api/status
+      additionalMetricsRelabels:
+        component: 'content_delivery'
+      module: aue_healthy
+    - name: edge-wus
+      url: https://edge.sitecorecloud.io/api/status
+      additionalMetricsRelabels:
+        component: 'content_delivery'
+      module: wus_healthy
+    - name: edge-jpe
+      url: https://edge.sitecorecloud.io/api/status
+      additionalMetricsRelabels:
+        component: 'content_delivery'
+      module: jpe_healthy
+      # Authoring endpoints
+    - name: atkoreinter48ff-atkorexmc-prod
+      url: https://xmc-atkoreinter48ff-atkorexmc-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: interwellhef0b1-interwellheb2b1-main
+      url: https://xmc-interwellhef0b1-interwellheb2b1-main.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: thefactory1-temporaryrn2ff6-production
+      url: https://xmc-thefactory1-temporaryrn2ff6-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: issworldser7673-issextranet-production
+      url: https://xmc-issworldser7673-issextranet-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa28f2-jimmyxmplay74e7-sitecoredem0452
+      url: https://xmc-sitecoresaa28f2-jimmyxmplay74e7-sitecoredem0452.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: rosengruppe1-rosengroup-production
+      url: https://xmc-rosengruppe1-rosengroup-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: unaverhoeven1-sitecorecatd3c6-prod
+      url: https://xmc-unaverhoeven1-sitecorecatd3c6-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaac058-rhorxmcdemo-starterprod
+      url: https://xmc-sitecoresaac058-rhorxmcdemo-starterprod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa0d89-meaplaysummit-meaplaysummit
+      url: https://xmc-sitecoresaa0d89-meaplaysummit-meaplaysummit.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: zuelligphar3c90-zpcms-prod
+      url: https://xmc-zuelligphar3c90-zpcms-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: eftelingbv1-website-production
+      url: https://xmc-eftelingbv1-website-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: tourismsaskd098-tsaskxmcloud-tsaskxmclou0cba
+      url: https://xmc-tourismsaskd098-tsaskxmcloud-tsaskxmclou0cba.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: issworldsera337-issworld-issworldpro3305
+      url: https://xmc-issworldsera337-issworld-issworldpro3305.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaad166-productmaster-townhalltest
+      url: https://xmc-sitecoresaad166-productmaster-townhalltest.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa59d4-pff-pffworkshop
+      url: https://xmc-sitecoresaa59d4-pff-pffworkshop.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa1cc9-kdistarter-xmcloudstar95b8
+      url: https://xmc-sitecoresaa1cc9-kdistarter-xmcloudstar95b8.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: vercel-partnerdemo01-production
+      url: https://xmc-vercel-partnerdemo01-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: codehouse-codehousexm94c7-prd
+      url: https://xmc-codehouse-codehousexm94c7-prd.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: pssna1-codefirstpr0cdf-codefirstpr1149
+      url: https://xmc-pssna1-codefirstpr0cdf-codefirstpr1149.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: agencyq-agencyqxmcloud-production
+      url: https://xmc-agencyq-agencyqxmcloud-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: tataconsultf36f-charutest-prod
+      url: https://xmc-tataconsultf36f-charutest-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: enmaxcorpor036c-enmaxnext-prod
+      url: https://xmc-enmaxcorpor036c-enmaxnext-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: generalasse0460-contentservices-prod
+      url: https://xmc-generalasse0460-contentservices-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: oneokinc1-oneok-prod
+      url: https://xmc-oneokinc1-oneok-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: considab1-axis-pc81
+      url: https://xmc-considab1-axis-pc81.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: bridgestone5182-bridgestone-production
+      url: https://xmc-bridgestone5182-bridgestone-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: institutecof37f-icdwebsite-icdprod
+      url: https://xmc-institutecof37f-icdwebsite-icdprod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa81aa-fdefoundation-fdefoundation
+      url: https://xmc-sitecoresaa81aa-fdefoundation-fdefoundation.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: gcicommunica6e8-customerapp9281-prod
+      url: https://xmc-gcicommunica6e8-customerapp9281-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: fishtankconc21d-getfishtanknext-prod
+      url: https://xmc-fishtankconc21d-getfishtanknext-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: xmcloudpageb507-playtravelc33c9-playtraveldemo
+      url: https://xmc-xmcloudpageb507-playtravelc33c9-playtraveldemo.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: eckesgranin9d3c-eghfhocdemo-production
+      url: https://xmc-eckesgranin9d3c-eghfhocdemo-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa94c3-xmcloudintr2ef7-production
+      url: https://xmc-sitecoresaa94c3-xmcloudintr2ef7-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: switchit-a2m-productec9
+      url: https://xmc-switchit-a2m-productec9.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoreusainc1-ordercloudse7c4-production
+      url: https://xmc-sitecoreusainc1-ordercloudse7c4-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: akqa1-lonfoundati6c3e-production
+      url: https://xmc-akqa1-lonfoundati6c3e-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: politecnicod657-polimi-prod
+      url: https://xmc-politecnicod657-polimi-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: globallifeseaae-cytivaxmcloud-prod
+      url: https://xmc-globallifeseaae-cytivaxmcloud-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: xcentium-xcdxpdemo-production
+      url: https://xmc-xcentium-xcdxpdemo-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: eckesgraninf81b-eghf-prod
+      url: https://xmc-eckesgraninf81b-eghf-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: outfrontmed8a35-outfront2022-prod
+      url: https://xmc-outfrontmed8a35-outfront2022-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: eidebaillyllp1-eidebaillypcd51-prod
+      url: https://xmc-eidebaillyllp1-eidebaillypcd51-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: dubaiintern0078-difcexperie96c5-production
+      url: https://xmc-dubaiintern0078-difcexperie96c5-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: tataconsult7816-xmclouddemo-prod
+      url: https://xmc-tataconsult7816-xmclouddemo-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: synlab1-synlab-production
+      url: https://xmc-synlab1-synlab-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: professiona86b3-xmcloudmdarpro-prod
+      url: https://xmc-professiona86b3-xmcloudmdarpro-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: chartwellma83cf-chartwellsxa-cwprod
+      url: https://xmc-chartwellma83cf-chartwellsxa-cwprod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: thetrusteesc483-pennmedicine-prod
+      url: https://xmc-thetrusteesc483-pennmedicine-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: zurichinsurf8c0-zwpshared-prod
+      url: https://xmc-zurichinsurf8c0-zwpshared-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: cruinternatf577-crugroup-crugroupcom
+      url: https://xmc-cruinternatf577-crugroup-crugroupcom.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: unitedsurgi1178-uspi-prod
+      url: https://xmc-unitedsurgi1178-uspi-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa1efd-pointbdxp-production
+      url: https://xmc-sitecoresaa1efd-pointbdxp-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: raiamsterdambv-raiamsterdambv-raiamsterdam
+      url: https://xmc-raiamsterdambv-raiamsterdambv-raiamsterdam.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa0653-mljxmclouddemo-production
+      url: https://xmc-sitecoresaa0653-mljxmclouddemo-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: translationscom-gccpdm-product
+      url: https://xmc-translationscom-gccpdm-product.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: millelacscorp1-mlcv-prod
+      url: https://xmc-millelacscorp1-mlcv-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: unic1-componentsp16b5-development
+      url: https://xmc-unic1-componentsp16b5-development.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: stategovernc45d-cftw-production
+      url: https://xmc-stategovernc45d-cftw-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: californiatc2ec-ctamb-production
+      url: https://xmc-californiatc2ec-ctamb-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: nacubo1-nacubo-prd
+      url: https://xmc-nacubo1-nacubo-prd.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: seaus-xmcbasedemo-prod
+      url: https://xmc-seaus-xmcbasedemo-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: zurichinsur6934-zwpcorp-prod
+      url: https://xmc-zurichinsur6934-zwpcorp-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: avanadeinc2-dotcom-prod
+      url: https://xmc-avanadeinc2-dotcom-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: asmlnetherlaaea-asmlcom-prd
+      url: https://xmc-asmlnetherlaaea-asmlcom-prd.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: hugellc1-darling-demo
+      url: https://xmc-hugellc1-darling-demo.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: postchag1-postportalxcdc0-prod
+      url: https://xmc-postchag1-postportalxcdc0-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: trutzschlerf111-truetzschleff5b-prod
+      url: https://xmc-trutzschlerf111-truetzschleff5b-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: swirehotels1-swirehotels-production
+      url: https://xmc-swirehotels1-swirehotels-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: vercel-vercelxmclo293d-production
+      url: https://xmc-vercel-vercelxmclo293d-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: gowlingwlg1-gowlingcadic0aa-prod
+      url: https://xmc-gowlingwlg1-gowlingcadic0aa-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: stategovern4aea-multisite-production
+      url: https://xmc-stategovern4aea-multisite-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: internation5b29-iwe-production
+      url: https://xmc-internation5b29-iwe-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: giclimited1-qiccom-prod
+      url: https://xmc-giclimited1-qiccom-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: cimicgroupl634d-cimicxmcloud-production
+      url: https://xmc-cimicgroupl634d-cimicxmcloud-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: fundacionuna422-ceu-production
+      url: https://xmc-fundacionuna422-ceu-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sodexofrance1-sodexocorpsites-prod
+      url: https://xmc-sodexofrance1-sodexocorpsites-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa833e-fmcxmclouddemo-uclm
+      url: https://xmc-sitecoresaa833e-fmcxmclouddemo-uclm.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: ohiofarmers63b6-westfieldind832-prod
+      url: https://xmc-ohiofarmers63b6-westfieldind832-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: arabesquefl5949-beondibe-ibeprod
+      url: https://xmc-arabesquefl5949-beondibe-ibeprod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: rosengruppe1-rosengroupclone-production
+      url: https://xmc-rosengruppe1-rosengroupclone-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: marvinlumbe66b3-marvinsitecore-prd
+      url: https://xmc-marvinlumbe66b3-marvinsitecore-prd.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaaec30-rzfxmc-bit
+      url: https://xmc-sitecoresaaec30-rzfxmc-bit.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: perficient-pocs-playsummit
+      url: https://xmc-perficient-pocs-playsummit.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: hcainternatd39a-hcadigital-prod
+      url: https://xmc-hcainternatd39a-hcadigital-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: professionafddf-ps-prod
+      url: https://xmc-professionafddf-ps-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaaea42-mljnordicdemo-production
+      url: https://xmc-sitecoresaaea42-mljnordicdemo-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: ravenindustf163-ravenind-ravenindprod
+      url: https://xmc-ravenindustf163-ravenind-ravenindprod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: purmogroup1-purmogroup-p763
+      url: https://xmc-purmogroup1-purmogroup-p763.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: linakis-personalize-sandbox
+      url: https://xmc-linakis-personalize-sandbox.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa2cff-jpxmcsbtsandbox-prod
+      url: https://xmc-sitecoresaa2cff-jpxmcsbtsandbox-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: ombrello1-relevantedgacd6-relevantedg8fb3
+      url: https://xmc-ombrello1-relevantedgacd6-relevantedg8fb3.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: nationaloil37c5-novinc-prod
+      url: https://xmc-nationaloil37c5-novinc-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: aaacluballi1493-aaacluballi9b10-production
+      url: https://xmc-aaacluballi1493-aaacluballi9b10-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: tessituraneab9a-tessiturane5642-staging
+      url: https://xmc-tessituraneab9a-tessiturane5642-staging.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaaa293-sitecoresalb886-prod
+      url: https://xmc-sitecoresaaa293-sitecoresalb886-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: darlingingr8628-darlingingr6280-production
+      url: https://xmc-darlingingr8628-darlingingr6280-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: hubinternat3abf-viubyhub-prod
+      url: https://xmc-hubinternat3abf-viubyhub-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: personalizeteam-cdppproject-prodsite
+      url: https://xmc-personalizeteam-cdppproject-prodsite.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: macaw-foundation-vgz
+      url: https://xmc-macaw-foundation-vgz.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: vgwholdings89e8-vgw-prod
+      url: https://xmc-vgwholdings89e8-vgw-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: rotorkcontrols1-rotork-prod
+      url: https://xmc-rotorkcontrols1-rotork-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: akqa1-dcxmcloudtest-pade
+      url: https://xmc-akqa1-dcxmcloudtest-pade.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: rosen2holdi8f38-rosennxt-production
+      url: https://xmc-rosen2holdi8f38-rosennxt-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sparebanken6a2b-spvno-production
+      url: https://xmc-sparebanken6a2b-spvno-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: aljasserhol3d83-uc-prod
+      url: https://xmc-aljasserhol3d83-uc-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sasolchemic3a30-sasol-prod
+      url: https://xmc-sasolchemic3a30-sasol-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: epam1-accelerator557f-contentmigrad22
+      url: https://xmc-epam1-accelerator557f-contentmigrad22.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: velirstudioba46-stonexxmclo3667-production
+      url: https://xmc-velirstudioba46-stonexxmclo3667-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: pssna1-cawistarter-cawistartere
+      url: https://xmc-pssna1-cawistarter-cawistartere.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: vanwijnengroep1-vanwijnendidf3d-production
+      url: https://xmc-vanwijnengroep1-vanwijnendidf3d-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: vanwijnengroep1-fijndigital84da-production
+      url: https://xmc-vanwijnengroep1-fijndigital84da-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: kamstrupas-kamstrup-prd
+      url: https://xmc-kamstrupas-kamstrup-prd.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: scjohnsonana080-dart-production
+      url: https://xmc-scjohnsonana080-dart-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: zurichinsura267-zwpzna-prod
+      url: https://xmc-zurichinsura267-zwpzna-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sascargo1-cargoweb-prod
+      url: https://xmc-sascargo1-cargoweb-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: altudo1-sitecorepra3ef8-legalaccele8f74
+      url: https://xmc-altudo1-sitecorepra3ef8-legalaccele8f74.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: horizontald449c-poc-prod
+      url: https://xmc-horizontald449c-poc-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: altudo1-legalaccele91dd-legalacceled6ae
+      url: https://xmc-altudo1-legalaccele91dd-legalacceled6ae.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: presidentsclub-hestia-prod
+      url: https://xmc-presidentsclub-hestia-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: epam1-hcajadeseco79fd-live
+      url: https://xmc-epam1-hcajadeseco79fd-live.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: greystarglo9870-propertywebb298-production
+      url: https://xmc-greystarglo9870-propertywebb298-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: pssna1-viafdecember-viafenvname
+      url: https://xmc-pssna1-viafdecember-viafenvname.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: csrlimited1-csrscxmcweb-prod
+      url: https://xmc-csrlimited1-csrscxmcweb-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: daycoeuropesrl-globalafter0df0-prd
+      url: https://xmc-daycoeuropesrl-globalafter0df0-prd.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaac6ae-jora-standarddemo
+      url: https://xmc-sitecoresaac6ae-jora-standarddemo.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: professionad9d5-mmcfoundatidba9-mmaembeddedd712
+      url: https://xmc-professionad9d5-mmcfoundatidba9-mmaembeddedd712.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa0a33-sitecorexmcpoc-prod
+      url: https://xmc-sitecoresaa0a33-sitecorexmcpoc-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa734b-joslworkshop-prod
+      url: https://xmc-sitecoresaa734b-joslworkshop-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: suncoastcre57dd-suncoast-suncoastprod
+      url: https://xmc-suncoastcre57dd-suncoast-suncoastprod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: gsquared1-g2vertex-prod1
+      url: https://xmc-gsquared1-g2vertex-prod1.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaaf61c-bizxmcdemos-bizxmcdemo
+      url: https://xmc-sitecoresaaf61c-bizxmcdemos-bizxmcdemo.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: gsquared1-vertex-prodxmcloudlite
+      url: https://xmc-gsquared1-vertex-prodxmcloudlite.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: victorianth5022-rdcmdxp-production
+      url: https://xmc-victorianth5022-rdcmdxp-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: petsupplies9cf0-petsuppliesplus-prod
+      url: https://xmc-petsupplies9cf0-petsuppliesplus-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: gloryglobal2560-gloryglobal-gloryglobal
+      url: https://xmc-gloryglobal2560-gloryglobal-gloryglobal.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: meccabrands213d-meccaxm-prod
+      url: https://xmc-meccabrands213d-meccaxm-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa0ec1-mlj-production
+      url: https://xmc-sitecoresaa0ec1-mlj-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: oshyn-xmclouddxp-prod
+      url: https://xmc-oshyn-xmclouddxp-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaaea96-lacuna-prod
+      url: https://xmc-sitecoresaaea96-lacuna-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: beyondblue1-beyondblueltd-p69c
+      url: https://xmc-beyondblue1-beyondblueltd-p69c.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa882d-componentsd6e81-componentsd3771
+      url: https://xmc-sitecoresaa882d-componentsd6e81-componentsd3771.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa95a1-fmcxmclouddemo-production
+      url: https://xmc-sitecoresaa95a1-fmcxmclouddemo-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa58af-fdedemo-fdedemoprod
+      url: https://xmc-sitecoresaa58af-fdedemo-fdedemoprod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaab3ef-chah-prod
+      url: https://xmc-sitecoresaab3ef-chah-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: avanade-xmcloudavan797a-pnarendrakumar
+      url: https://xmc-avanade-xmcloudavan797a-pnarendrakumar.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: epam1-learningsandbox-demo
+      url: https://xmc-epam1-learningsandbox-demo.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: jeldwencanada1-jeldwen-p523
+      url: https://xmc-jeldwencanada1-jeldwen-p523.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: epam1-aramarkpoc-d2fc
+      url: https://xmc-epam1-aramarkpoc-d2fc.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: hatchltd1-hatchcorpsi44ab-prod
+      url: https://xmc-hatchltd1-hatchcorpsi44ab-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: aceik-aceiksandpitxmc-prod
+      url: https://xmc-aceik-aceiksandpitxmc-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaaae9a-madetestproject-prodtestenv
+      url: https://xmc-sitecoresaaae9a-madetestproject-prodtestenv.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: xmcloudpmuswest-ch1demo-prod
+      url: https://xmc-xmcloudpmuswest-ch1demo-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: professiona878c-nicsdemoproject-xmc21demo
+      url: https://xmc-professiona878c-nicsdemoproject-xmc21demo.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: acrisurellc1-acrisure-prod
+      url: https://xmc-acrisurellc1-acrisure-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: valtechse1-techtransfo3d18-himanshu
+      url: https://xmc-valtechse1-techtransfo3d18-himanshu.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: raiamsterdambv-raidigitalp4c10-production
+      url: https://xmc-raiamsterdambv-raidigitalp4c10-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: merge1-nmhsxmcloud-production
+      url: https://xmc-merge1-nmhsxmcloud-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: macaw-macawdemo-sec65
+      url: https://xmc-macaw-macawdemo-sec65.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa7815-akxmcplaysummit-prod
+      url: https://xmc-sitecoresaa7815-akxmcplaysummit-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa3bb2-xmcdevtraining-rahmah
+      url: https://xmc-sitecoresaa3bb2-xmcdevtraining-rahmah.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa94dc-meilxmc1-prod
+      url: https://xmc-sitecoresaa94dc-meilxmc1-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: vertisdigital-vertis-vertiscorporate
+      url: https://xmc-vertisdigital-vertis-vertiscorporate.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: personalizeteam-devexdemo-env1akos
+      url: https://xmc-personalizeteam-devexdemo-env1akos.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: brunelinterddf0-bruneldigit4055-production
+      url: https://xmc-brunelinterddf0-bruneldigit4055-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: luminary1-erianlumina6248-prod
+      url: https://xmc-luminary1-erianlumina6248-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: shureincorp65f6-shureredesia1c7-production
+      url: https://xmc-shureincorp65f6-shureredesia1c7-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaaf6cc-seemaxmcloud-dev
+      url: https://xmc-sitecoresaaf6cc-seemaxmcloud-dev.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: espireinfol698a-espirestart9196-temp
+      url: https://xmc-espireinfol698a-espirestart9196-temp.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: epamemeatra9f20-epamxmcloud-prod
+      url: https://xmc-epamemeatra9f20-epamxmcloud-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: avanade-xmcloudavan9b28-atcitraining2
+      url: https://xmc-avanade-xmcloudavan9b28-atcitraining2.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: avanade-xmcloudtraining-atcitraining1
+      url: https://xmc-avanade-xmcloudtraining-atcitraining1.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: allenoveryllp1-aoshearmanwe0db-production
+      url: https://xmc-allenoveryllp1-aoshearmanwe0db-production.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: epam1-experimenta3321-int
+      url: https://xmc-epam1-experimenta3321-int.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: brutextilesnv1-cms-prd
+      url: https://xmc-brutextilesnv1-cms-prd.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: simcorp1-simcorp-pc2b
+      url: https://xmc-simcorp1-simcorp-pc2b.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: gatespa1-sitecoregate-prod
+      url: https://xmc-gatespa1-sitecoregate-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaacb71-iekatestproject-test11
+      url: https://xmc-sitecoresaacb71-iekatestproject-test11.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaac275-wenxmc-wenxmcenv
+      url: https://xmc-sitecoresaac275-wenxmc-wenxmcenv.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaaae68-zeplaysummi2659-zeproductio9179
+      url: https://xmc-sitecoresaaae68-zeplaysummi2659-zeproductio9179.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: blueyonderie8e6-corporateefb0-prod6ccb
+      url: https://xmc-blueyonderie8e6-corporateefb0-prod6ccb.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoredeu119f-test05e3-prod9663
+      url: https://xmc-sitecoredeu119f-test05e3-prod9663.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa6aaf-componentswc4ac-donotdeletef939
+      url: https://xmc-sitecoresaa6aaf-componentswc4ac-donotdeletef939.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoredeud62a-foundationhd46b-prodd504
+      url: https://xmc-sitecoredeud62a-foundationhd46b-prodd504.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaab94c-fmcorderclo7401-productionb912
+      url: https://xmc-sitecoresaab94c-fmcorderclo7401-productionb912.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: veluxas177ed-externalrel0f9c-prodb325
+      url: https://xmc-veluxas177ed-externalrel0f9c-prodb325.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: valtechse13bf1-therig666e-prod86b4
+      url: https://xmc-valtechse13bf1-therig666e-prod86b4.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: labatonsuch55ed-lantern22c31-prodca31
+      url: https://xmc-labatonsuch55ed-lantern22c31-prodca31.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaaa6ba-measolution3152-measolution0774
+      url: https://xmc-sitecoresaaa6ba-measolution3152-measolution0774.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: adeccogroup9f6d-swpxmcloudp7af8-prodc553
+      url: https://xmc-adeccogroup9f6d-swpxmcloudp7af8-prodc553.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: americafujie172-aflglobalmic7b2-multisite7fb0
+      url: https://xmc-americafujie172-aflglobalmic7b2-multisite7fb0.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: newyorkpowe2bd0-canalsf418-productionbf60
+      url: https://xmc-newyorkpowe2bd0-canalsf418-productionbf60.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: scangroup18a53-scanwebsite38a0-prod562d
+      url: https://xmc-scangroup18a53-scanwebsite38a0-prod562d.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: nttdata34851-arpitnewdemedf8-ndilxmcloud407b
+      url: https://xmc-nttdata34851-arpitnewdemedf8-ndilxmcloud407b.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: michigansta4a14-msu70a4-prod718c
+      url: https://xmc-michigansta4a14-msu70a4-prod718c.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoreusa9414-hestiabb15-prod6018
+      url: https://xmc-sitecoreusa9414-hestiabb15-prod6018.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: avanade1f8e-xmcloudplay7b7e-btholkappiyd6b8
+      url: https://xmc-avanade1f8e-xmcloudplay7b7e-btholkappiyd6b8.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: internation4edf-athlete3651000-prod9c07
+      url: https://xmc-internation4edf-athlete3651000-prod9c07.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: pssapj1d315-dsdtesta62b-dsdformse2c6
+      url: https://xmc-pssapj1d315-dsdtesta62b-dsdformse2c6.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: xmcloudpmau570b-testmigratie6da-prod5f1e
+      url: https://xmc-xmcloudpmau570b-testmigratie6da-prod5f1e.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: digitaslbi120a8-adriantestib5f8-prod58f1
+      url: https://xmc-digitaslbi120a8-adriantestib5f8-prod58f1.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: americafuji5088-aflglobalde66fb-poc837e
+      url: https://xmc-americafuji5088-aflglobalde66fb-poc837e.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: valtechse122e6-techtransfo0dbb-okiselov0147
+      url: https://xmc-valtechse122e6-techtransfo0dbb-okiselov0147.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: xmclouddepld353-march22prod415e-38848
+      url: https://xmc-xmclouddepld353-march22prod415e-38848.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: brembospa1c296-brembo776a-prod30c4
+      url: https://xmc-brembospa1c296-brembo776a-prod30c4.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaacb9a-rkxmcloudde5f86-prod3298
+      url: https://xmc-sitecoresaacb9a-rkxmcloudde5f86-prod3298.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: challengerg66c7-challengerprod-prod
+      url: https://xmc-challengerg66c7-challengerprod-prod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: aliaservizi63f7-alia5f85-prod6da3
+      url: https://xmc-aliaservizi63f7-alia5f85-prod6da3.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: horizontalde5ce-training1224449-jatintrainie412
+      url: https://xmc-horizontalde5ce-training1224449-jatintrainie412.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: liontrustfuf266-liontrust2783-production23a6
+      url: https://xmc-liontrustfuf266-liontrust2783-production23a6.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: pssapj18829-whcproj5486-prod16fda
+      url: https://xmc-pssapj18829-whcproj5486-prod16fda.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaac7b1-mdidemoproj3845-mdiprod10aa
+      url: https://xmc-sitecoresaac7b1-mdidemoproj3845-mdiprod10aa.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: perficient38bd-jumpstartdb00-test2bf6
+      url: https://xmc-perficient38bd-jumpstartdb00-test2bf6.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: nycsca196fb-nycscacd1f-prod1c7a
+      url: https://xmc-nycsca196fb-nycscacd1f-prod1c7a.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: seaus74e3-xmcdemojp0127-productiond204
+      url: https://xmc-seaus74e3-xmcdemojp0127-productiond204.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: xmcloudpmus5057-testactions2631-staging9435
+      url: https://xmc-xmcloudpmus5057-testactions2631-staging9435.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: assurex85db-xmcloudplay5a90-m2cloude58e
+      url: https://xmc-assurex85db-xmcloudplay5a90-m2cloude58e.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaaec66-meilxmcsand6a69-prod6ad7
+      url: https://xmc-sitecoresaaec66-meilxmcsand6a69-prod6ad7.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa69a9-verticals38c6-production06c6
+      url: https://xmc-sitecoresaa69a9-verticals38c6-production06c6.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: hedinitaban17ea-hedin39bd-production0b89
+      url: https://xmc-hedinitaban17ea-hedin39bd-production0b89.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: rochesterred189-rrh4822-prodb67b
+      url: https://xmc-rochesterred189-rrh4822-prodb67b.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: avanade8825-xmcloudavanbcb6-eterbeeke5ca0
+      url: https://xmc-avanade8825-xmcloudavanbcb6-eterbeeke5ca0.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: ineosautomo2582-ialgrenadie41d4-starterkit52a7
+      url: https://xmc-ineosautomo2582-ialgrenadie41d4-starterkit52a7.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecore332b5-brianiltdemdb0b-production15a8
+      url: https://xmc-sitecore332b5-brianiltdemdb0b-production15a8.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaae3eb-jzixmcec8f-mckinseywora6c9
+      url: https://xmc-sitecoresaae3eb-jzixmcec8f-mckinseywora6c9.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: volkswagenpa733-experiencep9805-productionc97e
+      url: https://xmc-volkswagenpa733-experiencep9805-productionc97e.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: epamemeatra325a-omyroshnyche279-production1d45
+      url: https://xmc-epamemeatra325a-omyroshnyche279-production1d45.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: sitecoresaa6082-dannyxmc9c02-annaadf5
+      url: https://xmc-sitecoresaa6082-dannyxmc9c02-annaadf5.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: pssapj1b685-kahscasesco956f-kahscs044312f53
+      url: https://xmc-pssapj1b685-kahscasesco956f-kahscs044312f53.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'authoring'
+      module: healthy
+    - name: aue-e1-aks-01.sitecorecloud.io
+      url: https://aue-e1-aks-01.sitecorecloud.io/api/graphql
+      additionalMetricsRelabels:
+        system: 'edge'
+        component: 'webapi'
+      module: http_2xx
+    - name: eus-e1-aks-01.sitecorecloud.io
+      url: https://eus-e1-aks-01.sitecorecloud.io/api/graphql
+      additionalMetricsRelabels:
+        system: 'edge'
+        component: 'webapi'
+      module: http_2xx
+    - name: jpe-e1-aks-01.sitecorecloud.io
+      url: https://jpe-e1-aks-01.sitecorecloud.io/api/graphql
+      additionalMetricsRelabels:
+        system: 'edge'
+        component: 'webapi'
+      module: http_2xx
+    - name: weu-e1-aks-01.sitecorecloud.io
+      url: https://weu-e1-aks-01.sitecorecloud.io/api/graphql
+      additionalMetricsRelabels:
+        system: 'edge'
+        component: 'webapi'
+      module: http_2xx
+    - name: wus2-e1-aks-01.sitecorecloud.io
+      url: https://wus2-e1-aks-01.sitecorecloud.io/api/graphql
+      additionalMetricsRelabels:
+        system: 'edge'
+        component: 'webapi'
+      module: http_2xx
+    - name: use-e1-oe-aks-01-sidecar-0.sitecorecloud.app
+      url: https://use-e1-oe-aks-01-sidecar-0.sitecorecloud.app
+      additionalMetricsRelabels:
+        system: 'cpl'
+        component: 'ssl'
+      module: http_4xx
+    - name: ai-ab-testing-euw-prod
+      url: https://ai-ab-testing-api-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-brands-euw-prod
+      url: https://ai-brands-api-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-brief-euw-prod
+      url: https://ai-brief-api-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-chat-euw-prod
+      url: https://ai-chat-api-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-documents-euw-prod
+      url: https://ai-documents-api-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-learned-euw-prod
+      url: https://ai-learned-api-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-llm-gateway-proxy-euw-prod
+      url: https://ai-llm-gateway-proxy-api-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-pipeline-euw-prod
+      url: https://ai-pipeline-api-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-tenants-euw-prod
+      url: https://ai-tenants-api-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-ab-testing-use-prod
+      url: https://ai-ab-testing-api-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-brands-use-prod
+      url: https://ai-brands-api-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-brief-use-prod
+      url: https://ai-brief-api-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-chat-use-prod
+      url: https://ai-chat-api-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-documents-use-prod
+      url: https://ai-documents-api-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-learned-use-prod
+      url: https://ai-learned-api-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-llm-gateway-proxy-use-prod
+      url: https://ai-llm-gateway-proxy-api-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-pipeline-use-prod
+      url: https://ai-pipeline-api-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-tenants-use-prod
+      url: https://ai-tenants-api-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-ab-testing-aue-prod
+      url: https://ai-ab-testing-api-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-brands-aue-prod
+      url: https://ai-brands-api-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-brief-aue-prod
+      url: https://ai-brief-api-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-chat-aue-prod
+      url: https://ai-chat-api-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-documents-aue-prod
+      url: https://ai-documents-api-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-learned-aue-prod
+      url: https://ai-learned-api-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-llm-gateway-proxy-aue-prod
+      url: https://ai-llm-gateway-proxy-api-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-pipeline-aue-prod
+      url: https://ai-pipeline-api-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-tenants-aue-prod
+      url: https://ai-tenants-api-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-symphonyui-euw-prod
+      url: https://stream.sitecorecloud.io/api/status/health
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-symphonyui-use-prod
+      url: https://stream-use.sitecorecloud.io/api/status/health
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-symphonyui-aue-prod
+      url: https://stream-aue.sitecorecloud.io/api/status/health
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: xmcpub-publishing-api-dev
+      url: https://publishing-dev.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmcpub'
+      module: healthy
+    - name: xmcpub-publishing-api-qa
+      url: https://publishing-qa.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmcpub'
+      module: healthy
+    - name: xmcpub-publishing-api-staging
+      url: https://publishing-staging.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmcpub'
+      module: healthy
+    - name: xmcpub-publishing-api-euw-preprod
+      url: https://publishing-preprod-euw.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmcpub'
+      module: healthy
+    - name: xmcpub-publishing-api-euw-prod
+      url: https://publishing-euw.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmcpub'
+      module: healthy
+    - name: xmcpub-publishing-api-aue-prod
+      url: https://publishing-aue.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmcpub'
+      module: healthy
+    - name: xmcpub-publishing-api-jpe-prod
+      url: https://publishing-jpe.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmcpub'
+      module: healthy
+    - name: xmcpub-publishing-api-use-prod
+      url: https://publishing-use.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmcpub'
+      module: healthy
+    - name: cs-query-graphqlapi-staging
+      url: https://cs-graphqlapi-staging.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs-query'
+      module: status_healthy
+    - name: cs-query-graphqlapi-preprod
+      url: https://cs-graphqlapi-preprod.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs-query'
+      module: status_healthy
+    - name: cs-query-graphqlapi-prod
+      url: https://cs-graphqlapi-prod.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs-query'
+      module: status_healthy
+    - name: cs-query-tokenapi-staging
+      url: https://cs-tokenapi-staging.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs-query'
+      module: status_healthy
+    - name: cs-query-tokenapi-preprod
+      url: https://cs-tokenapi-preprod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs-query'
+      module: status_healthy
+    - name: cs-query-tokenapi-prod
+      url: https://cs-tokenapi.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs-query'
+      module: status_healthy
+    - name: cs-cmapi-euw-staging
+      url: https://cs-cmapi-staging.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-euw-staging
+      url: https://cs-contentbackgroundworker-staging.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-graphqlapi-euw-staging
+      url: https://cs-graphqlapi-staging.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-provisioning-api-euw-staging
+      url: https://cs-provisioningapi-staging.sitecorecloud.app/api/v2/provisioning/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-euw-staging
+      url: https://cs-tokenapi-staging.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-ui-euw-staging
+      url: https://cs-ui-staging.sitecorecloud.app/api/v1/status/health
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_ok
+    - name: cs-workset-api-euw-staging
+      url: https://cs-workset-api-staging.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-cmapi-euw-preprod
+      url: https://cs-cmapi-preprod.sitecorecloud.io/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-euw-preprod
+      url: https://cs-contentbackgroundworker-preprod.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-graphqlapi-euw-preprod
+      url: https://cs-graphqlapi-preprod.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-provisioning-api-euw-preprod
+      url: https://content-services-provisioning-api-preprod.sitecorecloud.app/api/v2/provisioning/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-euw-preprod
+      url: https://cs-tokenapi-preprod.sitecorecloud.io/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-workset-api-euw-preprod
+      url: https://cs-workset-api-preprod.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-system-euw-prod
+      url: https://content-services-provisioning-api-prod.sitecorecloud.app/api/v2/provisioning/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-provisioning-euw-prod
+      url: https://content-services-provisioning-api-prod.sitecorecloud.app/api/v2/provisioning/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: ai-assignments-api-euw-prod
+      url: https://ai-assignments-api-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-brainstorming-api-euw-prod
+      url : https://ai-brainstorming-api-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-extractions-euw-prod
+      url : https://ai-extractions-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx 
+    - name:  ai-workflows-euw-prod
+      url : https://ai-workflows-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-assignments-api-use-prod
+      url : https://ai-assignments-api-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-brainstorming-api-use-prod
+      url : https://ai-brainstorming-api-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-extractions-use-prod
+      url : https://ai-extractions-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name:  ai-workflows-use-prod
+      url : https://ai-workflows-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-assignments-api-aue-prod
+      url : https://ai-assignments-api-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-brainstorming-api-aue-prod
+      url : https://ai-brainstorming-api-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-extractions-aue-prod
+      url : https://ai-extractions-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name:  ai-workflows-aue-prod
+      url : https://ai-workflows-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-ab-testing-jpe-prod
+      url : https://ai-ab-testing-api-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-brands-jpe-prod
+      url : https://ai-brands-api-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-assignments-api-jpe-prod
+      url : https://ai-assignments-api-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-brainstorming-api-jpe-prod
+      url : https://ai-brainstorming-api-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-brief-jpe-prod
+      url : https://ai-brief-api-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-chat-jpe-prod
+      url : https://ai-chat-api-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-documents-jpe-prod
+      url : https://ai-documents-api-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-extractions-jpe-prod
+      url : https://ai-extractions-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-learned-jpe-prod
+      url : https://ai-learned-api-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-llm-gateway-proxy-jpe-prod
+      url : https://ai-llm-gateway-proxy-api-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-pipeline-jpe-prod
+      url : https://ai-pipeline-api-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-tenants-jpe-prod
+      url : https://ai-tenants-api-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name:  ai-workflows-jpe-prod
+      url: https://ai-workflows-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+    - name: ai-agents-api-euw-dev
+      url: https://ai-agent-api-euw-dev.sitecore-staging.cloud/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-agents-api-euw-staging
+      url: https://ai-agent-api-euw-staging.sitecore-staging.cloud/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-agents-api-euw-qa
+      url: https://ai-agent-api-euw-qa.sitecore-staging.cloud/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-agents-api-euw-preprod
+      url: https://ai-agent-api-euw-preprod.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-agents-api-euw-prod
+      url: https://ai-agent-api-euw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-agents-api-use-prod
+      url: https://ai-agent-api-use.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-agents-api-usw-prod
+      url: https://ai-agent-api-usw.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx      
+    - name: ai-agents-api-jpe-prod
+      url: https://ai-agent-api-jpe.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: ai-agents-api-aue-prod
+      url: https://ai-agent-api-aue.sitecorecloud.io/api/version
+      additionalMetricsRelabels:
+        component: 'ai'
+      module: http_2xx
+    - name: xmapps-api-prod-euw
+      url : https://xmapps-api-euw.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmapps'
+      module: status_healthy
+    - name: xmapps-componentsapi-prod-euw
+      url : https://xmapps-componentsapi-euw.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmapps'
+      module: status_healthy
+    - name: xmapps-designlibrary-prod-euw
+      url : https://designlibrary.sitecorecloud.io/
+      additionalMetricsRelabels:
+        component: 'xmapps'
+      module: http_2xx
+    - name: xmapps-dashboard-ui-prod-euw
+      url : https://xmapps.sitecorecloud.io/
+      additionalMetricsRelabels:
+        component: 'xmapps'
+      module: http_2xx
+    - name: xmapps-api-prod-use
+      url : https://xmapps-api-use.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmapps'
+      module: status_healthy
+    - name: xmapps-componentsapi-prod-use
+      url : https://xmapps-componentsapi-use.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmapps'
+      module: status_healthy   
+    - name: xmapps-componentsapi-prod-usw
+      url : https://xmapps-componentsapi-usw.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmapps'
+      module: status_healthy 
+    - name: xmapps-api-prod-jpe
+      url : https://xmapps-api-jpe.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmapps'
+      module: status_healthy
+    - name: xmapps-componentsapi-prod-jpe
+      url : https://xmapps-componentsapi-jpe.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmapps'
+      module: status_healthy 
+    - name: xmapps-api-prod-aue
+      url : https://xmapps-api-aue.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmapps'
+      module: status_healthy
+    - name: xmapps-componentsapi-prod-aue
+      url : https://xmapps-componentsapi-aue.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'xmapps'
+      module: status_healthy     
+    - name: mkp-application-prod
+      url : https://marketplace.sitecorecloud.io/
+      additionalMetricsRelabels:
+        component: 'mkp'
+      module: healthy
+    - name: mkp-demo-app-prod
+      url : https://marketplace-demo-app.sitecorecloud.io/
+      additionalMetricsRelabels:
+        component: 'mkp'
+      module: healthy
+    - name: mkp-installations-api-app-prod
+      url : https://marketplace-api.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'mkp'
+      module: healthy
+    - name:  mkp-installations-api-prod
+      url : https://marketplace-api.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'mkp'
+      module: healthy
+    - name: mkp-portal-shell-prod
+      url : https://marketplace-app.sitecorecloud.io/
+      additionalMetricsRelabels:
+        component: 'mkp'
+      module: healthy
+    - name: mkp-runtime-configuration-api-app-prod
+      url : https://marketplace-api.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'mkp'
+      module: healthy
+    - name: mkp-runtime-configuration-api-prod
+      url : https://marketplace-api.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'mkp'
+      module: healthy
+    - name:  mkp-web-api-prod
+      url : https://marketplace-api.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'mkp'
+      module: healthy
+### CS-CM-API
+  # EUW
+    - name: cs-cmapi-euw-p1-prod
+      url: https://cs-euw-prd-p1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-cmapi-euw-p2-prod
+      url: https://cs-euw-prd-p2-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-cmapi-euw-s1-prod
+      url: https://cs-euw-prd-s1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-cmapi-euw-s1-dev
+      url: https://cs-euw-dev-s1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+
+    - name: cs-cmapi-euw-s1-qa
+      url: https://cs-euw-qa-s1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+    - name: cs-cmapi-euw-s2-qa
+      url: https://cs-euw-qa-s2-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+    - name: cs-cmapi-euw-s3-qa
+      url: https://cs-euw-qa-s3-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+
+    - name: cs-cmapi-euw-s1-staging
+      url: https://cs-euw-stg-s1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+
+    - name: cs-cmapi-euw-s1-preprod
+      url: https://cs-euw-pre-s1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+    - name: cs-cmapi-euw-s2-preprod
+      url: https://cs-euw-pre-s2-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+  # AUE
+    - name: cs-cmapi-aue-p1-prod
+      url: https://cs-aue-prd-p1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-cmapi-aue-p2-prod
+      url: https://cs-aue-prd-p2-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-cmapi-aue-s1-prod
+      url: https://cs-aue-prd-s1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+  # JPE
+    - name: cs-cmapi-jpe-p1-prod
+      url: https://cs-jpe-prd-p1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-cmapi-jpe-p2-prod
+      url: https://cs-jpe-prd-p2-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-cmapi-jpe-s1-prod
+      url: https://cs-jpe-prd-s1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+  # USW
+    - name: cs-cmapi-usw-p1-prod
+      url: https://cs-usw-prd-p1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-cmapi-usw-p2-prod
+      url: https://cs-usw-prd-p2-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-cmapi-usw-s1-prod
+      url: https://cs-usw-prd-s1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+  # USE
+    - name: cs-cmapi-use-p1-prod
+      url: https://cs-use-prd-p1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-cmapi-use-p2-prod
+      url: https://cs-use-prd-p2-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-cmapi-use-s1-prod
+      url: https://cs-use-prd-s1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-cmapi-use-s1-preprod
+      url: https://cs-use-pre-s1-cmapi.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+  # Unified Platform
+    - name: ch-up-nonprod-euw-dev-app-01
+      url: https://udm-api-f4bgcfgzhuhndsaz.westeurope-01.azurewebsites.net/api/status/health
+      additionalMetricsRelabels:
+        component: 'ch'
+      module: healthy
+    - name: up-nonprod-euw-dev-func-wnd
+      url: https://udm-function.azurewebsites.net/api/status/health
+      additionalMetricsRelabels:
+        component: 'ch'
+      module: healthy
+    - name: up-nonprod-euw-dev-func-lnx
+      url: https://udm-k8s-linux.azurewebsites.net/api/status/health
+      additionalMetricsRelabels:
+        component: 'ch'
+      module: healthy
+    - name: ch-up-nonprod-euw-staging-app-01
+      url: https://ch-up-nonprod-euw-staging-app-01.azurewebsites.net/api/status/health
+      additionalMetricsRelabels:
+        component: 'ch'
+    - name: up-nonprod-euw-staging-func-wnd
+      url: https://up-nonprod-euw-staging-func-wnd.azurewebsites.net/api/status/health
+      additionalMetricsRelabels:
+        component: 'ch'
+      module: healthy
+    - name: up-nonprod-euw-staging-func-lnx
+      url: https://up-nonprod-euw-staging-func-lnx.azurewebsites.net/api/status/health
+      additionalMetricsRelabels:
+        component: 'ch'
+      module: healthy
+### CS Token API 
+    # EUW
+    - name: cs-tokenapi-euw-s1-prod
+      url: https://cs-euw-prd-s1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-euw-p1-prod
+      url: https://cs-euw-prd-p1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-euw-p2-prod
+      url: https://cs-euw-prd-p2-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-euw-s1-dev
+      url: https://cs-euw-dev-s1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-euw-s1-qa
+      url: https://cs-euw-qa-s1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-euw-s2-qa
+      url: https://cs-euw-qa-s2-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-euw-s1-staging
+      url: https://cs-euw-stg-s1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-euw-s2-staging
+      url: https://cs-euw-stg-s2-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-euw-s1-preprod
+      url: https://cs-euw-pre-s1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-euw-s2-preprod
+      url: https://cs-euw-pre-s2-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    # AUE
+    - name: cs-tokenapi-aue-s1-prod
+      url: https://cs-aue-prd-s1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-aue-p1-prod
+      url: https://cs-aue-prd-p1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-aue-p2-prod
+      url: https://cs-aue-prd-p2-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    # JPE
+    - name: cs-tokenapi-jpe-s1-prod
+      url: https://cs-jpe-prd-s1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-jpe-p1-prod
+      url: https://cs-jpe-prd-p1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-jpe-p2-prod
+      url: https://cs-jpe-prd-p2-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    # USE
+    - name: cs-tokenapi-use-s1-prod
+      url: https://cs-use-prd-s1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-use-p1-prod
+      url: https://cs-use-prd-p1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-use-p2-prod
+      url: https://cs-use-prd-p2-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    # USW
+    - name: cs-tokenapi-usw-s1-prod
+      url: https://cs-usw-prd-s1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-usw-p1-prod
+      url: https://cs-usw-prd-p1-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-tokenapi-usw-p2-prod
+      url: https://cs-usw-prd-p2-tokenapi.sitecorecloud.app/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+###CS GraphQL
+    # EUW
+    - name: cs-graphqlapi-euw-s1-prod
+      url: https://cs-euw-prd-s1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-euw-p1-prod
+      url: https://cs-euw-prd-p1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-euw-p2-prod
+      url: https://cs-euw-prd-p2-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-euw-s1-dev
+      url: https://cs-euw-dev-s1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-euw-s1-qa
+      url: https://cs-euw-qa-s1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-euw-s2-qa
+      url: https://cs-euw-qa-s2-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-euw-s1-staging
+      url: https://cs-euw-stg-s1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-euw-s2-staging
+      url: https://cs-euw-stg-s2-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-euw-s1-preprod
+      url: https://cs-euw-pre-s1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-euw-s2-preprod
+      url: https://cs-euw-pre-s2-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    # AUE
+    - name: cs-graphqlapi-aue-s1-prod
+      url: https://cs-aue-prd-s1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-aue-p1-prod
+      url: https://cs-aue-prd-p1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-aue-p2-prod
+      url: https://cs-aue-prd-p2-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    # JPE
+    - name: cs-graphqlapi-jpe-s1-prod
+      url: https://cs-jpe-prd-s1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-jpe-p1-prod
+      url: https://cs-jpe-prd-p1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-jpe-p2-prod
+      url: https://cs-jpe-prd-p2-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    # USE
+    - name: cs-graphqlapi-use-s1-prod
+      url: https://cs-use-prd-s1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-use-p1-prod
+      url: https://cs-use-prd-p1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-use-p2-prod
+      url: https://cs-use-prd-p2-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    # USW
+    - name: cs-graphqlapi-usw-s1-prod
+      url: https://cs-usw-prd-s1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-usw-p1-prod
+      url: https://cs-usw-prd-p1-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+    - name: cs-graphqlapi-usw-p2-prod
+      url: https://cs-usw-prd-p2-graphqlapi.sitecorecloud.app/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: status_healthy
+
+### CONTENTBACKGROUNDWORKER
+  # EUW
+    - name: cs-contentbackgroundworker-euw-p1-prod
+      url: https://cs-euw-prd-p1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-euw-p2-prod
+      url: https://cs-euw-prd-p2-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-euw-s1-prod
+      url: https://cs-euw-prd-s1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-euw-s1-dev
+      url: https://cs-euw-dev-s1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-euw-s1-qa
+      url: https://cs-euw-qa-s1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-euw-s2-qa
+      url: https://cs-euw-qa-s2-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-euw-s3-qa
+      url: https://cs-euw-qa-s3-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-euw-s1-staging
+      url: https://cs-euw-stg-s1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-euw-s1-preprod
+      url: https://cs-euw-pre-s1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-euw-s2-preprod
+      url: https://cs-euw-pre-s2-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+  # AUE
+    - name: cs-contentbackgroundworker-aue-p1-prod
+      url: https://cs-aue-prd-p1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-aue-p2-prod
+      url: https://cs-aue-prd-p2-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-aue-s1-prod
+      url: https://cs-aue-prd-s1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+  # JPE
+    - name: cs-contentbackgroundworker-jpe-p1-prod
+      url: https://cs-jpe-prd-p1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-jpe-p2-prod
+      url: https://cs-jpe-prd-p2-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-jpe-s1-prod
+      url: https://cs-jpe-prd-s1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+  # USW
+    - name: cs-contentbackgroundworker-usw-p1-prod
+      url: https://cs-usw-prd-p1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-usw-p2-prod
+      url: https://cs-usw-prd-p2-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-usw-s1-prod
+      url: https://cs-usw-prd-s1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+  # USE
+    - name: cs-contentbackgroundworker-use-p1-prod
+      url: https://cs-use-prd-p1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-use-p2-prod
+      url: https://cs-use-prd-p2-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-use-s1-prod
+      url: https://cs-use-prd-s1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-contentbackgroundworker-use-s1-preprod
+      url: https://cs-use-pre-s1-contentbackgroundworker.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+
+### CS-WORKSETS
+  # EUW
+    - name: cs-worksets-euw-p1-prod
+      url: https://cs-euw-prd-p1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-euw-p2-prod
+      url: https://cs-euw-prd-p2-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-euw-s1-prod
+      url: https://cs-euw-prd-s1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-euw-s1-dev
+      url: https://cs-euw-dev-s1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+
+    - name: cs-worksets-euw-s1-qa
+      url: https://cs-euw-qa-s1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-euw-s2-qa
+      url: https://cs-euw-qa-s2-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-euw-s3-qa
+      url: https://cs-euw-qa-s3-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+
+    - name: cs-worksets-euw-s1-staging
+      url: https://cs-euw-stg-s1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+
+    - name: cs-worksets-euw-s1-preprod
+      url: https://cs-euw-pre-s1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-euw-s2-preprod
+      url: https://cs-euw-pre-s2-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+  # AUE
+    - name: cs-worksets-aue-p1-prod
+      url: https://cs-aue-prd-p1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-aue-p2-prod
+      url: https://cs-aue-prd-p2-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-aue-s1-prod
+      url: https://cs-aue-prd-s1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+  # JPE
+    - name: cs-worksets-jpe-p1-prod
+      url: https://cs-jpe-prd-p1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-jpe-p2-prod
+      url: https://cs-jpe-prd-p2-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-jpe-s1-prod
+      url: https://cs-jpe-prd-s1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+  # USW
+    - name: cs-worksets-usw-p1-prod
+      url: https://cs-usw-prd-p1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-usw-p2-prod
+      url: https://cs-usw-prd-p2-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-usw-s1-prod
+      url: https://cs-usw-prd-s1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+  # USE
+    - name: cs-worksets-use-p1-prod
+      url: https://cs-use-prd-p1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-use-p2-prod
+      url: https://cs-use-prd-p2-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-use-s1-prod
+      url: https://cs-use-prd-s1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+      module: healthy
+    - name: cs-worksets-use-s1-preprod
+      url: https://cs-use-pre-s1-worksets.sitecorecloud.app/api/cm/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'cs'
+### TCS
+  # Liveness
+    - name: tcs-euw-liveness
+      url: https://tcs-euw.sitecorecloud.io/api/status/healthz/live
+      additionalMetricsRelabels:
+        component: 'tcs' 
+    - name: tcs-use-liveness
+      url: https://tcs-use.sitecorecloud.io/api/status/healthz/live
+      additionalMetricsRelabels:
+        component: 'tcs'           
+    - name: tcs-usw-liveness
+      url: https://tcs-usw.sitecorecloud.io/api/status/healthz/live
+      additionalMetricsRelabels:
+        component: 'tcs' 
+    - name: tcs-jpe-liveness
+      url: https://tcs-jpe.sitecorecloud.io/api/status/healthz/live
+      additionalMetricsRelabels:
+        component: 'tcs'
+    - name: tcs-aue-liveness
+      url: https://tcs-aue.sitecorecloud.io/api/status/healthz/live
+      additionalMetricsRelabels:
+        component: 'tcs'  
+  # Readiness
+    - name: tcs-euw-readiness
+      url: https://tcs-euw.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'tcs' 
+    - name: tcs-use-readiness
+      url: https://tcs-use.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'tcs'           
+    - name: tcs-usw-readiness
+      url: https://tcs-usw.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'tcs' 
+    - name: tcs-jpe-readiness
+      url: https://tcs-jpe.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'tcs'
+    - name: tcs-aue-readiness
+      url: https://tcs-aue.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'tcs'               
+  # Global
+    # Liveness
+    - name: tcs-global-liveness
+      url: https://tcs.sitecorecloud.io/api/status/healthz/live
+      additionalMetricsRelabels:
+        component: 'tcs' 
+    # Readiness
+    - name: tcs-global-readiness
+      url: https://tcs.sitecorecloud.io/api/status/healthz/ready
+      additionalMetricsRelabels:
+        component: 'tcs'       
+
+#    - name: example                    # Human readable URL that will appear in Prometheus / AlertManager
+#      url: http://example.com/healthz  # The URL that blackbox will scrape
+#      hostname: example.com            # HTTP probes can accept an additional `hostname` parameter that will set `Host` header and TLS SNI
+#      labels: {}                       # Map of labels for ServiceMonitor. Overrides value set in `defaults`
+#      interval: 60s                    # Scraping interval. Overrides value set in `defaults`
+#      scrapeTimeout: 60s               # Scrape timeout. Overrides value set in `defaults`
+#      module: http_2xx                 # Module used for scraping. Overrides value set in `defaults`
+#      additionalMetricsRelabels: {}    # Map of metric labels and values to add
+#      additionalRelabeling: []         # List of metric relabeling actions to run
+
+## Custom PrometheusRules to be defined
+## ref: https://github.com/coreos/prometheus-operator#customresourcedefinitions
+prometheusRule:
+  enabled: false
+  additionalLabels: {}
+  namespace: ""
+  rules: []
+
+podMonitoring:
+  ## If true, a PodMonitoring CR is created for google managed prometheus
+  ## https://cloud.google.com/stackdriver/docs/managed-prometheus/setup-managed#gmp-pod-monitoring for blackbox-exporter itself
+  ##
+  selfMonitor:
+    enabled: false
+    additionalMetricsRelabels: {}
+    labels: {}
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  ## If true, a PodMonitoring CR is created for a google managed prometheus
+  ## https://cloud.google.com/stackdriver/docs/managed-prometheus/setup-managed#gmp-pod-monitoring for each target
+  ##
+  enabled: false
+
+  ## Default values that will be used for all PodMonitoring created by `targets`
+  ## Following PodMonitoring API specs https://github.com/GoogleCloudPlatform/prometheus-engine/blob/main/doc/api.md#scrapeendpoint
+  defaults:
+    additionalMetricsRelabels: {}
+    labels: {}
+    interval: 30s
+    scrapeTimeout: 30s
+    module: http_2xx
+  ## scheme: Protocol scheme to use to scrape.
+  scheme: http
+  ## path: HTTP path. Needs to be adjusted, if web.route-prefix is set
+  path: "/probe"
+  ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
+  ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
+  tlsConfig: {}
+
+  targets:
+#    - name: example                    # Human readable URL that will appear in Google Managed Prometheus / AlertManager
+#      url: http://example.com/healthz  # The URL that blackbox will scrape
+#      hostname: example.com            # HTTP probes can accept an additional `hostname` parameter that will set `Host` header and TLS SNI
+#      labels: {}                       # Map of labels for PodMonitoring. Overrides value set in `defaults`
+#      interval: 60s                    # Scraping interval. Overrides value set in `defaults`
+#      scrapeTimeout: 60s               # Scrape timeout. Overrides value set in `defaults`
+#      module: http_2xx                 # Module used for scraping. Overrides value set in `defaults`
+#      additionalMetricsRelabels: {}    # Map of metric labels and values to add
+
+## Network policy for chart
+networkPolicy:
+  # Enable network policy and allow access from anywhere
+  enabled: false
+  # Limit access only from monitoring namespace
+  # Before setting this value to true, you must add the name=monitoring label to the monitoring namespace
+  # Network Policy uses label filtering
+  allowMonitoringNamespace: false
+
+## dnsPolicy and dnsConfig for Deployments and Daemonsets if you want non-default settings.
+## These will be passed directly to the PodSpec of same.
+dnsPolicy:
+dnsConfig:
+
+# Extra manifests to deploy as an array
+extraManifests: []
+  # - apiVersion: v1
+  #   kind: ConfigMap
+  #   metadata:
+  #   labels:
+  #     name: prometheus-extra
+  #   data:
+  #     extra-data: "value"
+
+# global common labels, applied to all ressources
+commonLabels: {}
+
+# Enable vertical pod autoscaler support for prometheus-blackbox-exporter
+verticalPodAutoscaler:
+  enabled: false
+
+  # Recommender responsible for generating recommendation for the object.
+  # List should be empty (then the default recommender will generate the recommendation)
+  # or contain exactly one recommender.
+  # recommenders:
+  # - name: custom-recommender-performance
+
+  # List of resources that the vertical pod autoscaler can control. Defaults to cpu and memory
+  controlledResources: []
+  # Specifies which resource values should be controlled: RequestsOnly or RequestsAndLimits.
+  # controlledValues: RequestsAndLimits
+
+  # Define the max allowed resources for the pod
+  maxAllowed: {}
+  # cpu: 200m
+  # memory: 100Mi
+  # Define the min allowed resources for the pod
+  minAllowed: {}
+  # cpu: 200m
+  # memory: 100Mi
+
+  updatePolicy:
+    # Specifies minimal number of replicas which need to be alive for VPA Updater to attempt pod eviction
+    # minReplicas: 1
+    # Specifies whether recommended updates are applied when a Pod is started and whether recommended updates
+    # are applied during the life of a Pod. Possible values are "Off", "Initial", "Recreate", and "Auto".
+    updateMode: Auto
+
+configReloader:
+  enabled: false
+  containerPort: 8080
+  config:
+    logFormat: logfmt
+    logLevel: info
+    watchInterval: 1m
+  image:
+    registry: quay.io
+    repository: prometheus-operator/prometheus-config-reloader
+    tag: "v0.71.2"
+    pullPolicy: IfNotPresent
+    digest: ""
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+  resources:
+    limits:
+      memory: 50Mi
+    requests:
+      cpu: 10m
+      memory: 20Mi
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: reloader-web
+      scheme: HTTP
+  readinessProbe:
+    httpGet:
+      path: /healthz
+      port: reloader-web
+      scheme: HTTP
+  service:
+    port: 8080
+  serviceMonitor:
+    selfMonitor:
+      additionalMetricsRelabels: {}
+      additionalRelabeling: []
+      path: /metrics
+      scheme: http
+      tlsConfig: {}
+      interval: 30s
+      scrapeTimeout: 30s

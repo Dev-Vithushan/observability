@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: weu-i1-heimdall-01-aks-objstore-config-thanos
+type: Opaque
+data:
+    objstore.yml: ENC[AES256_GCM,data:3u6PaFBTxuO0KYPy6H6gbIu255UIZbsuJl9p2q8cvez1dt6mKtfLb5j6o02hjL+33ncD9Ik6PlNz1Z97NoNw21o6RPZnwik6spuVL4LJfWS1LZb8A4oiYiwpDfYk4XYFR9jiLTyUy3xPNVpqxOf1aDYDZMQL61aPORLF+j++x3fC827Kif2lbFv0PY0/dU/XdOlOLEqSI4ecOOTrXX4BOjaFfDVD8hdCoRr3raCWjHJQ8K1NzqU0JFBDiML9SwRaEXvClYhaFUZKL0nCgZe1/iVH8x8RryrEU0lh1W5gDQRiEEBo778reGC5UI4g7CwsU4ROTp12oxxw367hO6ALV/w3/QoWq4rlnafeWmzn87yW7nvGKpwkE+LpXAv/8krZU0EAPJFUMDMDoFhoHDTcLOTkzYckZpnrQ9yEUWZxbjM=,iv:wC0CkoKe4y6JlzhlFnJIEaix2mflAO5MTdEUzKk756k=,tag:TiCWUtEx8QSfQ/oCCnL77w==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2024-09-02T09:42:35Z"
+          enc: hCLsmbLzZaWvhb7SG910dCVGQXTqBGOowuS-bHmb7EbhpTVlj4UWoTUhko-Vcfp7xR_1a96SYjPRr2WUOeyWyowXHouDfx2ZF16Cze8VQ6nKgJGuPEBlOzxcRMV7DSibU5qR-XckDsHvcqfa3e6OFCq9_JMNvQqztPMwE39B9-6IlQLjVqXQTsKER3PdNP47EDKpedZdcQhHlm_Otkq17bwxrZf2aanWAH_c5y3iXAaIfC4cutOoaPGk6qjYsHrBRjgibUiXXAdm3pj3WUJK495VqRy84r_bsx8JcFydk0ckWCShoPhGcXoMlV33YGmLG-2A5FIIyDZRQPKe9yD5pNfc1w5Bb1j77uyw_aFNuEER4x6RNTA8gx64Wf_3kcClt6U2kbs2migOBtlzPfi94F8p1ZFIT-zcEKFoZhnJHQF_EdEh5rwG3lwehALwxnKRaSvFDTnpYfM9f4gLDuDfa01xkfihNHPLNIF2SCaM9fY9mPnQ0zrA5hwtTyELGZLm1jTLzaNE5iWAk-4zHkW_fRAAKwTU3rUp-xK_y2oCIW6udWt-EonWa14QS_xa38x8GYsnBI0dh3F75fLgEcImMWFZ3rVln0pb4LiNcyQQ-Q8j1ktIfw3juhloZJYlyA_xy_XnJ0B1IinUZLja29QX0FtqsTLEiLYpMRfzLFlJbkM
+    hc_vault: []
+    age: []
+    lastmodified: "2024-09-02T09:42:36Z"
+    mac: ENC[AES256_GCM,data:xjlHiaGBo7cIq7hF3vw+4H2UcSkgU4H7vuBs2qfeBcFAJ//h+hFgaZjvS9HAJ3NcMLRJX8FoM5NfjCmSoHfE4FMJVBRQCWH9QN30sw9fsHuQUMiAy16ekbRhwzIN7hv7P8mh1HN8mSH8ooBpbHfQgLevNWcYbgodBCqM4ljctsM=,iv:Et5xv9elfLzWfcXeaZj9RILQzqShdspTC9IIy8SkjMs=,tag:QXhc6bPnbKHPCWKXjbo4lg==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

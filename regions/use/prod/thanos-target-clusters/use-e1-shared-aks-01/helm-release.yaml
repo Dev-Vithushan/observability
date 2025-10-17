@@ -1,0 +1,26 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: thanos-stack-use-e1-shared-aks-01
+spec:
+  interval: 1h0m0s
+  chart:
+    spec:
+      version: 15.7.29
+      chart: thanos
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: oe-thanos
+  valuesFrom:
+    - kind: ConfigMap
+      name: helm-values-thanos-stack-base
+      valuesKey: values.yaml
+    - kind: ConfigMap
+      name: helm-values-thanos-stack-use-e1-shared-aks-01
+      valuesKey: values.yaml
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3

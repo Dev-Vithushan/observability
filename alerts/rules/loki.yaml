@@ -1,0 +1,50 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: loki-prometheus-alerts
+  namespace: oe-alerts
+spec:
+  groups:
+    - name: loki-alerts
+      rules:
+      - alert: LokiRequestErrors
+        annotations:
+          message: |
+            {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}% errors.
+        expr: |
+          100 * sum(rate(loki_request_duration_seconds_count{status_code=~"5.."}[2m])) by (namespace, job, route)
+            /
+          sum(rate(loki_request_duration_seconds_count[2m])) by (namespace, job, route)
+            > 10
+        for: 15m
+        labels:
+          severity: P3
+      - alert: LokiRequestPanics
+        annotations:
+          message: |
+            {{ $labels.job }} is experiencing {{ printf "%.2f" $value }}% increase of panics.
+        expr: |
+          sum(increase(loki_panic_total[10m])) by (namespace, job) > 0
+        labels:
+          severity: P3
+      - alert: LokiRequestLatency
+        annotations:
+          message: |
+            {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.
+        expr: |
+          sum by (cluster, namespace, pod, container) ( irate(container_cpu_usage_seconds_total{route!~"(?i).*tail.*|/schedulerpb.SchedulerForQuerier/QuerierLoop",job="kubelet", metrics_path="/metrics/cadvisor", image!=""}[5m])) * on (cluster, namespace, pod) group_left(node) topk by (cluster, namespace, pod) ( 1, max by(cluster, namespace, pod, node) (kube_pod_info{node!=""})) > 1
+        for: 15m
+        labels:
+          severity: P3
+      - alert: LokiTooManyCompactorsRunning
+        annotations:
+          message: |
+            {{ $labels.cluster }} {{ $labels.namespace }} has had {{ printf "%.0f" $value }} compactors running for more than 5m. Only one compactor should run at a time.
+        expr: |
+          sum(loki_boltdb_shipper_compactor_running) by (namespace, cluster) > 1
+        for: 5m
+        labels:
+          severity: P3

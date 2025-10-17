@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: euw-i1-contenthub-sb-aks-01-objstore-config-thanos
+type: Opaque
+data:
+    objstore.yml: ENC[AES256_GCM,data:o5vFytC0lBUjefIKISNghhM1XdCHgRcAwW2icI7Cpxf3j591ZbvtvWtDkEWxJNwXA06CCFbuGz6DL/8ySU745diNt7Md1rK7XBp3tjTo55kaKijSho47r6BWRQ1ENTHOclVP9kn8ABxd9bfBxKmtd0KjnU+whnkk4WCAET++FL8FgFGnbU2LBohE31KNj4ESJZFTx+T44iXyYUNO6damoFKQbbRS1SqyM8aI/otUjMagrkD6Q+Hr6vguqi01JLBglk3cMrtRWWoMbRdw7rJ8dFdZuHmAdo0UtolDankWrXPE4nzyAowbSq9ZcWo7k6i0GLkEjnrV4XGu4zdshjIZltgkMK7839vTcRmzcRmyEBLLeWtYCqpvCzJ9o4bozS0waRPId62ZFRQRtIGiS3UNM5AzqTDYeloudkrhW/cd4C3KUBRmuZgGvr0cZk6QZPpZVyHxDdtwv2Ej8GuwXj9uzkHS9yrxzIbTRlae00a5RAk=,iv:mznxjwjQuMKcg/POxyzf7kV6UWw/kpEVWFvYe2i37FA=,tag:SpuBUtV5TuSpAg+PFYXHPA==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2023-11-29T08:03:37Z"
+          enc: giOFjQPyk809gCiE9QM0EfFqlXJsAc2AI7KPMx4JECZEdyqmaTNxXrksES50HskJqB0WaSZ23hcVE7nRZpeWUi_NZ9YHD9aX9WQxw56GjI6mdiDy0Uuv9CODkFWdbU7ir-8LkvNykM0NwM5XZXwJkggVR3cCTojFglJLMA3bd3Y_cCHu0a9NjQphQX6e0yQ3xiwEF3m3gud3GwVphZ0DPy1EL3Cjy_Lgd7-UoJDna8OkQDkEy1hunBpyVxHvoon8FJX-IRSKQD-xgbtNg2O7CB83JR3kTD3Xz_vaxsXZpQ_veyOzMsiTjctkdpPWaO5gvudA_68RW6UbCRAog95Ci6PDISRF6ou1jyPFNxJN83wq2mmG-L9eUtXkAdynhjxx_yGsxROSaxWUwlq3OZNzIlu48Cigzvq-Bad9vhKDLDmo5Kti8It4nuTBf0yRLcGkjon2vGNMAiwdQ5kVJEejLaDYiIt7bV_vRZn1HBIHwptikkmG_OXuYo4pscO-cWSN5k-MNS9IaXujjFG_dx5hDaXv5KG6oPw7NElRQu9vrsS53_vU5Zi6fxFE-FS8soaWDxjBcsFIGOkyiNnaP0-K8BbOAhfina_Z5RnP1bxLRJEIWmxiG-WnwjQVFN3k1kzFocRKHKObVpHXERf3PCB-gKv_wflLaAakRsFlhHeSaDo
+    hc_vault: []
+    age: []
+    lastmodified: "2023-11-29T08:03:38Z"
+    mac: ENC[AES256_GCM,data:KPGiMVD8UUvLETo7PU3RyQkjWOT/ZXtihiQwf3NeBx91Z+cIoB2GNZ+T6PdaZPuSIhvOc356tNktSm+NMtcFHIVrXst2v2p+O8DFFly7ci3I+7abzZbywJsWgrMkPpQioUDUIXotaA76iL+A+pIZYz+zhWBeomJOd6WtDsyI/sU=,iv:TO22nwfKJ3CIEh1+wNdMHr9KVL0xuWONl489JkfuyIo=,tag:SIZxns2avnZe9sIsgrxuoQ==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

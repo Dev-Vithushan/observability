@@ -1,0 +1,122 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helm-values-pyroscope-stack-regional
+  namespace: oe-pyroscope
+data:
+  values.yaml: |
+    pyroscope:
+      components:
+        querier:
+          kind: Deployment
+          autoscaling:
+            enabled: true
+            minReplicas: 2
+            maxReplicas: 6
+            targetMemoryUtilizationPercentage: 60
+            targetCPUUtilizationPercentage: null
+            behavior:
+              enabled: true
+              scaleDown:
+                stabilizationWindowSeconds: 60
+          persistence:
+            enabled: false  # Stateless component - no persistence needed
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 256Mi
+              cpu: 100m
+        query-frontend:
+          kind: Deployment
+          autoscaling:
+            enabled: true
+            minReplicas: 2
+            maxReplicas: 4
+            targetMemoryUtilizationPercentage: 60
+            targetCPUUtilizationPercentage: null
+          persistence:
+            enabled: false  # Stateless component - no persistence needed
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 256Mi
+              cpu: 100m
+        query-scheduler:
+          kind: Deployment
+          autoscaling:
+            enabled: true
+            minReplicas: 2
+            maxReplicas: 4
+            targetCPUUtilizationPercentage: 40
+            targetMemoryUtilizationPercentage: null
+          persistence:
+            enabled: false  # Stateless component - no persistence needed
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 256Mi
+              cpu: 100m
+        distributor:
+          kind: Deployment
+          autoscaling:
+            enabled: true
+            minReplicas: 2
+            maxReplicas: 5
+            targetMemoryUtilizationPercentage: 60
+            targetCPUUtilizationPercentage: null
+          persistence:
+            enabled: false  # Stateless component - no persistence needed
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 256Mi
+              cpu: 500m
+        ingester:
+          kind: StatefulSet
+          terminationGracePeriodSeconds: 600
+          persistence:
+            enabled: true   # Critical: WAL for data safety and block storage
+            size: 20Gi      # Adequate space for WAL and temporary block storage
+          resources:
+            limits:
+              memory: 16Gi
+            requests:
+              memory: 8Gi
+              cpu: 1
+        compactor:
+          kind: StatefulSet
+          terminationGracePeriodSeconds: 1200
+          persistence:
+            enabled: true  # Enable persistence for compactor - needs temp space for index processing
+            size: 10Gi     # Temporary storage for index file processing
+          resources:
+            limits:
+              memory: 16Gi
+            requests:
+              memory: 8Gi
+              cpu: 1
+        store-gateway:
+          kind: StatefulSet
+          persistence:
+            # Enable persistence for store-gateway to cache index-headers and improve query performance
+            # This avoids re-downloading index-headers on restart, reducing startup time
+            enabled: true
+            size: 5Gi     # Storage for index-header cache
+          resources:
+            limits:
+              memory: 16Gi
+            requests:
+              memory: 8Gi
+              cpu: 1
+          readinessProbe:
+            # The store gateway can be configured to wait on startup for ring stability to be reached before it becomes
+            # ready. See the `store-gateway.sharding-ring.wait-stability-min-duration` server argument for more information.
+            #
+            # Depending on this flag and the number of tenants + blocks that need to be synced on startup, pods can take
+            # some time to become ready. This value can be used to ensure Kubernetes waits long enough and reduce errors.
+            initialDelaySeconds: 60

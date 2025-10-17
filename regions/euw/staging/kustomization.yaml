@@ -1,0 +1,155 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # - ../../../base/
+  # Section to deploy base & regional thanos resources
+  - ../../../thanos/
+  - helm-values-thanos-stack-regional.yaml
+  - thanos-secret.yaml
+  #- thanos-target-clusters/
+  # Section to deploy base & regional grafana resources
+  - ../../../grafana/
+  - helm-values-grafana-stack-regional.yaml
+  - grafana-stack-dev/
+  - helm-release-grafana-dashboards.yaml
+  - grafana-secret-datasources.yaml
+  - oe-sku-dashboard.yaml
+  # Section to deploy RedisLab exporters
+  - redis-target-clusters/
+  # Section to deploy apm-server
+  - ../../../apm-server/
+  - helm-values-apm-server-regional.yaml
+  # Section to deploy oTel resources
+  - ../../../otel-collector/
+  - helm-values-otel-collector-regional.yaml
+  # Section to deploy Pyroscope resources
+  - ../../../pyroscope/
+  - helm-values-pyroscope-stack-regional.yaml
+  # Section to deploy base & regional Loki resources
+  - ../../../loki/
+  - helm-values-loki-stack-regional.yaml
+  # Section to deploy Tempo resources
+  - ../../../tempo/
+  - helm-values-tempo-stack-regional.yaml
+  # Section to deploy Mimir resources
+  - ../../../mimir/
+  - helm-values-mimir-stack-regional.yaml
+  #Section to deploy alertmanagerconfig
+  # - ../../../alerts/staging/
+  # Section to deploy Dora Platform resources
+  - ../../../dora-platform/
+  # Section to deploy Sample App resources
+  - ../../../sample-app/
+  - helm-values-sample-app-regional.yaml
+
+components:
+  #  - ../../../components/exporters/kafka-metrics
+  - ../../../components/exporters/databricks-exporter
+  #  - ../../../components/exporters/cloudflare-exporter
+  - ../../../components/exporters/alloy-exporter
+  #- ../../../components/exporters/prometheus-blackbox-exporter
+  #- ../../../components/exporters/azure-metrics-exporter
+
+patchesStrategicMerge:
+  - helm-release-thanos-stack-regional-patch.yaml
+  - helm-release-loki-stack-regional-patch.yaml
+  - helm-release-tempo-stack-regional-patch.yaml
+  - helm-release-mimir-stack-regional-patch.yaml
+  - helm-release-grafana-stack-regional-patch.yaml
+  - helm-release-pyroscope-stack-regional-patch.yaml
+  - helm-release-otel-collector-regional-patch.yaml
+  - helm-release-apm-server-regional-patch.yaml
+  - helm-release-sample-app-regional-patch.yaml
+  - apm-envs.yaml
+  - loki-secret.yaml
+  - otel-secret.yaml
+  - tempo-secret.yaml
+  - mimir-secret.yaml
+  - pyroscope-secret.yaml
+  - sample-app-apm-secret.yaml
+  #- helm-release-kafka-lag-exporter-patch.yaml
+
+patches:
+  #- path: kafka-service-monitor-patch.yaml
+  #  target:
+  #    kind: ServiceMonitor
+  #    name: kafka-metric-api
+  #    namespace: oe-kafka-metrics
+  - path: databricks-deployment-patch.yaml
+    target:
+      kind: Deployment
+      name: databricks-exporter
+      namespace: oe-databricks-exporter
+
+secretGenerator:
+  - name: apm-server-elasticsearch
+    namespace: oe-apm-server
+    literals:
+      - host=changeme
+      - kibana_host=changeme
+      - username=changeme
+      - password=changeme
+      - apm_token=changeme
+      - metric_username=changeme
+      - metric_password=changeme
+      - metric_host=changeme
+      - cluster_uuid=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: tempo-secret
+    namespace: oe-tempo
+    literals:
+      - AZURE_ACCOUNT_KEY=changeme
+      - AZURE_ACCOUNT_NAME=changeme
+      - AZURE_CONTAINER_NAME=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: mimir-secret
+    namespace: oe-mimir
+    literals:
+      - AZURE_ACCOUNT_KEY=changeme
+      - AZURE_ACCOUNT_NAME=changeme
+      - AZURE_CONTAINER_NAME_RULER=changeme
+      - AZURE_CONTAINER_NAME_BLOCKS=changeme
+      - AZURE_CONTAINER_NAME_ALERTMANAGER=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: loki-secret
+    namespace: oe-loki
+    literals:
+      - AZURE_ACCOUNT_KEY=changeme
+      - AZURE_ACCOUNT_NAME=changeme
+      - AZURE_CONTAINER_NAME=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: otel-secret
+    namespace: oe-otel
+    literals:
+      - OPEN_TELEMETRY_COLLECTOR_CF_TOKEN=changeme
+      - OTLP_USER=changeme
+      - OTLP_PASSWORD=changeme
+      - APM_SERVER_TOKEN=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: pyroscope-secret
+    namespace: oe-pyroscope
+    literals:
+      - AZURE_ACCOUNT_KEY=changeme
+      - AZURE_ACCOUNT_NAME=changeme
+      - AZURE_CONTAINER_NAME=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: apm-server-prod-token
+    namespace: oe-sample-app
+    literals:
+      - token=changeme
+    options:
+      disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: silences-creation-script
+    namespace: oe-grafana
+    files:
+      - ../../../grafana/create-silences.sh
+    options:
+      disableNameSuffixHash: true

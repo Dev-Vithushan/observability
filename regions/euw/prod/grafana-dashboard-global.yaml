@@ -1,0 +1,835 @@
+---
+apiVersion: v1
+data:
+  global.json: |-
+    {
+    "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": 1,
+    "iteration": 1643883620070,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+    {
+      "circleMaxSize": "30",
+      "circleMinSize": "30",
+      "colors": [
+        "rgba(245, 54, 54, 0.9)",
+        "rgba(237, 129, 40, 0.89)",
+        "rgba(50, 172, 45, 0.97)",
+        "rgba(50, 172, 45, 0.97)"
+      ],
+      "datasource": "Prometheus-Thanos",
+      "decimals": 0,
+      "esMetric": "Count",
+      "gridPos": {
+        "h": 18,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "hideEmpty": false,
+      "hideZero": false,
+      "id": 35,
+      "initialZoom": "3",
+      "jsonUrl": "https://grafanaglobal.blob.core.windows.net/globaldashboard/grafanaglobaldashbaord.json",
+      "links": [],
+      "locationData": "json endpoint",
+      "mapCenter": "custom",
+      "mapCenterLatitude": "16",
+      "mapCenterLongitude": 14,
+      "maxDataPoints": 1,
+      "mouseWheelZoom": false,
+      "showLegend": false,
+      "stickyLabels": false,
+      "tableQueryOptions": {
+        "geohashField": "geohash",
+        "latitudeField": "latitude",
+        "longitudeField": "longitude",
+        "metricField": "metric",
+        "queryType": "geohash"
+      },
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "sum(up{job=\"node-exporter\", cluster!=\"sl-aksw-weu-01\", node!~\".*win.*\"}) by (location) / sum(kube_node_info{cluster!=\"sl-aksw-weu-01\", cluster!=\"sli-akso-weu-01\", cluster!=\"sli-akso-eus-01\", os_image!~\".*Win.*\"}) by (location)",
+          "format": "time_series",
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "{{location}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": "0,0.5,1",
+      "timeFrom": null,
+      "timeShift": null,
+      "transparent": true,
+      "type": "grafana-worldmap-panel",
+      "unitPlural": "",
+      "unitSingle": "",
+      "unitSingular": "",
+      "valueName": "total"
+    },
+    {
+      "datasource": null,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 33,
+      "links": [],
+      "options": {
+        "content": "\n# Global Scale Unit Health\n\n---\n\n\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.2.1",
+      "timeFrom": null,
+      "timeShift": null,
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": null,
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 0,
+        "y": 20
+      },
+      "id": 37,
+      "options": {
+        "content": "## Europe\n---",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.2.1",
+      "timeFrom": null,
+      "timeShift": null,
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": null,
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 8,
+        "y": 20
+      },
+      "id": 38,
+      "options": {
+        "content": "## Australia & East Asia\n---",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.2.1",
+      "timeFrom": null,
+      "timeShift": null,
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": null,
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 16,
+        "y": 20
+      },
+      "id": 39,
+      "options": {
+        "content": "## United States\n---",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.2.1",
+      "timeFrom": null,
+      "timeShift": null,
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": "Prometheus-Thanos",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "",
+              "url": "https://grafana-prod-euw.sitecorecloud.app/d/su/level-2-weu-unit?$__all_variables"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "from": 1,
+                "result": {
+                  "text": "Western Europe"
+                },
+                "to": 10
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0.01,
+                "result": {
+                  "text": "Western Europe"
+                },
+                "to": 0.99
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "text": "Western Europe"
+                },
+                "to": 0
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#C4162A",
+                "value": null
+              },
+              {
+                "color": "#FF9830",
+                "value": 0
+              },
+              {
+                "color": "#73BF69",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 0,
+        "y": 22
+      },
+      "id": 20,
+      "interval": null,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "Explore this unit",
+          "url": "https://grafana-prod-euw.sitecorecloud.app/d/su/level-2-weu-unit?$__all_variables"
+        }
+      ],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.2.1",
+      "targets": [
+        {
+          "expr": "sum(up{job=\"node-exporter\", location=\"westeurope\", cluster!=\"sl-aksw-weu-01\", cluster!=\"sli-akso-weu-01\", node!~\".*win.*\"}) / (sum(kube_node_info{location=\"westeurope\", cluster!=\"sl-aksw-weu-01\", cluster!=\"sli-akso-weu-01\", os_image!~\".*Win.*\"}) / 2)",
+          "format": "time_series",
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Western Europe",
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": "Prometheus-Thanos",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "",
+              "url": "https://grafana-prod-aue.sitecorecloud.app/d/su/level-2-units?orgId=1&refresh=10s&var-location=australiaeast&var-cluster=All"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "from": 1,
+                "result": {
+                  "text": "Eastern Australia"
+                },
+                "to": 10
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0.01,
+                "result": {
+                  "text": "Eastern Australia"
+                },
+                "to": 0.99
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "text": "Eastern Australia"
+                },
+                "to": 0
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 0
+              },
+              {
+                "color": "#73BF69",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 8,
+        "y": 22
+      },
+      "id": 21,
+      "interval": null,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "Explore this SU",
+          "url": "https://grafana-prod-aue.sitecorecloud.app/d/su/level-2-units?orgId=1&refresh=10s&var-location=australiaeast&var-cluster=All"
+        }
+      ],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.2.1",
+      "targets": [
+        {
+          "expr": "sum(up{job=\"node-exporter\", location=\"australiaeast\", node!~\".*win.*\"}) / sum(kube_node_info{location=\"australiaeast\", os_image!~\".*Win.*\"})",
+          "format": "time_series",
+          "instant": true,
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Eastern Australia",
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": "Prometheus-Thanos",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "",
+              "url": "https://grafana-prod-jpe.sitecorecloud.app/d/su/level-2-units?orgId=1&refresh=10s&var-location=japaneast&var-cluster=All"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "from": 1,
+                "result": {
+                  "text": "Eastern Japan"
+                },
+                "to": 10
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0.01,
+                "result": {
+                  "text": "Eastern Japan"
+                },
+                "to": 0.99
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "text": "Eastern Japan"
+                },
+                "to": 0
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 0
+              },
+              {
+                "color": "#73BF69",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 11,
+        "y": 22
+      },
+      "id": 41,
+      "interval": null,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "Explore this SU",
+          "url": "https://grafana-prod-jpe.sitecorecloud.app/d/su/level-2-units?orgId=1&refresh=10s&var-location=japaneast&var-cluster=All"
+        }
+      ],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.2.1",
+      "targets": [
+        {
+          "expr": "sum(up{job=\"node-exporter\", location=\"japaneast\", node!~\".*win.*\"}) / sum(kube_node_info{location=\"japaneast\", os_image!~\".*Win.*\"})",
+          "format": "time_series",
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Eastern Japan",
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": "Prometheus-Thanos",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "",
+              "url": "https://grafana-prod-use.sitecorecloud.app/d/su/level-2-units?orgId=1&refresh=10s&var-location=eastus&var-cluster=All"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "from": 1,
+                "result": {
+                  "text": "Eastern United States"
+                },
+                "to": 10
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0.01,
+                "result": {
+                  "text": "Eastern United States"
+                },
+                "to": 0.99
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "text": "Eastern United States"
+                },
+                "to": 0
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 0
+              },
+              {
+                "color": "#73BF69",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 16,
+        "y": 22
+      },
+      "id": 25,
+      "interval": null,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "Explore this unit",
+          "url": "https://grafana-prod-use.sitecorecloud.app/d/su/level-2-units?orgId=1&refresh=10s&var-location=eastus&var-cluster=All"
+        }
+      ],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.2.1",
+      "repeat": null,
+      "targets": [
+        {
+          "expr": "sum(up{job=\"node-exporter\", location=\"eastus\", cluster!=\"sli-akso-eus-01\", node!~\".*win.*\"}) / (sum(kube_node_info{location=\"eastus\", cluster!=\"sli-akso-eus-01\", os_image!~\".*Win.*\"}) / 2)",
+          "format": "time_series",
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Eastern United States",
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": "Prometheus-Thanos",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "",
+              "url": "https://grafana-prod-usw.sitecorecloud.app/d/su/west-us-scale-unit?orgId=1&refresh=1m"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "from": 1,
+                "result": {
+                  "text": "Western United States 2"
+                },
+                "to": 10
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0.01,
+                "result": {
+                  "text": "Western United States 2"
+                },
+                "to": 0.99
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "text": "Western United States 2"
+                },
+                "to": 0
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 0
+              },
+              {
+                "color": "#73BF69",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 19,
+        "y": 22
+      },
+      "id": 40,
+      "interval": null,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "Explore this SU",
+          "url": "https://grafana-prod-usw.sitecorecloud.app/d/su/west-us-scale-unit?orgId=1&refresh=1m"
+        }
+      ],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.2.1",
+      "targets": [
+        {
+          "expr": "sum(up{job=\"node-exporter\", location=\"westus2\", node!~\".*win.*\"}) / sum(kube_node_info{location=\"westus2\", os_image!~\".*Win.*\"})",
+          "format": "time_series",
+          "instant": true,
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Western United States 2",
+      "type": "stat"
+    }
+    ],
+    "refresh": "",
+    "schemaVersion": 31,
+    "style": "dark",
+    "tags": [
+    "Global"
+    ],
+    "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "westeurope",
+          "value": "westeurope"
+        },
+        "datasource": "Prometheus-Thanos",
+        "definition": "label_values(kube_node_labels, location)",
+        "description": null,
+        "error": null,
+        "hide": 2,
+        "includeAll": false,
+        "label": "SU Locale",
+        "multi": false,
+        "name": "location",
+        "options": [],
+        "query": {
+          "query": "label_values(kube_node_labels, location)",
+          "refId": "Prometheus-Thanos-location-Variable-Query"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+    },
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ]
+    },
+    "timezone": "",
+    "title": "Global Health",
+    "uid": "global",
+    "version": 10
+    }
+kind: ConfigMap
+metadata:
+  labels:
+    app: grafana
+    type: grafana-global-dashboard
+  name: grafana-dashboard-global
+  namespace: oe-grafana

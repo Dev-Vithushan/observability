@@ -1,0 +1,51 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: oe-grafana
+resources:
+  - namespace.yaml
+  #- grafana-dashboard-global.yaml
+  - helm-repo.yaml
+  #- grafana-global-stack-values.yaml special type of Configmap. It presents the Grafana Dashboard when someone visits the  unit-monitoring.stylelabs.io. Need to check in which existing AKSO clusters exists, may have to transfer it to a region and not base directory.
+  - helmrelease-grafana-stack.yaml
+
+configMapGenerator:
+  - name: helm-values-grafana-stack-base
+    files:
+    - values.yaml
+    options:
+      disableNameSuffixHash: true
+  - name: users-creation-script
+    files:
+    - entry.sh
+    - create-user.sh
+    options:
+      disableNameSuffixHash: true
+      annotations:
+        reloader.stakater.com/match: "true"
+
+secretGenerator:
+  - name: grafana-secrets
+    literals:
+      - GF_AUTH_AZUREAD_CLIENT_ID=changeme
+      - GF_AUTH_AZUREAD_CLIENT_SECRET=changeme
+      - aad_client_id=changeme
+      - aad_client_secret=changeme
+      - admin_password=changeme
+      - admin_user=changeme
+      - grafana_bot_token=changeme
+      - sendgrid_password=changeme
+      - sendgrid_user=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: users-credentials
+    literals:
+      - creds=changeme
+    options:
+      disableNameSuffixHash: true
+      annotations:
+        reloader.stakater.com/match: "true"
+
+patchesStrategicMerge:
+- grafana-secrets.yaml
+- users-creds.yaml
+

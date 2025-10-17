@@ -1,0 +1,466 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helm-values-loki-stack-regional
+  namespace: oe-loki
+data:
+  values.yaml: |
+    fullnameOverride: "loki"
+    ## @param fullnameOverride String to fully override common.names.fullname template
+    loki:
+      limits_config:
+        reject_old_samples: true
+        reject_old_samples_max_age: 24h
+        max_cache_freshness_per_query: 10m
+        split_queries_by_interval: 15m
+        tsdb_max_query_parallelism: 256
+        query_timeout: 600s
+        allow_structured_metadata: true
+        volume_enabled: true
+        retention_period: 90d
+        index_gateway_shard_size: 1
+        per_stream_rate_limit: 512M
+        ingestion_rate_mb: 100000
+        ingestion_burst_size_mb: 100
+        max_global_streams_per_user: 0
+        max_query_parallelism: 64
+        max_entries_limit_per_query: 100000000
+        max_query_series: 1000000
+        max_line_size: 0
+        deletion_mode: "filter-and-delete"
+      rulerConfig:
+        wal:
+          dir: /var/loki/ruler-wal
+        storage:
+          type: local
+          local:
+            directory: /var/loki/rules
+        rule_path: /var/loki/rules/fake
+        remote_write:
+          enabled: true
+          client:
+            url: http://kube-prometheus-stack-prometheus.oe-prometheus.svc.cluster.local:9090/api/v1/write
+        ring:
+          kvstore:
+            store: memberlist
+        enable_api: true
+        enable_sharding: true
+        alertmanager_url: http://kube-prometheus-stack-alertmanager.oe-prometheus.svc.cluster.local:9093
+        enable_alertmanager_v2: true
+      ingester:
+        chunk_encoding: snappy
+    # -- Configuration for the ingester
+    ingester:
+      # -- Number of replicas for the ingester, when zoneAwareReplication.enabled is true, the total
+      # number of replicas will match this value with each zone having 1/3rd of the total replicas.
+      replicas: 4
+      # -- hostAliases to add
+      hostAliases: []
+      #  - ip: 1.2.3.4
+      #    hostnames:
+      #      - domain.tld
+      autoscaling:
+        # -- Enable autoscaling for the ingester
+        enabled: false
+        # -- Minimum autoscaling replicas for the ingester
+        minReplicas: 1
+        # -- Maximum autoscaling replicas for the ingester
+        maxReplicas: 3
+        # -- Target CPU utilisation percentage for the ingester
+        targetCPUUtilizationPercentage: 60
+        # -- Target memory utilisation percentage for the ingester
+        targetMemoryUtilizationPercentage: null
+        # -- Allows one to define custom metrics using the HPA/v2 schema (for example, Pods, Object or External metrics)
+        customMetrics: []
+        # - type: Pods
+        #   pods:
+        #     metric:
+        #       name: loki_lines_total
+        #     target:
+        #       type: AverageValue
+        #       averageValue: 10k
+        behavior:
+          # -- Enable autoscaling behaviours
+          enabled: false
+          # -- define scale down policies, must conform to HPAScalingRules
+          scaleDown: {}
+          # -- define scale up policies, must conform to HPAScalingRules
+          scaleUp: {}
+      image:
+        # -- The Docker registry for the ingester image. Overrides `loki.image.registry`
+        registry: null
+        # -- Docker image repository for the ingester image. Overrides `loki.image.repository`
+        repository: null
+        # -- Docker image tag for the ingester image. Overrides `loki.image.tag`
+        tag: null
+      # -- Command to execute instead of defined in Docker image
+      command: null
+      priorityClassName: null
+      # -- Labels for ingester pods
+      podLabels: {}
+      # -- Annotations for ingester pods
+      podAnnotations: {}
+      # -- The name of the PriorityClass for ingester pods
+      # -- Labels for ingestor service
+      serviceLabels: {}
+      # -- Additional CLI args for the ingester
+      extraArgs:
+        - -config.expand-env=true
+      # -- Environment variables to add to the ingester pods
+      extraEnv: []
+      # -- Environment variables from secrets or configmaps to add to the ingester pods
+      extraEnvFrom:
+        - secretRef:
+            name: loki-secret
+      # -- Volume mounts to add to the ingester pods
+      extraVolumeMounts: []
+      # -- Volumes to add to the ingester pods
+      extraVolumes: []
+      # -- Resource requests and limits for the ingester
+      resources: {}
+      # -- Containers to add to the ingester pods
+      extraContainers: []
+      # -- Init containers to add to the ingester pods
+      initContainers: []
+      # -- Grace period to allow the ingester to shutdown before it is killed. Especially for the ingestor,
+      # this must be increased. It must be long enough so ingesters can be gracefully shutdown flushing/transferring
+      # all data and to successfully leave the member ring on shutdown.
+      terminationGracePeriodSeconds: 300
+      # -- Lifecycle for the ingester container
+      lifecycle: {}
+      # -- topologySpread for ingester pods.
+      # @default -- Defaults to allow skew no more than 1 node
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: ingester
+      # -- Affinity for ingester pods. Ignored if zoneAwareReplication is enabled.
+      # @default -- Hard node anti-affinity
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: ingester
+              topologyKey: kubernetes.io/hostname
+      # -- Pod Disruption Budget maxUnavailable
+      maxUnavailable: 3
+      # -- Node selector for ingester pods
+      nodeSelector: {}
+      # -- Tolerations for ingester pods
+      tolerations: []
+      # -- readiness probe settings for ingester pods. If empty, use `loki.readinessProbe`
+      readinessProbe: {}
+      # -- liveness probe settings for ingester pods. If empty use `loki.livenessProbe`
+      livenessProbe: {}
+      persistence:
+        # -- Enable creating PVCs which is required when using boltdb-shipper
+        enabled: true
+        # -- Use emptyDir with ramdisk for storage. **Please note that all data in ingester will be lost on pod restart**
+        inMemory: false
+        # -- List of the ingester PVCs
+        # @notationType -- list
+        claims:
+          - name: data
+            size: 20Gi
+            #   -- Storage class to be used.
+            #   If defined, storageClassName: <storageClass>.
+            #   If set to "-", storageClassName: "", which disables dynamic provisioning.
+            #   If empty or set to null, no storageClassName spec is
+            #   set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS, and OpenStack).
+            storageClass: null
+            # - name: wal
+            #   size: 150Gi
+        # -- Enable StatefulSetAutoDeletePVC feature
+        enableStatefulSetAutoDeletePVC: false
+        whenDeleted: Retain
+        whenScaled: Retain
+      # -- Adds the appProtocol field to the ingester service. This allows ingester to work with istio protocol selection.
+      appProtocol:
+        # -- Set the optional grpc service protocol. Ex: "grpc", "http2" or "https"
+        grpc: ""
+      # -- Enabling zone awareness on ingesters will create 3 statefulests where all writes will send a replica to each zone.
+      # This is primarily intended to accelerate rollout operations by allowing for multiple ingesters within a single
+      # zone to be shutdown and restart simultaneously (the remaining 2 zones will be guaranteed to have at least one copy
+      # of the data).
+      # Note: This can be used to run Loki over multiple cloud provider availability zones however this is not currently
+      # recommended as Loki is not optimized for this and cross zone network traffic costs can become extremely high
+      # extremely quickly. Even with zone awareness enabled, it is recommended to run Loki in a single availability zone.
+      zoneAwareReplication:
+        # -- Enable zone awareness.
+        enabled: true
+        # -- The percent of replicas in each zone that will be restarted at once. In a value of 0-100
+        maxUnavailablePct: 50
+        # -- zoneA configuration
+        zoneA:
+          # -- optionally define a node selector for this zone
+          nodeSelector:
+            kubernetes.azure.com/agentpool: lnxusr001
+            topology.kubernetes.io/zone: australiaeast-1
+          # -- optionally define extra affinity rules, by default different zones are not allowed to schedule on the same host
+          extraAffinity: {}
+          # -- Specific annotations to add to zone A statefulset
+          annotations: {}
+          # -- Specific annotations to add to zone A pods
+          podAnnotations: {}
+        zoneB:
+          # -- optionally define a node selector for this zone
+          nodeSelector:
+            kubernetes.azure.com/agentpool: lnxusr001
+            topology.kubernetes.io/zone: australiaeast-2
+          # -- optionally define extra affinity rules, by default different zones are not allowed to schedule on the same host
+          extraAffinity: {}
+          # -- Specific annotations to add to zone B statefulset
+          annotations: {}
+          # -- Specific annotations to add to zone B pods
+          podAnnotations: {}
+        zoneC:
+          # -- optionally define a node selector for this zone
+          nodeSelector:
+            kubernetes.azure.com/agentpool: lnxusr001
+            topology.kubernetes.io/zone: australiaeast-3
+          # -- optionally define extra affinity rules, by default different zones are not allowed to schedule on the same host
+          extraAffinity: {}
+          # -- Specific annotations to add to zone C statefulset
+          annotations: {}
+          # -- Specific annotations to add to zone C pods
+          podAnnotations: {}
+        # -- The migration block allows migrating non zone aware ingesters to zone aware ingesters.
+        migration:
+          enabled: false
+          excludeDefaultZone: false
+          readPath: false
+          writePath: false
+
+    querier:
+      # -- Number of replicas for the querier
+      replicas: 2
+      # -- hostAliases to add
+      hostAliases: []
+      #  - ip: 1.2.3.4
+      #    hostnames:
+      #      - domain.tld
+      autoscaling:
+        # -- Enable autoscaling for the querier, this is only used if `indexGateway.enabled: true`
+        enabled: true
+        # -- Minimum autoscaling replicas for the querier
+        minReplicas: 2
+        # -- Maximum autoscaling replicas for the querier
+        maxReplicas: 12
+        # -- Target CPU utilisation percentage for the querier
+        targetCPUUtilizationPercentage: 80
+        # -- Target memory utilisation percentage for the querier
+        targetMemoryUtilizationPercentage: 80
+        # -- Allows one to define custom metrics using the HPA/v2 schema (for example, Pods, Object or External metrics)
+        customMetrics: []
+        # - type: External
+        #   external:
+        #     metric:
+        #       name: loki_inflight_queries
+        #     target:
+        #       type: AverageValue
+        #       averageValue: 12
+        behavior:
+          # -- Enable autoscaling behaviours
+          enabled: false
+          # -- define scale down policies, must conform to HPAScalingRules
+          scaleDown: {}
+          # -- define scale up policies, must conform to HPAScalingRules
+          scaleUp: {}
+      image:
+        # -- The Docker registry for the querier image. Overrides `loki.image.registry`
+        registry: null
+        # -- Docker image repository for the querier image. Overrides `loki.image.repository`
+        repository: null
+        # -- Docker image tag for the querier image. Overrides `loki.image.tag`
+        tag: null
+      # -- Command to execute instead of defined in Docker image
+      command: null
+      # -- The name of the PriorityClass for querier pods
+      priorityClassName: null
+      # -- Labels for querier pods
+      podLabels: {}
+      # -- Annotations for querier pods
+      podAnnotations: {}
+      # -- Labels for querier service
+      serviceLabels: {}
+      # -- Additional CLI args for the querier
+      extraArgs:
+        - -config.expand-env=true
+      # -- Environment variables to add to the querier pods
+      extraEnv: []
+      # -- Environment variables from secrets or configmaps to add to the querier pods
+      extraEnvFrom:
+        - secretRef:
+            name: loki-secret
+      # -- Volume mounts to add to the querier pods
+      extraVolumeMounts: []
+      # -- Volumes to add to the querier pods
+      extraVolumes: []
+      # -- Resource requests and limits for the querier
+      resources:
+        requests:
+          cpu: 500m
+          memory: 500Mi
+        limits:
+          cpu: 6000m
+          memory: 4000Mi
+      # -- Containers to add to the querier pods
+      extraContainers: []
+      # -- Init containers to add to the querier pods
+      initContainers: []
+      # -- Grace period to allow the querier to shutdown before it is killed
+      terminationGracePeriodSeconds: 30
+      # -- topologySpread for querier pods.
+      # @default -- Defaults to allow skew no more then 1 node
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: querier
+      # -- Affinity for querier pods.
+      # @default -- Hard node anti-affinity
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: querier
+              topologyKey: kubernetes.io/hostname
+      # -- Pod Disruption Budget maxUnavailable
+      maxUnavailable: 1
+      # -- Max Surge for querier pods
+      maxSurge: 0
+      # -- Node selector for querier pods
+      nodeSelector: {}
+      # -- Tolerations for querier pods
+      tolerations: []
+      # -- DNSConfig for querier pods
+      dnsConfig: {}
+      persistence:
+        # -- Enable creating PVCs for the querier cache
+        enabled: true
+        # -- Size of persistent disk
+        size: 20Gi
+        # -- Storage class to be used.
+        # If defined, storageClassName: <storageClass>.
+        # If set to "-", storageClassName: "", which disables dynamic provisioning.
+        # If empty or set to null, no storageClassName spec is
+        # set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS, and OpenStack).
+        storageClass: null
+        # -- Annotations for querier PVCs
+        annotations: {}
+      # -- Adds the appProtocol field to the querier service. This allows querier to work with istio protocol selection.
+      appProtocol:
+        # -- Set the optional grpc service protocol. Ex: "grpc", "http2" or "https"
+        grpc: ""
+      engine:
+        timeout: 5m
+      query_timeout: 5m
+      # default max_concurrent is 4
+      max_concurrent: 64
+    # -- Configuration for the query-frontend
+    queryFrontend:
+      # -- Number of replicas for the query-frontend
+      replicas: 1
+      # -- hostAliases to add
+      hostAliases: []
+      #  - ip: 1.2.3.4
+      #    hostnames:
+      #      - domain.tld
+      autoscaling:
+        # -- Enable autoscaling for the query-frontend
+        enabled: true
+        # -- Minimum autoscaling replicas for the query-frontend
+        minReplicas: 1
+        # -- Maximum autoscaling replicas for the query-frontend
+        maxReplicas: 4
+        # -- Target CPU utilisation percentage for the query-frontend
+        targetCPUUtilizationPercentage: 75
+        # -- Target memory utilisation percentage for the query-frontend
+        targetMemoryUtilizationPercentage: 75
+        # -- Allows one to define custom metrics using the HPA/v2 schema (for example, Pods, Object or External metrics)
+        customMetrics: []
+        # - type: Pods
+        #   pods:
+        #     metric:
+        #       name: loki_query_rate
+        #     target:
+        #       type: AverageValue
+        #       averageValue: 100
+        behavior:
+          # -- Enable autoscaling behaviours
+          enabled: false
+          # -- define scale down policies, must conform to HPAScalingRules
+          scaleDown: {}
+          # -- define scale up policies, must conform to HPAScalingRules
+          scaleUp: {}
+      image:
+        # -- The Docker registry for the query-frontend image. Overrides `loki.image.registry`
+        registry: null
+        # -- Docker image repository for the query-frontend image. Overrides `loki.image.repository`
+        repository: null
+        # -- Docker image tag for the query-frontend image. Overrides `loki.image.tag`
+        tag: null
+      # -- Command to execute instead of defined in Docker image
+      command: null
+      # -- The name of the PriorityClass for query-frontend pods
+      priorityClassName: null
+      # -- Labels for query-frontend pods
+      podLabels: {}
+      # -- Annotations for query-frontend pods
+      podAnnotations: {}
+      # -- Labels for query-frontend service
+      serviceLabels: {}
+      # -- Additional CLI args for the query-frontend
+      extraArgs:
+        - -config.expand-env=true
+      # -- Environment variables to add to the query-frontend pods
+      extraEnv: []
+      # -- Environment variables from secrets or configmaps to add to the query-frontend pods
+      extraEnvFrom:
+        - secretRef:
+            name: loki-secret
+      # -- Volume mounts to add to the query-frontend pods
+      extraVolumeMounts: []
+      # -- Volumes to add to the query-frontend pods
+      extraVolumes: []
+      # -- Resource requests and limits for the query-frontend
+      resources:
+        requests:
+          cpu: 100m
+          memory: 500Mi
+        limits:
+          cpu: 1000m
+          memory: 4000Mi
+      # -- Containers to add to the query-frontend pods
+      extraContainers: []
+      # -- Grace period to allow the query-frontend to shutdown before it is killed
+      terminationGracePeriodSeconds: 30
+      # -- Affinity for query-frontend pods.
+      # @default -- Hard node anti-affinity
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: query-frontend
+              topologyKey: kubernetes.io/hostname
+      # -- Pod Disruption Budget maxUnavailable
+      maxUnavailable: 1
+      # -- Node selector for query-frontend pods
+      nodeSelector: {}
+      # -- Tolerations for query-frontend pods
+      tolerations: []
+      # -- Adds the appProtocol field to the queryFrontend service. This allows queryFrontend to work with istio protocol selection.
+      appProtocol:
+        # -- Set the optional grpc service protocol. Ex: "grpc", "http2" or "https"
+        grpc: ""
+    ruler:
+      replicas: 2

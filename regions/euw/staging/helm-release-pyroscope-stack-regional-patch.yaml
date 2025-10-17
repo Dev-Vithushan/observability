@@ -1,0 +1,14 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pyroscope-stack
+  namespace: oe-pyroscope
+spec:
+  valuesFrom:
+    - kind: ConfigMap
+      name: helm-values-pyroscope-stack-base
+      valuesKey: values.yaml
+    - kind: ConfigMap
+      name: helm-values-pyroscope-stack-regional
+      valuesKey: values.yaml 

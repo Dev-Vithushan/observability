@@ -1,0 +1,386 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helm-values-otel-collector-regional
+  namespace: oe-otel
+data:
+  values.yaml: |
+    config:
+      connectors:
+        spanmetrics:
+          histogram:
+            explicit:
+              buckets: [100us, 1ms, 2ms, 6ms, 10ms, 100ms, 250ms]
+          dimensions:
+            - name: http.request.method
+            - name: http.response.status_code
+            - name: http.route
+            - name: mcp.tool.name
+          exclude_dimensions: ['status.code']
+          dimensions_cache_size: 1000
+          aggregation_temporality: "AGGREGATION_TEMPORALITY_CUMULATIVE"
+          metrics_flush_interval: 15s
+      exporters:
+        debug: {}
+        prometheusremotewrite/mimir:
+          endpoint: 'http://mimir-distributor.oe-mimir.svc.cluster.local:8080/api/v1/push'
+          headers:
+            x-scope-orgid: "oe-metrics"
+          tls:
+            insecure: true
+        prometheusremotewrite/prometheus:
+          endpoint: 'http://kube-prometheus-stack-prometheus.oe-prometheus.svc.cluster.local:9090/api/v1/write'
+          headers:
+            x-scope-orgid: "oe-metrics"
+          tls:
+            insecure: true
+        otlphttp/loki:
+          #auth:
+          #  authenticator: basicauth/otlp
+          endpoint:
+            http://loki-distributor.oe-loki.svc.cluster.local:3100/otlp
+          tls:
+            insecure: true
+        otlphttp/mimir:
+          endpoint: http://mimir-distributor.oe-mimir.svc.cluster.local:8080/otlp
+          headers:
+            x-scope-orgid: "oe-metrics"
+          tls:
+            insecure: true
+        otlp/tempo:
+          endpoint:
+            http://tempo-distributor.oe-tempo.svc.cluster.local:4317
+          tls:
+            insecure: true
+        otlp:
+          endpoint: 'otel-collector:4317'
+          tls:
+            insecure: true
+        otlphttp/elastic:
+          endpoint: "https://apm-server-${env_type}-${region}.sitecorecloud.app:443"
+          tls:
+            insecure: false
+            insecure_skip_verify: false
+          sending_queue:
+            enabled: true
+            num_consumers: 100
+            queue_size: 10000
+          headers:
+            Authorization: "Bearer $${APM_SERVER_TOKEN}"
+        prometheus/scrape:
+          enable_open_metrics: true
+          resource_to_telemetry_conversion:
+            enabled: true
+          endpoint: ${env:MY_POD_IP}:8889
+          metric_expiration: 180m
+          add_metric_suffixes: false
+      extensions:
+        # The health_check extension is mandatory for this chart.
+        # Without the health_check extension the collector will fail the readiness and liveliness probes.
+        # The health_check extension can be modified, but should never be removed.
+        zpages:
+          endpoint: ${env:MY_POD_IP}:55679
+        health_check:
+          endpoint: ${env:MY_POD_IP}:13133
+        basicauth/server:
+          htpasswd:
+            inline: | 
+              $${OTLP_USER}:$${OTLP_PASSWORD}
+      processors:
+        # Default memory limiter configuration for the collector based on k8s resource limits.
+        memory_limiter:
+          # check_interval is the time between measurements of memory usage.
+          check_interval: 5s
+          # By default limit_mib is set to 80% of ".Values.resources.limits.memory"
+          limit_percentage: 80
+          # By default spike_limit_mib is set to 25% of ".Values.resources.limits.memory"
+          spike_limit_percentage: 25
+
+        resource/cfhttp:
+          attributes:
+            - key: job
+              action: insert
+              value: cloudflare-http-logpush
+
+        resource/cffirewall:
+          attributes:
+            - key: job
+              action: insert
+              value: cloudflare-firewall-logpush
+
+        resource/cfworkers:
+          attributes:
+            - key: job
+              action: insert
+              value: cloudflare-worker-logpush
+
+        resource/httptls:
+          attributes:
+            - key: job
+              action: insert
+              value: cloudflare-tls-logpush
+
+        transform/worker_parse_and_tag:
+          error_mode: ignore
+          log_statements:
+            - context: log
+              statements:
+                - merge_maps(attributes, ParseJSON(body.string), "upsert") where IsMatch(body.string, "^\\{")
+                - set(attributes["worker"], attributes["ScriptName"]) where attributes["ScriptName"] != nil
+
+        transform/fw_parse_and_tag:
+          error_mode: ignore
+          log_statements:
+            - context: log
+              statements:
+                - merge_maps(attributes, ParseJSON(body.string), "upsert") where IsMatch(body.string, "^\\{")
+                - set(attributes["zone"], attributes["ZoneName"]) where attributes["ZoneName"] != nil
+                - set(attributes["host"], attributes["EdgeRequestHost"]) where attributes["EdgeRequestHost"] != nil
+
+        groupbyattrs/by_worker_host:
+          keys: [worker]
+
+        groupbyattrs/by_edge_host:
+          keys: [host]
+
+        transform/worker_promote_and_label:
+          error_mode: ignore
+          log_statements:
+            - context: log
+              statements:
+                - set(resource.attributes["worker"], attributes["worker"]) where attributes["worker"] != nil
+                - delete_matching_keys(attributes, "^(worker)$")
+
+        transform/fw_promote_and_label:
+          error_mode: ignore
+          log_statements:
+            - context: log
+              statements:
+                - set(resource.attributes["zone"], attributes["zone"]) where attributes["zone"] != nil
+                - set(resource.attributes["host"], attributes["host"]) where attributes["host"] != nil
+                - delete_matching_keys(attributes, "^(zone|host)$")
+
+        transform/metrics_tweak:
+          error_mode: ignore
+          metric_statements:
+            - context: metric
+              statements:
+                - set(description, "Measures the duration of inbound HTTP requests") where name == "http.server.duration"
+        batch:
+          send_batch_size: 500
+          send_batch_max_size: 500
+        filter/prometheus:
+          metrics:
+            metric:
+              - 'resource.attributes["SERVICE_NAME"] == "remote_prometheus_write"'
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: ${env:MY_POD_IP}:4317
+            http:
+              endpoint: ${env:MY_POD_IP}:4318
+              auth:
+                authenticator: basicauth/server
+        prometheus:
+          config:
+            scrape_configs:
+              - job_name: opentelemetry-collector
+                scrape_interval: 10s
+                static_configs:
+                  - targets:
+                      - ${env:MY_POD_IP}:8888
+        cloudflare/cfhttp:
+          logs:
+            endpoint: 0.0.0.0:5555
+            secret: "$${OPEN_TELEMETRY_COLLECTOR_CF_TOKEN}"
+
+        cloudflare/cffirewall:
+          logs:
+            endpoint: 0.0.0.0:5556
+            secret: "$${OPEN_TELEMETRY_COLLECTOR_CF_TOKEN}"
+
+        cloudflare/cfworkers:
+          logs:
+            endpoint: 0.0.0.0:5557
+            secret: "$${OPEN_TELEMETRY_COLLECTOR_CF_TOKEN}"
+
+        cloudflare/httptls:
+          logs:
+            endpoint: 0.0.0.0:5558
+            secret: "$${OPEN_TELEMETRY_COLLECTOR_CF_TOKEN}"
+
+      service:
+        telemetry:
+          metrics:
+            readers:
+              - pull:
+                  exporter:
+                    prometheus:
+                      host: "0.0.0.0"
+                      port: 8888
+        extensions:
+          - zpages
+          - health_check
+          - basicauth/server
+        pipelines:
+          logs:
+            exporters:
+              - debug
+              - otlphttp/loki
+            processors:
+              - batch
+            receivers:
+              - otlp
+          logs/cfhttp:
+            receivers: [cloudflare/cfhttp]
+            processors: [resource/cfhttp, batch]
+            exporters: [otlphttp/loki]
+          logs/cffirewall:
+            receivers: [cloudflare/cffirewall]
+            processors: [resource/cffirewall, transform/fw_parse_and_tag, groupbyattrs/by_edge_host, transform/fw_promote_and_label, batch]
+            exporters: [otlphttp/loki]
+          logs/cfworkers:
+            receivers: [cloudflare/cfworkers]
+            processors: [resource/cfworkers, transform/worker_parse_and_tag, groupbyattrs/by_worker_host, transform/worker_promote_and_label, batch]
+            exporters: [otlphttp/loki]
+          logs/httptls:
+            receivers: [cloudflare/httptls]
+            processors: [resource/httptls, batch]
+            exporters: [otlphttp/loki]
+
+          metrics:
+            receivers:
+              - otlp
+              - spanmetrics
+            processors:
+              - batch
+            exporters:
+              - prometheusremotewrite/prometheus
+              - prometheusremotewrite/mimir
+          traces:
+            exporters:
+              - otlp/tempo
+              - otlphttp/elastic
+              - spanmetrics
+            processors:
+              - batch
+            receivers:
+              - otlp
+    extraEnvs:
+      - name: OPEN_TELEMETRY_COLLECTOR_CF_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: otel-secret
+            key: OPEN_TELEMETRY_COLLECTOR_CF_TOKEN
+      - name: OTLP_USER
+        valueFrom:
+          secretKeyRef:
+            name: otel-secret
+            key: OTLP_USER
+      - name: OTLP_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: otel-secret
+            key: OTLP_PASSWORD
+      - name: APM_SERVER_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: otel-secret
+            key: APM_SERVER_TOKEN
+    ports:
+      otlp:
+        enabled: true
+        containerPort: 4317
+        servicePort: 4317
+        hostPort: 4317
+        protocol: TCP
+        # nodePort: 30317
+        appProtocol: grpc
+      otlp-http:
+        enabled: true
+        containerPort: 4318
+        servicePort: 4318
+        hostPort: 4318
+        protocol: TCP
+      loki-http:
+        enabled: true
+        containerPort: 3500
+        servicePort: 3500
+        hostPort: 3500
+        protocol: TCP
+      cfhttp:
+        enabled: true
+        containerPort: 5555
+        servicePort: 5555
+        hostPort: 5555
+        protocol: TCP
+      cffirewall:
+        enabled: true
+        containerPort: 5556
+        servicePort: 5556
+        hostPort: 5556
+        protocol: TCP
+      cfworkers:
+        enabled: true
+        containerPort: 5557
+        servicePort: 5557
+        hostPort: 5557
+        protocol: TCP
+      httptls:
+        enabled: true
+        containerPort: 5558
+        servicePort: 5558
+        hostPort: 5558
+        protocol: TCP
+      metrics:
+        enabled: true
+        containerPort: 8888
+        servicePort: 8888
+        protocol: TCP
+      zpages:
+        enabled: true
+        containerPort: 55679
+        servicePort: 55679
+        protocol: TCP
+    ingress:
+      enabled: true
+      annotations:
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: "GRPC,HTTP"
+        konghq.com/protocols: "grpc,grpcs,http,https"
+      ingressClassName: ${ingress_class}
+      hosts:
+        - host: otel-collector-g-${env_type}-${region}.sitecorecloud.app
+          paths:
+            - path: /
+              pathType: Prefix
+              port: 4317
+        - host: otel-collector-h-${env_type}-${region}.sitecorecloud.app
+          paths:
+            - path: /
+              pathType: Prefix
+              port: 4318
+        - host: otel-collector-${env_type}-${region}.sitecorecloud.app
+          paths:
+            - path: /
+              pathType: Prefix
+              port: 4318
+        - host: otel-collector-${env_type}-${region}.sitecore-staging.cloud
+          paths:
+            - path: /cf-http
+              pathType: Prefix
+              port: 5555
+            - path: /cf-firewall
+              pathType: Prefix
+              port: 5556
+            - path: /cf-workers
+              pathType: Prefix
+              port: 5557
+            - path: /http-tls
+              pathType: Prefix
+              port: 5558
+            - path: /
+              pathType: Prefix
+              port: 4318

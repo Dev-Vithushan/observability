@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: use-e1-contenthub-sb-aks-01-objstore-config-thanos
+type: Opaque
+data:
+    objstore.yml: ENC[AES256_GCM,data:A3h38PdzU4NMb3MLuMZSOqdJW7m1RHv6ccaUxsNWyAiq361Ceco5kZ8nQ360Fhros0vmfmmLqJc9KXrvO7EzAljjjuD250OkIz7SD4N78DU6Es6hGCZZgBv77k04VSK6HDe+vwGdICs88wNdd5du1T+ApOFvUtDh2zzmVX3DqIuIUk1GL1hSEjXW5hzRFknrT6EPB8ebzdN2v5Tt3Rlp7ZMptAwPo+ltrYInQeEGIPNdh9c3qggm1hDqrqz6KD3h94ZElggEvVy0qkAHUcLK5vPIrCHvE0loLzyi7dBY3NH8ag8Jm3vBrQg9EZbLwzbM6VKcRLIHxwXhPJo2A72HdnT4CLyaq0srbVZOc4KWIHLhH/FgRhqKloT78YLcotOAX01u+0IsUxuObN/evHgG16GuqdZllUkZhYb3NqPfEc0xfKq2/4XN3bCjZBYFSwCsz4p7xUh0o7U=,iv:YdrcrJiJxbRApr8R1/iAse2NzM/gUV6vPNuB4UOe/lI=,tag:7AS3ZklxyiOqIKANGMb2tw==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2024-04-04T09:14:35Z"
+          enc: YZPY1O8e7ukWkq_paHIEeWRzu4UGan-l36HSJPeqDRExZ-0bBu8_YcUA4HTOt5ugIBuKppf0SaZZ8BsaboKaCTS2-UYxdcU2bEPE10K4Uca12d_mY5KzP0IgHknmCg8Wk90aoP2XfO2fRP-zstcJn0kSPaT3o8VZ0ILZyCbrdlS0V5mc8WBZ9Vt8vjCKhQgRJQ8F7JTB81Vcr80aEq6pEFBqaV1Mqf_9tJPSKgBoPzfJCb56WoAYFV9xS5hXg--88YbvgWDksWoENsYvWrY0k7S7hC5szZRQkwiZk4pYaUn3RQ1Rm1ypmVBW8oBFVk8B1k5dAY3hDitxZJbdlRdS7AIamk4oCDO_oSzy0HZ-AUzOZFau557ITiIDo7m6y5L7jGVPD_QEOEkQR87ANiixlaf6kfLoeEE8uh9NoBkUCdiTImUACshNluopuuo3ngHUmq6PIRic5IUKMu0Mwwo3sfGF-MKE0oLFvngbw9qyfa6m0Noh-EH-WOICMtRFd0hm2a8IR1BVo_1lxhA20dFZY4CHmq9WahgmnnHoiZjP_0vg9LO0AS0nZDAYhrWjT_0Y2SKiaje5su4GmUruUyIMhD82VvwJhT1z4IUePWwwRRSZAiGnnvKLm731Yhv9RfpJPujiN-iyrbcRWnIt1yLbkyUw4wjbtbeGYQPogI5z9IM
+    hc_vault: []
+    age: []
+    lastmodified: "2024-04-04T09:14:36Z"
+    mac: ENC[AES256_GCM,data:7p5O6QMStMWhTvFoVFak6VyAt16qOSiRPxYJTcMbiZ1wKG3VKI13XzoXv5XktWtEanGjgzhxugdo9XGGqERN3caW1xqmYf5QZROugn9bJ/E25frBelUMCNILuvplhi/si7T/wV+QKPbNNQSH74E7hcwYs+Ds4pD4AOFW8wDV++o=,iv:u6Caf7bx/7P6Diy6cv9XgoPcsAoXeaxDStDdv0DRiY8=,tag:AlQ7zN9DHbqc8maiBuaAXw==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

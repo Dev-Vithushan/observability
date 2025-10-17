@@ -1,0 +1,18 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    release: kube-prometheus-stack
+  name: hosted-redislabs-exporter
+  namespace: oe-redis-exporter-hosted
+spec:
+  selector:
+    matchLabels:
+      app: hosted-redislabs-exporter
+# By default, Prometheus will only pick up ServiceMonitors from the current namespace.
+#  namespaceSelector:
+#    any: true
+  endpoints:
+  - interval: 15s
+    port: metrics

@@ -1,0 +1,19 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: oe-redis-exporter-self-hosted-hkjc-f2
+
+components:
+  - ../../../../../../components/exporters/redislabs-self-hosted-exporter
+
+patches:
+  - path: deployment-patch.yaml
+    target:
+      kind: Deployment
+      name: selfhosted-redislabs-exporter
+      namespace: oe-redis-exporter-self-hosted
+  - path: service-patch.yaml
+    target:
+      kind: Service
+      name: selfhosted-redislabs-exporter
+      namespace: oe-redis-exporter-self-hosted

@@ -1,0 +1,27 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - euw-e1-cs-aks-01/
+  - euw-e1-shared-aks-01/
+  - euw-e1-shared-aks-02/
+  - euw-i1-shared-aks-06/
+  - euw-i1-shared-aks-07/
+  - euw-i1-shared-aks-01/
+  - euw-i1-contenthub-aks-02/
+  - euw-i1-contenthub-sb-aks-01/
+  - euw-i1-devops-aks-01/
+  - euw-e1-devops-aks-01/
+  - euw-i1-oe-aks-02/
+  - euw-e1-contenthub-aks-01/
+  - euw-e1-contenthub-sb-aks-01/
+  - weu-e1-xmcloud-cm-10-aks/
+  - weu-e1-xmcloud-cm-11-aks/
+  - weu-i1-cicd-01-aks/
+  - weu-i1-heimdall-01-aks/
+  - weu-i1-xmcloud-cm-10-aks/
+  - weu-i1-xmcloud-cm-11-aks/
+  - weu-i1-xmcloud-cm-12-aks/
+  - euw-e1-xmcloud-cm-12-aks/
+

@@ -1,0 +1,19 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: mimir-stack
+  namespace: oe-mimir
+spec:
+  valuesFrom:
+    - kind: ConfigMap
+      name: helm-values-mimir-stack-base
+      valuesKey: values.yaml
+    - kind: ConfigMap
+      name: helm-values-mimir-stack-regional
+      valuesKey: values.yaml
+  upgrade:
+    timeout: 20m
+    remediation:
+      strategy: rollback
+      retries: 3

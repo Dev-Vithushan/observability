@@ -1,0 +1,119 @@
+[
+    {
+        "comment": "CPU Throttling alerts",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "CPUThrottlingHigh"
+            },
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "container",
+                "value": "kube-prometheus-stack|node-exporter|alloy"
+            }
+
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    },
+    {
+        "comment": "Thanos alerts",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "ThanosCompactHalted|ThanosCompactHasNotRun|ThanosQuerierGrpcClientErrorRate"
+            }
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    },
+    {
+        "comment": "Alloy alerts",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "AlloyClusterNodeCountMismatch|AlloyClusterNodeUnhealthy|AlloyClusterNotConverging|AlloyWriteToLokiDroppedEntries"
+            }
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    },
+    {
+        "comment": "Memory usage alerts for prometheus|alloy|retina|config-reloader|kube-prometheus-stack containers",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "ContainerCriticalMemoryUsage|ContainerHighMemoryUsage"
+            },
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "container",
+                "value": "prometheus|alloy|retina|config-reloader|kube-prometheus-stack"
+            }
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    },
+    {
+        "comment": "Prometheus alerts",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "ThanosSidecarGrpcErrorRate"
+            }
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    },
+    {
+        "comment": "LokiRequestLatency alert",
+        "createdBy": "OE Team",
+        "endsAt": "2028-05-19T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "LokiRequestLatency"
+            }
+        ],
+        "startsAt": "2025-03-12T14:38:56.747Z"
+    },
+    {
+        "comment": "Pod Out Of Memory",
+        "createdBy": "OE Team",
+        "endsAt": "2027-06-04T14:38:56.747Z",
+        "matchers": [
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "alertname",
+                "value": "PodOutOfMemory"
+            },
+            {
+                "isEqual": true,
+                "isRegex": true,
+                "name": "pod",
+                "value": "loki-querier-.*"
+            }            
+        ],
+        "startsAt": "2025-06-05T21:00:00.000Z"
+    }
+]

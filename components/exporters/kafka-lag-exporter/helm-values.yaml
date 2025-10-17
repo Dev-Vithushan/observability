@@ -1,0 +1,268 @@
+## Statically define one or more cluster
+#clusters: {} # This is patched for each environment individually as secret!
+## Ex)
+#clusters:
+#  - name: "default"
+#    bootstrapBrokers: "simple-strimzi-kafka-bootstrap.strimzi.svc.cluster.local:9092"
+#    topicWhitelist:
+#    - "^xyz-corp-topics\..+"
+#    topicBlacklist:
+#    - "^unmonitored-topics-.+"
+#    groupWhitelist:
+#    - "^analytics-app-.+"
+#    groupBlacklist:
+#    - "^unmonitored-groups-.+"
+#    # Properties defined by org.apache.kafka.clients.consumer.ConsumerConfig
+#    # can be defined in this configuration section.
+#    # https://kafka.apache.org/documentation/#consumerconfigs
+#    consumerProperties:
+#      security.protocol: SSL
+#      ssl.truststore.location: /path/to/my.truststore.jks
+#    consumerPropertiesNoQuotes:
+#      ssl.truststore.password: mypwd
+#    # https://kafka.apache.org/documentation/#adminclientconfigs
+#    adminClientProperties:
+#      security.protocol: SSL
+#      ssl.truststore.location: /path/to/my.truststore.jks
+#    adminClientPropertiesNoQuotes:
+#      ssl.truststore.password: mypwd
+#    labels:
+#      location: ny
+#      zone: "us-east"
+
+# Lookup Table
+lookup:
+  memory:
+    ## Size of the sliding window of offsets to keep in each partition's lookup table
+    size: 60
+  redis:
+    enabled: false
+    # host: localhost
+    # database: 0
+    # port: 6379
+    # timeout: 60
+    # prefix: kafka-lag-exporter
+    # separator: ":"
+    # retention: 1 day
+    # expiration: 7 days
+
+## The interval between refreshing metrics
+pollIntervalSeconds: 30
+## The Consumer Group `group.id` to use when connecting to Kafka
+clientGroupId: "kafkalagexporter"
+## The timeout when communicating with Kafka clusters
+kafkaClientTimeoutSeconds: 10
+## The number of retry when getting the consumer groups
+kafkaRetries: 2
+## Reporters will send metrics to time series databases
+reporters:
+  prometheus:
+    ## Flag to enable the Prometheus metrics reporter
+    enabled: true
+    ## The port to run the Prometheus endpoint on
+    port: 8000
+  graphite:
+    ## Flag to enable the graphite metrics reporter
+    enabled: false
+    ## The graphite host to send metrics to
+    host: "http://graphite"
+    ## The graphite port to send metrics to
+    port: 2003
+    ## The graphite metric prefix
+    prefix: ""
+  influxdb:
+    ## Flag to enable the influxdb metrics reporter
+    enabled: false
+    ## The influxdb host to send metrics to
+    endpoint: "http://influxdb"
+    ## The influxdb port to send metrics to
+    port: 8086
+    ## The influxdb database to send metrics to
+    database: "kafka_lag_exporter"
+    ## The influxdb username to connect
+    username: ""
+    ## The influxdb password to connect
+    password: ""
+    ## Flag to enable influxdb async non-blocking write mode to send metrics
+    async: true
+## Watchers will automatically discover and forget Kafka clusters
+watchers:
+  ## The Strimzi Cluster Watcher automatically watches for `kafka.strimzi.io` group, `Kafka` kind resources and will
+  ## configure the Kafka Lag Exporter appropriately.
+  strimzi: false
+## Applicable only in non-Strimzi installation. If true, a service account will be created and bind to the deployment.
+## Otherwise, the default service account for the namespace will be used.
+serviceAccount:
+  create: false
+  ## The name of the service account will be generated based on the release name, use nameOverride to override
+  ## with a static name.
+  # nameOverride: my-serviceaccount
+  ## Annotations to add to the service account (e.g., add IAM role to the service)
+  # annotations:
+  #     iam.gke.io/gcp-service-account: gke-workload@my-gcp-project.iam.gserviceaccount.com
+
+## You can use regex to control the metrics exposed by Prometheus endpoint.
+## Any metric that matches one of the regex in the whitelist will be exposed.
+## For example, if you only wish to expose the max lag metrics, use either:
+## metricWhitelist:
+##   - ^kafka_consumergroup_group_max_lag.*
+##
+## Or
+##
+## metricWhitelist:
+##   - kafka_consumergroup_group_max_lag
+##   - kafka_consumergroup_group_max_lag_seconds
+metricWhitelist:
+  - .*
+
+## The log level of the ROOT logger
+rootLogLevel: INFO
+## The log level of Kafka Lag Exporter
+kafkaLagExporterLogLevel: INFO
+## The log level of `org.apache.kafka` logger
+kafkaLogLevel: INFO
+## The log level of Akka
+akkaLogLevel: DEBUG
+
+## Additional labels to add to all resources
+additionalLabels: #{}
+  app: kafka-lag-exporter
+  sc_system: ${sc_system}
+  sc_domain: ${sc_domain}
+  sc_component: ${sc_system}-kafka_lag_exporter
+  sc_env: ${sc_env}
+  sc_region: ${sc_region}
+  sc_provider: ${sc_provider} 
+  sc_createdby: ${sc_createdby}
+  sc_type: ${sc_type}
+  sc_owner: ${sc_owner}
+
+## You probably won't need to change anything below this line.
+image:
+  repository: lightbend/kafka-lag-exporter
+  tag: 0.6.8
+  # If digest is set it will be used instead of tag to specify the image
+  # digest: sha256:0f6387aa011e6eb7952ea211ac139bf8613ad3ef6954a1a5d910676d293bd610
+  pullPolicy: Always
+  pullSecrets: []
+securityContext: {}
+  # allowPrivilegeEscalation: false
+  # runAsUser: 1001
+  # runAsNonRoot: true
+  # capabilities:
+  #   drop: ["all"]
+initContainers: []
+## Init containers to be added to the pod.
+# - name: my-init-container
+#   image: busybox:latest
+#   command: ['sh', '-c', 'echo hello']
+service:
+  type: ClusterIP
+  port: 8000
+  additionalLabels: {}
+resources: {}
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+nodeSelector: {}
+tolerations: []
+affinity: {}
+extraConfigmapMounts: []
+  # - name: cacerts
+  #   configMap: cacerts-configmap
+  #   mountPath: /etc/pki/ca-trust/extracted/java/cacerts
+  #   subPath: ca-bundle.jks
+  #   readOnly: true
+extraMounts: []
+  # - name: my-secrets
+  #   mount:
+  #     emptyDir:
+  #       medium: Memory
+  #   mountPath: /var/run/my-secrets
+
+# Define secrets that are mounted at /opt/docker/secrets/ to be used elsewhere, for example in clusters for keystores
+secrets: {}
+#  name: secret-name
+#  data:
+#    - name: my-keystore-file.p12
+#      value: base64-encoded-string
+
+secretAnnotations: {}
+  # foo: bar
+
+hostAliases: {}
+#  - ip: "192.168.99.100"
+#    hostnames:
+#      - "platform.local"
+#      - "myotherhost.dev"
+
+env: {}
+  # - name: JAVA_OPTS
+  #   value: "-Djava.security.auth.login.config=/var/run/my-secrets/jaasConfig"
+
+# Define references to configmaps or secrets to be populated as environment variables
+envFromConfigMapRefs: []
+# - 'configmap-a'
+envFromSecretRefs: []
+# - 'secret-a'
+
+podAnnotations: {}
+  # foo: bar
+
+## Extra labels for the pod
+## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podExtraLabels: {}
+  # foo: bar
+
+## Extra labels for the deployment
+## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+deploymentExtraLabels: {}
+  # foo: bar
+
+## Readiness and liveness probe initial delay and timeout
+## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+readinessProbeInitialDelay: 30
+readinessProbePeriodSeconds: 5
+readinessProbeTimeout: 30
+readinessProbeFailureThreshold: 3
+readinessProbeSuccessThreshold: 1
+livenessProbeInitialDelay: 30
+livenessProbePeriodSeconds: 15
+livenessProbeTimeout: 30
+livenessProbeFailureThreshold: 3
+livenessProbeSuccessThreshold: 1
+
+prometheus:
+  serviceMonitor:
+    enabled: false
+    interval: "30s"
+    metricRelabelings:
+     - sourceLabels: [__name__]
+       regex: ^(process_|jvm_).*$
+       action: drop
+    relabelings: []
+    # service monitor label selectors: https://github.com/helm/charts/blob/f5a751f174263971fafd21eee4e35416d6612a3d/stable/prometheus-operator/templates/prometheus/prometheus.yaml#L74
+    # additionalLabels:
+    #   prometheus: k8s
+    # additionalConfig:
+    #   targetLabels:
+    #   - prometheus
+    #   - app.kubernetes.io/name
+
+# Allow alert rules to be configured for Prometheus Alertmanager
+prometheusRule:
+  enabled: false
+#  List of rules that can be used in Prometheus Alertmanager
+  rules: []
+#    - alert: ConsumerGroupLagHigh
+#      annotations:
+#        message: '{{ $labels.group }} on cluster {{ $labels.cluster_name }} is lagging on topic {{ $labels.topic }}'
+#      expr: 'max by (cluster_name, group, topic) (kafka_consumergroup_group_lag_seconds{cluster_name=~"my-cluster", group=~"consumergroup.A"} ) < Inf > 180'
+#      for: 5m
+#      labels:
+#        severity: medium
+
+logPattern: "%date{ISO8601} %-5level %logger{36} %X{akkaSource} - %msg %ex%n"

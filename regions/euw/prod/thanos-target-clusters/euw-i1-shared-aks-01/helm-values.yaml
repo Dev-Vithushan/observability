@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helm-values-thanos-stack-euw-i1-shared-aks-01
+data:
+  values.yaml: |
+    ## @param fullnameOverride String to fully override common.names.fullname template
+    ##
+    fullnameOverride: "thanos-euw-i1-shared-aks-01"
+    ## @param existingObjstoreSecret Secret with Objstore Configuration
+    ## Note: This will override objstoreConfig
+    ##
+    existingObjstoreSecret: "euw-i1-shared-aks-01-objstore-config-thanos"
+
+    ## @section Thanos Query parameters
+
+    query:
+      ## @param query.enabled Set to true to enable Thanos Query component
+      ##
+      enabled: false
+
+    ## @section Thanos Query Frontend parameters
+
+    queryFrontend:
+      ## @param queryFrontend.enabled Enable/disable Thanos Query Frontend component
+      ##
+      enabled: false
+
+    ## @section Thanos Store Gateway parameters
+
+    storegateway:
+      ## @param storegateway.ingress.enabled Enable ingress controller resource
+      ##
+      ingress:
+        grpc:
+          ## @param storegateway.ingress.grpc.hostname Default host for the ingress resource (GRPC)
+          ##
+          hostname:  euw-i1-shared-aks-01-store-gateway.sitecorecloud.app
+          ## @param storegateway.ingress.grpc.annotations Additional annotations for the Ingress resource (GRPC). To enable certificate autogeneration, place here your cert-manager annotations.
+          ## For a full list of possible ingress annotations, please see
+          ## ref: https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md
+          ## Use this parameter to set the required annotations for cert-manager, see
+          ## ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
+          ##
+          ## Examples:
+          ## kubernetes.io/ingress.class: monitoring
+          ## cert-manager.io/cluster-issuer: cluster-issuer-name
+          ##
+          annotations:
+            konghq.com/https-redirect-status-code: "301"
+            konghq.com/protocols: "grpc,grpcs"
+          ## @param storegateway.ingress.grpc.extraTls The tls configuration for additional hostnames to be covered with this ingress record.
+          ## see: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+          ## extraTls:
+          ## - hosts:
+          ##     - thanos-grpc.local
+          ##   secretName: thanos-grpc.local-tls
+          ##
+          extraTls: []

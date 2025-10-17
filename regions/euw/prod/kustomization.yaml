@@ -1,0 +1,121 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # - ../../../base/
+  # Section to deploy base & regional thanos resources
+  - ../../../thanos/
+  - helm-values-thanos-stack-regional.yaml
+  - thanos-secret.yaml
+  #Kustomization.yaml points to all thanos-target-clusters that should be included.
+  - thanos-target-clusters/
+  # Section to deploy base & regional grafana resources
+  - ../../../grafana
+  - helm-values-grafana-stack-regional.yaml
+  # temporary name of the global dashboard
+  - grafana-dashboard-global-enet-and-out.yaml
+  #- grafana-dashboard-global.yaml
+  #commenting out since we don't use, if we use it should be moved to grafanadashboards repo
+  #- grafana-dashboard-vault.yaml
+  - helm-release-grafana-dashboards.yaml
+  - grafana-secret-datasources.yaml
+  - oe-prod-sku-dashboard.yaml
+  # Section to deploy RedisLab exporters
+  - redis-target-clusters/
+  # Section to deploy apm-server
+  - ../../../apm-server
+  - helm-values-apm-server-regional.yaml
+  # Section to deploy oTel resources
+  - ../../../otel-collector/
+  - helm-values-otel-collector-regional.yaml
+  # Section to deploy Loki resources
+  - ../../../loki/
+  - helm-values-loki-stack-regional.yaml
+  # Section to deploy Tempo resources
+  - ../../../tempo/
+  - helm-values-tempo-stack-regional.yaml
+  # Section to deploy Kafka lag exporter
+  #- ../../../components/exporters/kafka-lag-exporter
+  #- helm-values-kafka-lag-exporter-secrets.yaml
+  #Section to deploy alertmanagerconfig
+  # - ../../../alerts/production/
+  # Section to deploy site247poller
+  - ../../../site247poller/
+
+components:
+  - ../../../components/exporters/kafka-metrics
+  - ../../../components/exporters/databricks-exporter
+  - ../../../components/exporters/cloudflare-exporter
+  - ../../../components/exporters/azure-metrics-exporter
+
+patchesStrategicMerge:
+  - helm-release-thanos-stack-regional-patch.yaml
+  - helm-release-loki-stack-regional-patch.yaml
+  - helm-release-tempo-stack-regional-patch.yaml
+  - helm-release-grafana-stack-regional-patch.yaml
+  - helm-release-otel-collector-regional-patch.yaml
+  - helm-release-apm-server-regional-patch.yaml
+  - loki-secret.yaml
+  - otel-secret.yaml
+  - tempo-secret.yaml
+  - apm-envs.yaml
+  #- helm-release-kafka-lag-exporter-patch.yaml
+
+patches:
+  - path: kafka-service-monitor-patch.yaml
+    target:
+      kind: ServiceMonitor
+      name: kafka-metric-api
+      namespace: oe-kafka-metrics
+  - path: databricks-deployment-patch.yaml
+    target:
+      kind: Deployment
+      name: databricks-exporter
+      namespace: oe-databricks-exporter
+
+secretGenerator:
+  - name: apm-server-elasticsearch
+    namespace: oe-apm-server
+    literals:
+      - host=changeme
+      - kibana_host=changeme
+      - username=changeme
+      - password=changeme
+      - apm_token=changeme
+      - metric_username=changeme
+      - metric_password=changeme
+      - metric_host=changeme
+      - cluster_uuid=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: tempo-secret
+    namespace: oe-tempo
+    literals:
+      - AZURE_ACCOUNT_KEY=changeme
+      - AZURE_ACCOUNT_NAME=changeme
+      - AZURE_CONTAINER_NAME=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: loki-secret
+    namespace: oe-loki
+    literals:
+      - AZURE_ACCOUNT_KEY=changeme
+      - AZURE_ACCOUNT_NAME=changeme
+      - AZURE_CONTAINER_NAME=changeme
+    options:
+      disableNameSuffixHash: true
+  - name: otel-secret
+    namespace: oe-otel
+    literals:
+      - OPEN_TELEMETRY_COLLECTOR_CF_TOKEN=changeme
+      - OTLP_USER=changeme
+      - OTLP_PASSWORD=changeme
+    options:
+      disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: silences-creation-script
+    namespace: oe-grafana
+    files:
+      - ../../../grafana/create-silences.sh
+    options:
+      disableNameSuffixHash: true

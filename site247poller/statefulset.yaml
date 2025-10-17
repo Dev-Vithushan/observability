@@ -1,0 +1,77 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: site24x7-poller
+  # Prefix with an unique ID specific to the cluster.
+  name: 8bd6ebdf06de40c28f4dba33c8240058-s247poller-deploy
+  namespace: oe-site247poller
+spec:
+  # Number of On-Premise Poller Instances count.
+  replicas: 2
+  selector:
+    matchLabels:
+      app: site24x7-poller
+  serviceName: site24x7-poller
+  template:
+    metadata:
+      labels:
+        app: site24x7-poller
+    spec:
+      containers:
+        - env:
+            - name: KEY
+              valueFrom:
+                secretKeyRef:
+                  name: site24x7-agent
+                  key: s247_device_key
+            #- name: PROXY
+            #  value: "true"
+            #- name: PROXY_HOST
+            #  value: "<proxy-host-ip>"
+            #- name: PROXY_PORT
+            #  value: "<proxy-port>"
+            #- name: PROXY_USER
+            #  value: "<proxy-username>"
+            #- name: PROXY_PASS
+            #  value: "<proxy-password>"
+            #- name: POLLER_GROUP_KEY
+            #  value: <poller-group-key>
+            - name: K8S_KIND
+              value: StatefulSet
+            - name: CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: site24x7-poller
+                  divisor: 1m
+                  resource: requests.cpu
+            - name: CPU_LIMIT
+              valueFrom:
+                resourceFieldRef:
+                  containerName: site24x7-poller
+                  divisor: 1m
+                  resource: limits.cpu
+            - name: MEMORY_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  containerName: site24x7-poller
+                  divisor: 1M
+                  resource: requests.memory
+            - name: MEMORY_LIMIT
+              valueFrom:
+                resourceFieldRef:
+                  containerName: site24x7-poller
+                  divisor: 1M
+                  resource: limits.memory
+          image: site24x7/poller_docker_agent:latest
+          imagePullPolicy: Always
+          name: site24x7-poller
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 3000M
+            requests:
+              cpu: 500m
+              memory: 2000M
+

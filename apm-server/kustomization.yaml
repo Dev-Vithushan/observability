@@ -1,0 +1,27 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: oe-apm-server
+resources:
+  - namespace.yaml
+  - helm-repo.yaml
+  - helm-release.yaml
+  #- hpa.yaml
+
+commonLabels:
+  app: apm-server
+  release: apm-server
+  sc_system: ${sc_system}
+  sc_domain: ${sc_domain}
+  sc_component: ${sc_system}-apm
+  sc_provider: ${sc_provider}
+  sc_createdby: ${sc_createdby}
+  sc_type: ${sc_type}
+  sc_owner: ${sc_owner}
+
+configMapGenerator:
+  - name: helm-values-apm-server-base
+    files:
+    - values.yaml
+    options:
+      disableNameSuffixHash: true

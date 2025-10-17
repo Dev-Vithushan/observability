@@ -1,0 +1,32 @@
+apiVersion: v1
+data:
+    host: ENC[AES256_GCM,data:BRU7XB/JShqzawFHnkmRd7RUhpBpPCiw5KlRP1j1aHH7Kt35ctt1rvxVOdpPaJd182hlhoonkwB6+UpaLSzrEQrpuSCTVxWlV9d8RY3NKq3htUck6my0/E94o4rsV869nPvCjQ==,iv:94PdEVdpvKcsNkw8iWXFqwMx4/fRsSMqHgsIayMlqNs=,tag:7TyPloB5wLSxKlQGTsLzfg==,type:str]
+    kibana_host: ENC[AES256_GCM,data:jTrYXib/qIrGGwlAuzs9mMqf7IPMSxd1Bk/KPasOviUl+n2domUvL+x5T/QjpUOWeZaudS94PnO2nHzDI/6j8PK9j/1tDce7Lrr2bygPmKyH710jqVrZGX7Fl/Yd4xH5gmAqpQ==,iv:Gbw9eBtPXB3g/ykfa7r9UbJGi36tmQWgA2+ToFdKyZg=,tag:uB2KoywzFCNs2FRF+CUPDw==,type:str]
+    password: ENC[AES256_GCM,data:Wv5EosaihImXWRIXM6mtH5CaybE=,iv:cKHLDI9uxn3ubE1BHAPE6BilQRH1BxKBnNO7yUFks0U=,tag:iyJxi7j4o2/R6cnMmqwPRA==,type:str]
+    username: ENC[AES256_GCM,data:KBhBYRd7g5/ycOIe+2l26aolYVc=,iv:OCKboHpZGde2HvWbUyydKfWlfEHgXVLNHQUgb/AqJJU=,tag:4hIcp8GwAHtKoFpe9BpKjg==,type:str]
+    apm_token: ENC[AES256_GCM,data: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,iv:sDK+W3vUo+2bF2z+1tPU9Yx9TY1yuPpqSgldVQnr2u4=,tag:Q0DSB2HTe2U6h633jIwysg==,type:str]
+    metric_username: ENC[AES256_GCM,data:or94CAjyzm8z2893,iv:1cw8ngkmDWIlyxwi3PtJl+SlAWSbRi9d65kzCWBbfTM=,tag:jgjAc08NOJDTK839vzuHzA==,type:str]
+    metric_password: ENC[AES256_GCM,data:RY/5PzXSCLKFulQ7FRf1xozranYOAnCajVJrif0p3y9VAzg8+vZa6aCcRq0=,iv:Xp2XQU6oimfsHDbcKnQKwmHVghuN1Kxhyba0bhVwhrY=,tag:nDfXR5gguxHjUS3MbkyVjw==,type:str]
+    metric_host: ENC[AES256_GCM,data:jtlm06xrAZSixN9jfzUuVdS754sDd7UgDLEbwpTbSg5AH4KOfBrVyb6J8fJ/dwEc2q9vSvMiLHeqaLEi9Yv+K0WxfEA6rpeGuuktvaFiNO0CDjUcCFuEc627hHE=,iv:qwjF1xgL1RxVJ9AoymPP6DJH4a/xPasJzDR0mHm0ZjI=,tag:+F0IoT58z1Djfp0x8p2hdg==,type:str]
+    cluster_uuid: ENC[AES256_GCM,data:CpwoXe8Ey7ufGmRghG0n3WnQLKt1+p+BRAVn0Df/F1A=,iv:RjdCID3VUCoJheqvpctR0C8TGiZZhbFXnsMwTwY7Trs=,tag:VIgszB3BS2GHng2Eibnm1g==,type:str]
+kind: Secret
+metadata:
+    name: apm-server-elasticsearch
+    namespace: oe-apm-server
+type: Opaque
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2024-01-12T12:36:53Z"
+          enc: P0QDILwile5TWBLhBDN3dlbwhsvYSjQGEg1rvoyvJkO06KukLQQSWcIaCB4DPqeXcXmRdVIc8Oix3mSky0bgppoSe9C-aiHpGxcr5j8-z2T88d8YOEeSQTJgjPoXpyjpXAajBSh9NcvuYzDoxzn5rr-c36wjaqT1q8uJXf8dLYQC9zhOjtaM_yUk8q3D-2KAzLysOD5bSd7NYKRInrQVIkJ35pqg4_qqwnUaVz7qT2nx3feJ8punWmY5E3q0STVL5WvweCzUyHN3e6_ctpJKvUvDY9GOrneZH4t6YG9Kk2tMsjF1Q-NJ5SC5CpJpHXqdKueW78UP_8gROPcD_n0a-gJBKKjrZYHp77tnP_W2xI3Y2i3h9LqdfrHWlVhxWC9CduK0t1fi7CA0N_YD3xBVAuGGt8NJfRKbXWxem47U-RbhPNqvvMMbeXq8uFSn6iXF7p3jaL-DEkNyJzOFSjQHXcy6SBdl5pHxlXElLC7kn61_ZTJk6zdflV9we-Pjv2YLLcegIwX7I0JEpHdcwtvXCs9UIFlhOAVH3QbXlHmBFKBQDWGj_Isk1lzG-A4H-tGfHg--DFYZEV4wcVQr_5sj57qdrgV4wb0Wf5MjyEzSU1kwizwd6U0sBzjrYdK1hgylPJloIh-wB-tlqa107JOptTEoqSglh1CuxBEo0V7iqx4
+    hc_vault: []
+    age: []
+    lastmodified: "2024-01-12T12:36:54Z"
+    mac: ENC[AES256_GCM,data:LM658IcYcLnolMQsOcQEPahKs0P9CQGcNXqncbzrSuzIsmeSrbXeG1DPCOBEGqRlSuvGGB/IArJgtXirArZstXXpuOmDVlKbTZ+tQSyJy65JxDuxK5+Ao5qVQjFuZ0K6DSLEBOq1068XAr7gdjTRxujPqijOwKfB5rRoRDAaQiE=,iv:ThZemuszMBtjAVrKD1RoTjQsRpC5wmE2819d2mTNxMk=,tag:2mx4ifAKRPj2A1vwklnfAw==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

@@ -1,0 +1,21 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: oe-thanos
+resources:
+  - namespace.yaml
+  - helm-repo.yaml
+  - helm-release.yaml
+  - ingress.yaml
+
+configMapGenerator:
+  - name: helm-values-thanos-stack-base
+    files:
+    - values.yaml
+    options:
+      disableNameSuffixHash: true
+  - name: helm-rules-thanos-stack-base
+    files:
+    - rules.yml
+    options:
+      disableNameSuffixHash: true

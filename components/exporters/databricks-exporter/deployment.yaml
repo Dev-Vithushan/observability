@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: databricks-exporter
+  namespace: oe-databricks-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: databricks-exporter
+  template:
+    metadata:
+      annotations:
+        logtype: json
+      labels:
+        app: databricks-exporter
+        release: kube-prometheus-stack
+        monitoring: prometheus
+        sc_system: ${sc_system}
+        sc_domain: ${sc_domain}
+        sc_component: ${sc_system}-databricks
+        sc_env: ${sc_env}
+        sc_region: ${sc_region}
+        sc_provider: ${sc_provider}
+        sc_createdby: ${sc_createdby}
+        sc_type: ${sc_type}
+        sc_owner: ${sc_owner}
+    spec:
+      containers:
+        - name: databricks-exporter
+          image: mregistry.azurecr.io/monitoring/databricks-exporter:1.0.2-alpha
+          env:
+          - name: DATABRICKS_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: databricks-exporter-credentials
+                key: DATABRICKS_API_TOKEN
+          - name: EXPORTER_PORT
+            value: "9090"
+          imagePullPolicy: Always
+          ports:
+          - name: exporter-port
+            containerPort: 9090
+            protocol: TCP
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi

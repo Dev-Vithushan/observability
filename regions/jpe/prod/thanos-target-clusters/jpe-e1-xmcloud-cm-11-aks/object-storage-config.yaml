@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: jpe-e1-xmcloud-cm-11-aks-objstore-config-thanos
+type: Opaque
+data:
+    objstore.yml: ENC[AES256_GCM,data:4Ka/RowhERV/b+f+tYbqPr8bgbGYsf94DOaQ3XVoLqZa9HluQs7zuw1+ZkoAe+6W4Bv4GJc/QEOCU27eNOzTpXY3MAn5mzRtR9IdSvi1VM/ylafSCMpXwK0C+fPOVdRGUPHnx0hGaR+gh5/rbj3M/IqN35L2gO/8KL/lPOSGceqhLXVUGHxgWFnSUElQ8NB6MPTPd2uvmYgglYpkI5AAULXRsy/ZGDrMpy1AelikLdbaxH3N4rgxQ8k5PlbWg/KpAxKGE0qDYKsJNbar/Dieu+t/GRbtVnlnJdaqSSFTbQl+1VH/UeE9iBaDrBLBIBmgX/E4ZX3R/XkAaOljvSMxNFk6ncku+iBYKhVJINxYbUHhTYi4tiuvKGyDrz4QQgMEEwNOo1dX7dw1gIVNMh/jNq+iG9aopAQmkJARJ+Dk3WnFtUnd,iv:RBi45QgEXVaSamDFicJAjMGRUVwFMYNk6XglojcIgzo=,tag:eFXABubn6g8qdqGP0xEjaQ==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2024-10-30T10:37:36Z"
+          enc: WE2sp5vkWuURWzOJ6mbZzVVgtNa_QLRycXhajSxzIQr0XyC0v5MemJqih067DT69wxtz0q2J7cBeXQuniFAllwQmOAKxoK54DWpjUVBwv4YYCg0Lq7cHLLrojudym5wIms65knkdJywq9nxQrDZTcf_z5k527QVlu_SlRHxhPM9KFgROX-93ATpiKSZrLaCX1qkFBtZIXhycQP7HcFrjjYXXGmpYljkFY5Cp8IcnJdZJXAkV1uGNR1To97530Z-u6l7cbvfScEH-i1uXIkU7dlUeHfi-TnvauA_gBiOjlsBt1GSZEAbY-86mCEGoE8WbPB1zzEEElgKM-BdZxZpSgijftJpw2-hSYadVwMIDNlbmPnIhhVrjIk6H_EwjjofbJMrVTeZsiA_R6CgS19-89jSGs5E5stoX7nVuuYQEdjNPuYMgR0OLge623WGFl2sYmacuILsmlTBynvUaryr0YQiTIRl4MT1xp2cJYwQgSRcP0HqPtkbTHqNGLsHvanTG--ri8wUjnuhn4sGv1__pTCxlKqMTU8m4LMepzFSRHLIp2tvd11ERjAGTkScZlOZXo2pab2-a7MoQ2VXb0MqMuMzf8boyPOMmvjDXNbQiuu054bGHNc8c5ay4HnhK1U3Z5tfpk0-Z-VNEJa79O5q3pfxCzGiNUCxYfFur5ClfMM0
+    hc_vault: []
+    age: []
+    lastmodified: "2024-10-30T10:37:38Z"
+    mac: ENC[AES256_GCM,data:z4evMVS7FJbH+fWhHXTs1gvA8q0HcbM6dY7FiVL0Mq/4Xz16E/9ipDq5MfjTSJAmgBs23oCXnA1h9qMQqdVKOND3fAQeT70/ZsZaf3PshsXQFeMZDCJMy0dAIbCaCBjSKl9ueUE9p2f8sYF0hdXMUtGgY209J3v4nJM8iGzouJA=,iv:V19cUDmw1dnxaccOnf5W+ldLJQK5yXDzj1M1sM3Aj44=,tag:8KBO63aMNh7hz+9IaNPpIw==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

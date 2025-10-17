@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: kafka-metric-api
+  namespace: oe-kafka-metrics
+  labels:
+    app: kafka-metric-api
+    release: kube-prometheus-stack
+subsets:
+- addresses:
+  - ip: 1.2.3.4
+  ports:
+  - name: kafka-metrics
+    port: 443
+    protocol: TCP

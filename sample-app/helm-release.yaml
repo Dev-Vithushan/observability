@@ -1,0 +1,23 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: sample-app
+spec:
+  interval: 1h0m0s
+  chart:
+    spec:
+      version: 0.1.0
+      chart: oe-dotnetsampleapp-service-provider
+      sourceRef:
+        kind: HelmRepository
+        name: sample-app
+        namespace: oe-sample-app
+  valuesFrom:
+    - kind: ConfigMap
+      name: helm-values-sampleapp-stack-base
+      valuesKey: values.yaml
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3

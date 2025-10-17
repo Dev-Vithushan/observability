@@ -1,0 +1,8 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: kafka-lag-exporter
+spec:
+  interval: 12h0m0s
+  url: https://seglo.github.io/kafka-lag-exporter/repo/

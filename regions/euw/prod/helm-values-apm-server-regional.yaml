@@ -1,0 +1,132 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helm-values-apm-server-regional
+  namespace: oe-apm-server
+data:
+  values.yaml: |
+    image: "docker.elastic.co/apm/apm-server"
+    imageTag: "8.17.3"
+    imagePullPolicy: "IfNotPresent"
+    imagePullSecrets: []
+
+    replicas: 2
+
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1000Mi"
+      limits:
+        cpu: "1000m"
+        memory: "3000Mi"
+
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 3
+      averageCpuUtilization: 50
+
+    # Extra environment variables to append to the DaemonSet pod spec.
+    # This will be appended to the current 'env:' key. You can use any of the kubernetes env
+    # syntax here
+    extraEnvs:
+      - name: 'ELASTICSEARCH_USERNAME'
+        valueFrom:
+          secretKeyRef:
+            name: apm-server-elasticsearch
+            key: username
+      - name: 'ELASTICSEARCH_PASSWORD'
+        valueFrom:
+          secretKeyRef:
+            name: apm-server-elasticsearch
+            key: password
+      - name: 'ES_HOST'
+        valueFrom:
+          secretKeyRef:
+            name: apm-server-elasticsearch
+            key: host
+      - name: 'KIBANA_HOST'
+        valueFrom:
+          secretKeyRef:
+            name: apm-server-elasticsearch
+            key: kibana_host
+      - name: 'APM_TOKEN'
+        valueFrom:
+          secretKeyRef:
+            name: apm-server-elasticsearch
+            key: apm_token
+      - name: 'METRIC_USERNAME'
+        valueFrom:
+          secretKeyRef:
+            name: apm-server-elasticsearch
+            key: metric_username
+      - name: 'METRIC_PASSWORD'
+        valueFrom:
+          secretKeyRef:
+            name: apm-server-elasticsearch
+            key: metric_password
+      - name: 'METRIC_HOST'
+        valueFrom:
+          secretKeyRef:
+            name: apm-server-elasticsearch
+            key: metric_host
+      - name: 'CLUSTER_UUID'
+        valueFrom:
+          secretKeyRef:
+            name: apm-server-elasticsearch
+            key: cluster_uuid
+
+    # Allows you to add config files
+    apmConfig:
+      apm-server.yml: |
+        apm-server:
+          host: :8200
+          auth:
+            secret_token: "$${APM_TOKEN}"
+          ssl:
+            enabled: false
+            supported_protocols: [TLSv1.3]
+          kibana:
+            enabled: true
+            host: "$${KIBANA_HOST}"
+            protocol: "https"
+            username: "$${ELASTICSEARCH_USERNAME}"
+            password: "$${ELASTICSEARCH_PASSWORD}"
+          rum:
+              enabled: true
+              allow_origins: ['*']
+          expvar.enabled: true
+
+        logging:
+          level: warning
+          to_stderr: true
+
+        otlp:
+          http:
+            enabled: true
+            json:
+              enabled: true
+              
+        output.elasticsearch:
+          enabled: true
+          hosts: "$${ES_HOST}"
+          protocol: "https"
+          username: "$${ELASTICSEARCH_USERNAME}"
+          password: "$${ELASTICSEARCH_PASSWORD}"
+          flush_bytes: "2MB"
+          flush_interval: "2s"
+          max_retries: 1
+          timeout: 60
+
+
+        http.enabled: true
+
+        monitoring:
+          enabled: true
+          cluster_uuid: "$${CLUSTER_UUID}"
+          elasticsearch:
+            hosts: "$${METRIC_HOST}"
+            protocol: "https"
+            username: "$${METRIC_USERNAME}"
+            password: "$${METRIC_PASSWORD}"

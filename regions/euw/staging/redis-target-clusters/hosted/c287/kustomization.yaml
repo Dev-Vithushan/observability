@@ -1,0 +1,31 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: oe-redis-exporter-hosted-c287
+
+components:
+  - ../../../../../../components/exporters/redislabs-exporter
+
+patchesStrategicMerge:
+- credentials.yaml
+
+patches:
+  - path: deployment-patch.yaml
+    target:
+      kind: Deployment
+      name: hosted-redislabs-exporter
+      namespace: oe-redis-exporter-hosted
+  - path: service-patch.yaml
+    target:
+      kind: Service
+      name: hosted-redislabs-exporter
+      namespace: oe-redis-exporter-hosted
+
+secretGenerator:
+  - name: oe-redis-exporter-hosted-credentials
+    namespace: oe-redis-exporter-hosted-c287
+    literals:
+      - API_KEY=changeme
+      - API_SECRET_KEY=changeme
+    options:
+      disableNameSuffixHash: true

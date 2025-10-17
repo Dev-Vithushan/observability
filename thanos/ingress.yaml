@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    konghq.com/https-redirect-status-code: "301"
+    konghq.com/protocols: grpc,grpcs
+  generation: 1
+  labels:
+    app.kubernetes.io/component: ruler
+    app.kubernetes.io/instance: thanos-stack
+  name: thanos-ruler
+  namespace: oe-thanos
+spec:
+  ingressClassName: kong
+  rules:
+  - host: ${cluster_name}-ruler.sitecorecloud.app
+    http:
+      paths:
+      - backend:
+          service:
+            name: thanos-ruler
+            port:
+              name: grpc
+        path: /
+        pathType: ImplementationSpecific

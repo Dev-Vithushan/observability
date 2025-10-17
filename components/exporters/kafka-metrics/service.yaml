@@ -1,0 +1,19 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: kafka-metric-api
+  namespace: oe-kafka-metrics
+  labels:
+    app: kafka-metric-api
+    release: kube-prometheus-stack
+spec:
+  type: ExternalName
+  externalName: api.telemetry.confluent.cloud
+  selector:
+    app: kafka-metric-api
+    release: kube-prometheus-stack
+  ports:
+  - name: kafka-metrics
+    port: 443
+    protocol: TCP
+    targetPort: 443

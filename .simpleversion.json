@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "branches": {
+    "release": [
+      "^refs/heads/main$"
+    ],
+    "overrides": [
+      {
+        "match": "^refs/heads/feature/.+$",
+        "label": [
+          "{shortbranchname}",
+          "{shortsha}"
+        ]
+      }
+    ]
+  }
+}

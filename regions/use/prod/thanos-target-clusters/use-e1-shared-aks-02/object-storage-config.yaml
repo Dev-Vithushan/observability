@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: use-e1-shared-aks-02-objstore-config-thanos
+type: Opaque
+data:
+    objstore.yml: ENC[AES256_GCM,data:B34iIWDbze+lOQYpUddZ2ZPSXf+BAFu40KQhyOOc7OFgGE1NpgccQlz8ed9QW0OdFIjm6vahqjTGdHa2lnKDuqERETdkunZNSKs6/0S7+EJ4T8c0nRhYvpHt9eP40eI2VlBuVtTQkjNN4OzyrwYOhPHwPNNuIng1mgvBX5GSyMSuAOIb3SZq0DM+C6njpkSN5LL1omdV3tf1HXI4PII6cfKhDoJ0+31RDbsXtXTTZBKAYOCRDG3OWJUukOMYXAnh7bNoeSOIMCD1JN67DsYG77yZF4urmKViZ5kguqVCY0Y1y1sRtpK90HleL3AO+e/A9OdKynkGkqzbBnCDxD+FVDY4cSmkRo5SKmudArQ6GpWaN9GX+7MNDkNeD5Rz+VNZrfnAW5Tpmt4hDAZXnhdniSJM+cXKESnT/FTJ29l5jr7fSOMynNzUxg==,iv:GnQN5W6RRWZZWxFNhXyNuO7AXJIrywArpEbKB5kgnr8=,tag:Vo+2LDwztwI3W6d/u4gwmg==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2023-10-05T12:28:02Z"
+          enc: i_tY5NNFUcT2u7M7pdZln58uJluUoSdYqI7jr9MuIHSXYQANV2qMMkY9e7pEc2jhl3A7bOkKGvWGcQ8WjchVGrBwm1Dgs4mY--kEYYb17MK8lnx3FCAiKOgxifjrMK20vDQexih3WahB8YhvOpF-mXM4S_qMaiMT2AWqAvcEMguHyY1rSFKlRZLmDyGVAjFNse3nMoZ6Os9-Bhh4bvu3VVuhsOtDXDfq3L70VsST3qF39wiWVGSKOeBC7qNumxaACQs3sVJFwqylV9lL3rNwcGn6bydu1Xs7HtQKqjl3wYd2m6HoSQMmv6aNzbuwCXPcuxLM38vz2qc9GSzy_XkQEvkiZOpb6nJkXX4WQ6GMx-vXJ9Dae8Ed_8-MnmozLG4g948VAa8OzAfkGDCHSS0ihq7qrdoCJfv770jQbHum-HbhtO8Ru4lHksRqrr9iWt67zFvsB_1bcY65z1VwSTi_9wsp99O43tzcgmf3k0Ge1-fBsDc-7LDVr8Uq99m2lKaEtsTKHm-gjOWB7mfTxLLIhTvZW1dy6O3BO7pYxJoA_k7KOQwoYp5JkS2eCKLBgRD3d6z-4ziM1jTlwM2eRFXjqAF5X3QwIzydLh3yifnxylOash3mkaSJmi4Nv6TjgWdtuIcBxpuZgwzIRYILArihvquDulMrkdT3jYuj5X8VMTU
+    hc_vault: []
+    age: []
+    lastmodified: "2023-10-05T12:28:04Z"
+    mac: ENC[AES256_GCM,data:lQvfWCJe+2Uz92VGzMILsY8QB7eA+rPBHHzPdEnuC7ZfFiKpUG06989Ads4wgM0bONLJhQq/HZ36e4zn9Z8y2LlHaRCXMEDcHBQejbExybOdtYtHLa6r057nJaKV44+VzSQd8tuvwHBPXwIcG2hemmzwsrfY1Ct+m6e3Jrz7fUE=,iv:2DNJZyCZQ/szgH/TJh83IwBz6JkLablSffQQR33jnTY=,tag:o1FSbmKh+ghsFcGBri06qQ==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - namespace.yaml
+  - helm-repo.yaml
+  - helm-release.yaml
+  - service-monitor.yaml
+
+configMapGenerator:
+  - name: helm-values-cloudflare-exporter
+    namespace: oe-cloudflare-exporter
+    files:
+    - helm-values.yaml
+    options:
+      disableNameSuffixHash: true
+
+secretGenerator:
+  - name: cloudflare-exporter-credentials
+    namespace: oe-cloudflare-exporter
+    literals:
+      - CF_API_TOKEN=changeme
+      - CF_ZONES=changeme
+    options:
+      disableNameSuffixHash: true
+
+patchesStrategicMerge:
+- secret.yaml

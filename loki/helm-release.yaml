@@ -1,0 +1,23 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: loki-stack
+spec:
+  interval: 1h0m0s
+  chart:
+    spec:
+      version: 6.21.0
+      chart: loki
+      sourceRef:
+        kind: HelmRepository
+        name: loki
+        namespace: oe-loki
+  valuesFrom:
+    - kind: ConfigMap
+      name: helm-values-loki-stack-base
+      valuesKey: values.yaml
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3

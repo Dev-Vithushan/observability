@@ -1,0 +1,19 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: loki-stack
+  namespace: oe-loki
+spec:
+  valuesFrom:
+    - kind: ConfigMap
+      name: helm-values-loki-stack-base
+      valuesKey: values.yaml
+    - kind: ConfigMap
+      name: helm-values-loki-stack-regional
+      valuesKey: values.yaml
+  upgrade:
+    timeout: 10m
+    remediation:
+      strategy: rollback
+      retries: 3

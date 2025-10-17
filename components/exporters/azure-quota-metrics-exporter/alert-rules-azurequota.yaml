@@ -1,0 +1,79 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    role: alert-rules
+  name: prometheus-azure-quota-usage-alerts
+  namespace: monitoring
+spec:
+    groups:
+    - name: AzureQuotaUsage
+      rules:
+      - alert: HighQuotaUsage_westeurope
+        annotations:
+          description: 'Near to quota  subscriptionID: {{ $labels.subscriptionID }}  scope:
+            {{ $labels.scope }}  quota: {{ $labels.quota }} (current usage: {{ $value
+            }}%) '
+          summary: Quota {{ $labels.quota }} for {{ $labels.scope }} in subscription {{
+            $labels.subscriptionID }} is  used more than 80% 
+        expr: azurerm_quota_usage{location="westeurope"} * 100 > 80
+        for: 1m
+        labels:
+          alerttype: HighQuotaUsage
+          severity: P3
+      - alert: HighQuotaUsage_westus2
+        annotations:
+          description: 'Near to quota  subscriptionID: {{ $labels.subscriptionID }}  scope:
+            {{ $labels.scope }}  quota: {{ $labels.quota }} (current usage: {{ $value
+            }}%)'
+          summary: Quota {{ $labels.quota }} for {{ $labels.scope }} in subscription {{
+            $labels.subscriptionID }} is  used more than 80%
+        expr: azurerm_quota_usage{location="westus2"} * 100 > 80
+        for: 1m
+        labels:
+          alerttype: HighQuotaUsage
+          severity: P3
+      - alert: HighQuotaUsage_japaneast
+        annotations:
+          description: 'Near to quota  subscriptionID: {{ $labels.subscriptionID }}  scope:
+            {{ $labels.scope }}  quota: {{ $labels.quota }} (current usage: {{ $value
+            }}%)'
+          summary: Quota {{ $labels.quota }} for {{ $labels.scope }} in subscription {{
+            $labels.subscriptionID }} is  used more than 80%
+        expr: azurerm_quota_usage{location="japaneast"} * 100 > 80
+        for: 1m
+        labels:
+          alerttype: HighQuotaUsage
+          severity: P3
+      - alert: HighQuotaUsage_australiaeast
+        annotations:
+          description: 'Near to quota  subscriptionID: {{ $labels.subscriptionID }}  scope:
+            {{ $labels.scope }}  quota: {{ $labels.quota }} (current usage: {{ $value
+            }}%)'
+          summary: Quota {{ $labels.quota }} for {{ $labels.scope }} in subscription {{
+            $labels.subscriptionID }} is  used more than 80%
+        expr: azurerm_quota_usage{location="australiaeast"} * 100 > 80
+        for: 1m
+        labels:
+          alerttype: HighQuotaUsage
+          severity: P3
+      - alert: HighQuotaUsage_eastus
+        annotations:
+          description: 'Near to quota  subscriptionID: {{ $labels.subscriptionID }}  scope:
+            {{ $labels.scope }}  quota: {{ $labels.quota }} (current usage: {{ $value
+            }}%)'
+          summary: Quota {{ $labels.quota }} for {{ $labels.scope }} in subscription {{
+            $labels.subscriptionID }} is  used more than 80%
+        expr: azurerm_quota_usage{location="eastus"} * 100 > 80
+      - alert: HighQuotaUsage_other_regions
+        annotations:
+          description: 'Near to quota  subscriptionID: {{ $labels.subscriptionID }} , scope:
+            {{ $labels.scope }},  quota: {{ $labels.quota }}, location: {{ $labels.location }} (current usage: {{ $value
+            }}%)'
+          summary: Quota {{ $labels.quota }} for {{ $labels.scope }} in subscription {{
+            $labels.subscriptionID }} is  used more than 80%
+        expr: azurerm_quota_usage{location!="eastus",location!="australiaeast",location!="westus2",location!="westeurope",location!="japaneast"} * 100 > 80
+        for: 1m
+        labels:
+          alerttype: HighQuotaUsage
+          severity: P3

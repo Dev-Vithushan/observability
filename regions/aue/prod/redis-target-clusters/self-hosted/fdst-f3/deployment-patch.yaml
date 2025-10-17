@@ -1,0 +1,21 @@
+---
+- op: replace
+  path: /metadata/name
+  value: fdst-f3-selfhosted-redislabs-exporter
+- op: add
+  path: /spec/selector/matchLabels/cluster
+  value: fdst-f3
+- op: add
+  path: /spec/template/metadata/labels/cluster
+  value: fdst-f3
+- op: add
+  path: /spec/template/metadata/labels/app.kubernetes.io~1instance
+  value: fdst-f3-selfhosted-redislabs-exporter
+- op: replace
+  path: /spec/template/spec/containers/0/name
+  value: fdst-f3-selfhosted-redislabs-exporter
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: REDIS_CLUSTER_HOSTS
+    value: "10.139.2.4,10.139.2.5,10.139.2.6"

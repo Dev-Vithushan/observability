@@ -1,0 +1,21 @@
+---
+- op: replace
+  path: /metadata/name
+  value: hkjc-f2-selfhosted-redislabs-exporter
+- op: add
+  path: /spec/selector/matchLabels/cluster
+  value: hkjc-f2
+- op: add
+  path: /spec/template/metadata/labels/cluster
+  value: hkjc-f2
+- op: add
+  path: /spec/template/metadata/labels/app.kubernetes.io~1instance
+  value: hkjc-f2-selfhosted-redislabs-exporter
+- op: replace
+  path: /spec/template/spec/containers/0/name
+  value: hkjc-f2-selfhosted-redislabs-exporter
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: REDIS_CLUSTER_HOSTS
+    value: "10.163.1.4,10.163.1.5,10.163.1.6"

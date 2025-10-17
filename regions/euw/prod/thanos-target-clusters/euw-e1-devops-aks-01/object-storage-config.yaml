@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: euw-e1-devops-aks-01-objstore-config-thanos
+type: Opaque
+data:
+    objstore.yml: ENC[AES256_GCM,data:II1eetRmI7AxTIo1EDbd6vz7WCyRJl50MJXhH/SHNuOY5gB80cMv5ZCXyXxDV4Eqg9Jbgw0rnXiZkcpVp9/KZ3NoG47mhiab3Rb5cQ7KBJ5N+6EtVLXkbH3VybqwKthSNY59tB3Zt7cL2vUQGKqobRygOqQEz3Fc45hM8kxmm3NOIJJRJOCazVU4W9cI4Vw1U+ID8nBO8qf4lMQklopzYF4uwhnTTLvPvo0rKVsd0utZQUEYQ/7NAvX+tLJd0lFExQFWiWhNwLzKr4aD7Z6penkTuMIq9X4nP9jksmOEdd75o/upDElSjXTKTRwfupyZGsHv+3uH5ExBnY5bVdwVw/+tF5mVXxFZkyJksSTVPByPVdlkI9tM+vEjOWklz+sytdRx2gGcLpMHpm+mrl73FSxpJBs/dQAQoKpBmA==,iv:pUbz9yvECErk6z3t0L+htM4QswTY9H3l6DZF/G07t4c=,tag:C4LedTIyo8TABHA3qGLGOA==,type:str]
+sops:
+    azure_kv:
+        - vault_url: https://global-e1-sopskv-01.vault.azure.net
+          name: sops-key
+          version: b8ecad3de3b6456e8ec9c6aff1c6c8b2
+          created_at: "2025-04-24T08:36:36Z"
+          enc: Teje-ZIMR4kHOpEDlxcGYgFaQXCGDyHJCrgSEpnynRhqtfFFKKgtEhUYeIhHqJBg0BInNnxmhhgFd8cs7iL_ASm1O3eHDDF0x5RgiOEh0BeQ2xTh9GjLHg0763K7cnrEQTahiqX42OTfWzggu4GIwmEWDzTc2MVn5yymViddp-CsGAK2hV3yG_Cj1__m7loBJIWTgTw9aeR6qFBruZIgRF6E1hNiFRX0dmPX8XOfRmQiTskpk5qDIQgcooMzTvrrjSmqiX9CDS3BCJ6hqs0akSTaSE5RYhvIMZto-gUoRsMVASb0-UzlTcXUcz82_V2iAAcnPbNhWms9ehtd_5xwVvxnXJ9iM_w5Va-mxvQ62KU5ulBSBJLj3_jTJT8iEyh7Sh3pkLURT5csfbcwE_hHT-vm8Vl2Icg2MLuWBe1cO9mOFgElJJCqZMNl5IeBf3VdyWMa2DkPu56F9CLiLwxnu9qxXld_WEuKi7If78yrtSrtoTxEktVgPAda5G4_BFG9A-Sxn4SBOWrI-qi96oz1MXL4X_TEfb9t00WFhiXiTTRGmupEc_xE0l0ZurucUFksDaVGyZCdMN0ajWBcimjGA-Jbq4qcW4NYAvS57rcQ2eWspD_dpuG6ad1gaAl930_ChSEy67gscjcWXP5t0Me_yHGR2k1cVnfKfrYDg8T9g5c
+    lastmodified: "2025-04-24T08:36:40Z"
+    mac: ENC[AES256_GCM,data:sCxmE8XeYGL8Bky1uioUsZgkIVUdB7JQ8I/LxpbuSpHMwD/+E4DqpT2Ggh1OGFVoQejVFUKoWtoSE1XbVpiDMGJoGGuDy10MmAGjXyk5frSw6vlj4PFW6MBd1ezPLfBoH1huXOWK2oO2Gr9667+HR6o19VKW6GaR0YwfZqJO3RQ=,iv:6/l6WeWJ2QjxJBxNR1JEf2J/nRnBsvLRuURydiZblHg=,tag:KSnsgBvMYb8SK+BJYdEDHA==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.10.2

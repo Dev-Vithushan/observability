@@ -1,0 +1,13 @@
+---
+- op: add
+  path: /metadata/labels/cluster
+  value: fdst-f3
+- op: add
+  path: /metadata/labels/app.kubernetes.io~1instance
+  value: fdst-f3-selfhosted-redislabs-exporter
+- op: replace
+  path: /metadata/name
+  value: fdst-f3-selfhosted-redislabs-exporter
+- op: add
+  path: /spec/selector/cluster
+  value: fdst-f3

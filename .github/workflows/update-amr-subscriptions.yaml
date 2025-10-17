@@ -1,0 +1,322 @@
+name: Update AMR Subscriptions
+
+on:
+  schedule:
+    # Run every 8 hours
+    - cron: "0 */8 * * *"
+  workflow_dispatch:
+
+# Prevent concurrent runs to avoid conflicts
+concurrency:
+  group: update-amr-subscriptions
+  cancel-in-progress: false
+
+env:
+  AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+
+jobs:
+  update-subscriptions:
+    runs-on: [self-hosted, linux]
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Create GitHub App installation token
+        id: app-token-specs
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: Sitecore-PD
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          token: ${{ steps.app-token-specs.outputs.token }}
+          persist-credentials: true
+
+      - name: Install Azure CLI
+        run: |
+          set -euo pipefail
+
+          echo "🔍 Checking for Azure CLI..."
+
+          if ! command -v az &> /dev/null; then
+            echo "📦 Installing Azure CLI..."
+            if curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash; then
+              echo "✅ Azure CLI installed successfully"
+            else
+              echo "❌ ERROR: Failed to install Azure CLI"
+              exit 1
+            fi
+          else
+            echo "✅ Azure CLI is already available"
+          fi
+
+          echo ""
+          echo "📋 Azure CLI version:"
+          az --version | head -n 1
+
+      - name: Install Azure Resource Graph extension
+        run: |
+          set -euo pipefail
+
+          echo "🔍 Checking Azure Resource Graph extension..."
+
+          if az extension show --name resource-graph &> /dev/null; then
+            echo "✅ Resource Graph extension already installed"
+          else
+            echo "📦 Installing Resource Graph extension..."
+            if az extension add --name resource-graph --only-show-errors; then
+              echo "✅ Resource Graph extension installed successfully"
+            else
+              echo "❌ ERROR: Failed to install Resource Graph extension"
+              exit 1
+            fi
+          fi
+
+      - name: Azure Login
+        run: |
+          set -euo pipefail
+
+          echo "🔐 Logging into Azure..."
+
+          if az login --service-principal \
+            --username ${{ env.AZURE_CLIENT_ID }} \
+            --password ${{ secrets.AZURE_CLIENT_SECRET }} \
+            --tenant ${{ env.AZURE_TENANT_ID }} --only-show-errors > /dev/null; then
+            echo "✅ Successfully logged into Azure"
+          else
+            echo "❌ ERROR: Failed to log into Azure"
+            exit 1
+          fi
+
+      - name: Fetch Azure Subscriptions
+        id: fetch_subs
+        run: |
+          set -euo pipefail
+
+          echo "🔍 Fetching Azure Subscriptions with Redis Enterprise resources..."
+
+          # Run the query and capture output
+          if ! QUERY_OUTPUT=$(az graph query -q "
+            Resources
+            | where type =~ 'Microsoft.Cache/redisEnterprise'
+            | distinct subscriptionId
+            " --query "data[].subscriptionId" -o tsv 2>&1); then
+            echo "❌ ERROR: Failed to execute Azure Resource Graph query"
+            echo "Error details: $QUERY_OUTPUT"
+            exit 1
+          fi
+
+          # Save to file
+          echo "$QUERY_OUTPUT" > /tmp/new_subscriptions.txt
+
+          SUB_COUNT=$(wc -l < /tmp/new_subscriptions.txt | tr -d ' ')
+
+          if [[ "$SUB_COUNT" -eq 0 ]]; then
+            echo "⚠️  WARNING: No subscriptions found with Redis Enterprise resources"
+            echo "This might be expected or could indicate an issue with the query"
+          else
+            echo "✅ Found $SUB_COUNT subscription(s) with Redis Enterprise resources"
+            echo ""
+            echo "📋 Subscription IDs:"
+            cat /tmp/new_subscriptions.txt | sed 's/^/  - /'
+          fi
+
+          echo "sub_count=$SUB_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Update values.yaml with new subscriptions
+        id: update_yaml
+        run: |
+          set -euo pipefail
+
+          echo "🔄 Running update script..."
+
+          if bash .github/scripts/update-values-yaml.sh; then
+            echo "✅ Update script completed successfully"
+          else
+            EXIT_CODE=$?
+            echo "❌ ERROR: Update script failed with exit code $EXIT_CODE"
+            exit $EXIT_CODE
+          fi
+
+      - name: Check for changes and prepare PR
+        id: git_status
+        run: |
+          set -euo pipefail
+
+          echo "🔍 Checking for changes in values.yaml..."
+
+          if [[ -n $(git status -s components/exporters/azure-metrics-exporter/values.yaml) ]]; then
+            echo "✅ Changes detected in values.yaml"
+            echo "changes=true" >> $GITHUB_OUTPUT
+            
+            # Configure git
+            git config --global user.email "isre-core@sitecore.com"
+            git config --global user.name "CORE Deploy Bot"
+            
+            # Commit changes
+            git add components/exporters/azure-metrics-exporter/values.yaml
+            git commit -m "chore: update Azure subscriptions in values.yaml"
+            
+            # Set up branch name
+            TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+            BRANCH_NAME="update-amr-subscriptions-${TIMESTAMP}-${{ github.run_number }}"
+            echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+            echo "📌 Branch name: $BRANCH_NAME"
+            
+            # Create and push branch
+            git checkout -b "$BRANCH_NAME"
+            git push origin "$BRANCH_NAME"
+            
+            echo "✅ Branch pushed successfully"
+            
+            PR_TITLE="chore: Update AMR Subscriptions"
+            PR_BODY="## Automated AMR Subscriptions Update
+
+            This PR was automatically generated to update the AMR Azure subscription IDs in the Azure Metrics Exporter configuration."
+            
+            echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
+            echo "PR_BODY<<EOF" >> $GITHUB_ENV
+            echo "$PR_BODY" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          else
+            echo "ℹ️  No changes detected in values.yaml"
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        id: create_pr
+        if: steps.git_status.outputs.changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token-specs.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          echo "📝 Creating Pull Request..."
+          echo "pr_created=false" >> $GITHUB_OUTPUT
+
+          # Create PR using GitHub REST API
+          PR_RESPONSE=$(curl -s -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ github.repository }}/pulls \
+            -d @- << EOF || echo "CURL_FAILED"
+          {
+            "title": $(echo '${{ env.PR_TITLE }}' | jq -R .),
+            "body": $(echo '${{ env.PR_BODY }}' | jq -Rs .),
+            "head": "${{ env.BRANCH_NAME }}",
+            "base": "main"
+          }
+          EOF
+          )
+
+          # Check if PR creation was successful
+          if [[ "$PR_RESPONSE" == "CURL_FAILED" ]]; then
+            echo "❌ ERROR: Failed to create pull request (curl failed)"
+            echo "This might be due to network issues or API rate limiting"
+            exit 1
+          fi
+
+
+          # Check if PR creation was successful
+          if echo "$PR_RESPONSE" | jq -e '.html_url' > /dev/null; then
+            PR_URL=$(echo "$PR_RESPONSE" | jq -r '.html_url')
+            PR_NUMBER=$(echo "$PR_RESPONSE" | jq -r '.number')
+            echo "pr_created=true" >> $GITHUB_OUTPUT
+            echo "✅ Pull request created successfully: $PR_URL"
+            echo "PR_URL=$PR_URL" >> $GITHUB_ENV
+            echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+          else
+            echo "❌ Failed to create pull request"
+            echo "Response: $PR_RESPONSE"
+            exit 1
+          fi
+
+      - name: Merge and tag
+        if: steps.create_pr.outputs.pr_created == 'true'
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token-specs.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          echo "🔀 Attempting to merge Pull Request #${{ env.PR_NUMBER }}..."
+
+          # Wait a moment for CI checks to start
+          echo "⏳ Waiting 5 seconds for CI checks to initialize..."
+          sleep 5
+
+          # Attempt to merge the PR
+          MERGE_RESPONSE=$(curl -sf -X PUT \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -d '{"merge_method":"squash"}' \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}/merge" || echo "MERGE_FAILED")
+
+          # Check if merge request failed at curl level
+          if [[ "$MERGE_RESPONSE" == "MERGE_FAILED" ]]; then
+            echo "❌ ERROR: Failed to send merge request to GitHub API"
+            exit 1
+          fi
+
+          # Validate merge response
+          if ! echo "$MERGE_RESPONSE" | jq -e '.merged' > /dev/null 2>&1; then
+            echo "❌ ERROR: Pull request could not be merged"
+            echo "API Response:"
+            echo "$MERGE_RESPONSE" | jq . || echo "$MERGE_RESPONSE"
+            exit 1
+          fi
+
+          MERGE_SHA=$(echo "$MERGE_RESPONSE" | jq -r '.sha')
+          echo "✅ Pull request merged successfully"
+          echo "🔖 Merge commit SHA: $MERGE_SHA"
+          echo "MERGE_SHA=$MERGE_SHA" >> $GITHUB_ENV
+
+          # Checkout main branch to get the merged commit
+          echo "🔄 Syncing with main branch..."
+          git fetch origin main
+          git checkout main
+          
+          # Reset to remote state (we just want to sync with the merged commit)
+          git reset --hard origin/main
+
+          echo "✅ Successfully synced with main branch"
+
+          # Add "prod-euw" tag to the merged commit
+          echo "🏷️  Tagging commit for production deployment..."
+          if git tag -f prod-euw "$MERGE_SHA" 2>/dev/null; then
+            echo "✅ Tag 'prod-euw' created successfully"
+          else
+            echo "❌ ERROR: Failed to create tag"
+            exit 1
+          fi
+
+          if git push -f origin prod-euw; then
+            echo "✅ Tag 'prod-euw' pushed to remote"
+            echo "🚀 Production deployment triggered"
+          else
+            echo "❌ ERROR: Failed to push tag to remote"
+            exit 1
+          fi
+
+      - name: Cleanup temporary files
+        if: always()
+        run: |
+          echo "🧹 Cleaning up temporary files..."
+
+          if [[ -f /tmp/new_subscriptions.txt ]]; then
+            rm -f /tmp/new_subscriptions.txt
+            echo "✅ Removed /tmp/new_subscriptions.txt"
+          fi
+          if [[ -f components/exporters/azure-metrics-exporter/values.yaml.backup ]]; then
+            rm -f components/exporters/azure-metrics-exporter/values.yaml.backup
+            echo "✅ Removed components/exporters/azure-metrics-exporter/values.yaml.backup"
+          fi
+
+          echo "✅ Cleanup completed"

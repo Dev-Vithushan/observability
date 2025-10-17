@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - namespace.yaml
+  - helm-repo.yaml
+  - helm-release.yaml
+
+configMapGenerator:
+  - name: helm-values-prometheus-blackbox-exporter
+    namespace: oe-prometheus-blackbox-exporter
+    files:
+    - values.yaml
+    options:
+      disableNameSuffixHash: true

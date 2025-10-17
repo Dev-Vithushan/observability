@@ -1,0 +1,181 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana-dashboards-application-specific
+  namespace: oe-grafana
+spec:
+  interval: 5m0s
+  chart:
+    spec:
+      version: "0.1.x-main"
+      chart: application-specific/application-specific
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-dashboards
+        namespace: oe-grafana
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana-dashboards-other
+  namespace: oe-grafana
+spec:
+  interval: 5m0s
+  chart:
+    spec:
+      version: "0.1.x-main"
+      chart: dashboard-definitions-other/dashboard-definitions-other
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-dashboards
+        namespace: oe-grafana
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana-dashboards-managed-services
+  namespace: oe-grafana
+spec:
+  interval: 5m0s
+  chart:
+    spec:
+      version: "0.1.x-main"
+      chart: managed-services/managed-services
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-dashboards
+        namespace: oe-grafana
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana-dashboards-oe-specific
+  namespace: oe-grafana
+spec:
+  interval: 5m0s
+  chart:
+    spec:
+      version: "0.1.x-main"
+      chart: oe-specific/oe-specific
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-dashboards
+        namespace: oe-grafana
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana-dashboards-udp-specific
+  namespace: oe-grafana
+spec:
+  interval: 5m0s
+  chart:
+    spec:
+      version: "0.1.x-main"
+      chart: udp-specific/udp-specific
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-dashboards
+        namespace: oe-grafana
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana-dashboards-cs-specific
+  namespace: oe-grafana
+spec:
+  interval: 5m0s
+  chart:
+    spec:
+      version: "0.1.x-main"
+      chart: cs-specific/cs-specific
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-dashboards
+        namespace: oe-grafana
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana-dashboards-ch-specific
+  namespace: oe-grafana
+spec:
+  interval: 5m0s
+  chart:
+    spec:
+      version: "0.1.x-main"
+      chart: ch-specific/ch-specific
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-dashboards
+        namespace: oe-grafana
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana-dashboards-saas-specific
+  namespace: oe-grafana
+spec:
+  interval: 5m0s
+  chart:
+    spec:
+      version: "0.1.x-main"
+      chart: saas-specific/saas-specific
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-dashboards
+        namespace: oe-grafana
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana-dashboards-xmc-specific
+  namespace: oe-grafana
+spec:
+  interval: 5m0s
+  chart:
+    spec:
+      version: "0.1.x-main"
+      chart: xmc-specific/xmc-specific
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-dashboards
+        namespace: oe-grafana
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3
+      

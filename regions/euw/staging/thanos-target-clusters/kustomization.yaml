@@ -1,0 +1,10 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - euw-i1-contenthub-aks-02/
+  - euw-i1-contenthub-sb-aks-01/    # https://sitecore.atlassian.net/browse/CPL-34127?focusedCommentId=916619
+  - euw-i1-devops-aks-01/
+  - euw-i1-shared-aks-06/
+  - euw-i1-contenthub-aks-04/

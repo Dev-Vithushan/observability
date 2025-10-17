@@ -1,0 +1,19 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana-stack
+  namespace: oe-grafana
+spec:
+  valuesFrom:
+    - kind: ConfigMap
+      name: helm-values-grafana-stack-base
+      valuesKey: values.yaml
+    - kind: ConfigMap
+      name: helm-values-grafana-stack-regional
+      valuesKey: values.yaml
+  upgrade:
+    timeout: 10m
+    remediation:
+      strategy: rollback
+      retries: 3

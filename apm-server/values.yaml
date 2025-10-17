@@ -1,0 +1,155 @@
+---
+extraContainers: ""
+# - name: dummy-init
+#   image: busybox
+#   command: ['echo', 'hey']
+
+extraInitContainers: ""
+# - name: dummy-init
+#   image: busybox
+#   command: ['echo', 'hey']
+
+
+# Allows you to load environment variables from kubernetes secret or config map
+envFrom: []
+# - secretRef:
+#     name: env-secret
+# - configMapRef:
+#     name: config-map
+
+extraVolumeMounts: []
+# - name: extras
+#   mountPath: /usr/share/extras
+#   readOnly: true
+
+extraVolumes: []
+# - name: extras
+#   emptyDir: {}
+
+hostAliases: []
+#- ip: "127.0.0.1"
+#  hostnames:
+#  - "foo.local"
+#  - "bar.local"
+
+# Whether this chart should self-manage its service account, role, and associated role binding.
+managedServiceAccount: true
+
+podAnnotations:
+  logtype: json
+  # iam.amazonaws.com/role: es-cluster
+
+# additionals labels
+labels:
+  sc_system: ${sc_system}
+  sc_domain: ${sc_domain}
+  sc_component: ${sc_system}-apm
+  sc_env: ${sc_env}
+  sc_region: ${sc_region}
+  sc_provider: ${sc_provider}
+  sc_createdby: ${sc_createdby}
+  sc_type: ${sc_type}
+  sc_owner: ${sc_owner}
+
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 0
+
+securityContext:
+  privileged: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 0
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+    scheme: HTTP
+  initialDelaySeconds: 30
+  failureThreshold: 3
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+    scheme: HTTP
+  initialDelaySeconds: 30
+  failureThreshold: 3
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+# Custom service account override that the pod will use
+serviceAccount: ""
+
+# Annotations to add to the ServiceAccount that is created if the serviceAccount value isn't set.
+serviceAccountAnnotations: {}
+# eks.amazonaws.com/role-arn: arn:aws:iam::111111111111:role/k8s.clustername.namespace.serviceaccount
+
+# A list of secrets and their paths to mount inside the pod
+secretMounts: []
+#  - name: elastic-certificate-pem
+#    secretName: elastic-certificates
+#    path: /usr/share/apm-server/config/certs
+
+terminationGracePeriod: 30
+
+tolerations: []
+
+nodeSelector:
+  kubernetes.io/os: linux
+
+affinity: {}
+
+# This is the PriorityClass settings as defined in
+# https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+priorityClassName: ""
+
+updateStrategy:
+  type: "RollingUpdate"
+
+# Override various naming aspects of this chart
+# Only edit these if you know what you're doing
+nameOverride: ""
+fullnameOverride: "apm-server"
+
+ingress:
+  enabled: true
+  className: ${ingress_class}
+  pathtype: ImplementationSpecific
+  annotations:
+    konghq.com/protocols: "https"
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  path: /
+  hosts:
+    - apm-server-${env_type}-${region}.${external_dns_zone}
+    - apm-server-${env_type}-${region}.sitecorecloud.app
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+service:
+  type: ClusterIP
+  loadBalancerIP: ""
+  port: 8200
+  nodePort: ""
+  annotations:
+    konghq.com/protocol: http
+    # cloud.google.com/load-balancer-type: "Internal"
+    # service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
+    # service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    # service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
+    # service.beta.kubernetes.io/cce-load-balancer-internal-vpc: "true"
+
+lifecycle: {}
+# preStop:
+#   exec:
+#     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+# postStart:
+#   exec:
+#     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]

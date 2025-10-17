@@ -1,0 +1,377 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: k8s-prometheus-alerts
+  namespace: oe-alerts
+spec:
+  groups:
+    - name: kubernetes-loads
+      rules:
+        - alert: KubeProdPodCrashLooping
+          annotations:
+            description: Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is restarting {{ printf "%.2f" $value }} times / 15 minutes.
+            message: A production pod is restarting often.
+          expr: |
+            rate(kube_pod_container_status_restarts_total{job="kube-state-metrics", namespace=~"oe-.*"}[15m]) * 60 * 5 > 0
+          for: 15m
+          labels:
+            severity: P1
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubePodNotReady
+          annotations:
+            description: Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in a non-ready state for longer than 15 minutes.
+            message: A pod is not ready.
+          expr: |
+            sum by (namespace, pod) (max by(namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", namespace=~"oe-.*", phase=~"Pending|Unknown"}) * on(namespace, pod) group_left(owner_kind) max by(namespace, pod, owner_kind) (kube_pod_owner{owner_kind!="Job"})) > 0
+          for: 15m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeDeploymentGenerationMismatch
+          annotations:
+            description: Deployment generation for {{ $labels.namespace }}/{{ $labels.deployment }} does not match, this indicates that the Deployment has failed but has not been rolled back.
+            message: A deployment has version mismatches.
+          expr: |
+            kube_deployment_status_observed_generation{job="kube-state-metrics", namespace=~"oe-.*"} != kube_deployment_metadata_generation{job="kube-state-metrics", namespace=~"oe-.*"}
+          for: 60m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeDeploymentReplicasMismatch
+          annotations:
+            description: Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not matched the expected number of replicas for longer than 15 minutes.
+            message: A deployment does not meet it's expected number of replicas.
+          expr: |
+            kube_deployment_spec_replicas{job="kube-state-metrics", namespace=~"oe-.*"} != kube_deployment_status_replicas_available{job="kube-state-metrics", namespace=~"oe-.*"}
+          for: 60m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: StatefulsetDown
+          annotations:
+            description: "StatefulSet down (instance {{ $labels.instance }})"
+            message: "A StatefulSet went down for longer than 10 minutes."
+          expr: (kube_statefulset_status_replicas_ready{namespace=~"oe-.*"} / kube_statefulset_status_replicas_current{namespace=~"oe-.*"}) != 1
+          for: 10m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeStatefulSetReplicasMismatch
+          annotations:
+            description: StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has not matched the expected number of replicas for longer than 15 minutes.
+            message: A statefulset does not meet it's expected number of replicas.
+          expr: |
+            kube_statefulset_status_replicas_ready{job="kube-state-metrics", namespace=~"oe-.*"} != kube_statefulset_status_replicas{job="kube-state-metrics", namespace=~"oe-.*"}
+          for: 60m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeStatefulSetGenerationMismatch
+          annotations:
+            description: StatefulSet generation for {{ $labels.namespace }}/{{ $labels.statefulset }} does not match, this indicates that the StatefulSet has failed but has not been rolled back.
+            message: A statefulset has version mismatches.
+          expr: |
+            kube_statefulset_status_observed_generation{job="kube-state-metrics", namespace=~"oe-.*"} != kube_statefulset_metadata_generation{job="kube-state-metrics", namespace=~"oe-.*"}
+          for: 60m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeStatefulSetUpdateNotRolledOut
+          annotations:
+            description: StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} update has not been rolled out.
+            message: A statefulset has failed to update.
+          expr: |
+            max without (revision) (
+              kube_statefulset_status_current_revision{job="kube-state-metrics", namespace=~"oe-.*"}
+                unless
+              kube_statefulset_status_update_revision{job="kube-state-metrics", namespace=~"oe-.*"}
+            )
+              *
+            (
+              kube_statefulset_replicas{job="kube-state-metrics", namespace=~"oe-.*"}
+                !=
+              kube_statefulset_status_replicas_updated{job="kube-state-metrics", namespace=~"oe-.*"}
+            )
+          for: 15m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeDaemonSetRolloutStuck
+          annotations:
+            description: Only {{ $value | humanizePercentage }} of the desired Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} are scheduled and ready.
+            message: A daemonset does not meet it's expected number of pods.
+          expr: |
+            kube_daemonset_status_number_ready{job="kube-state-metrics", namespace=~"oe-.*"}
+              /
+            kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics", namespace=~"oe-.*"} < 1.00
+          for: 15m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeContainerWaiting
+          annotations:
+            description: Pod {{ $labels.namespace }}/{{ $labels.pod }} container {{ $labels.container}} has been in waiting state for longer than 1 hour.
+            message: A container is stuck in a waiting state.
+          expr: |
+            sum by (namespace, pod, container, reason) (kube_pod_container_status_waiting_reason{job="kube-state-metrics", namespace=~"oe-.*"}) > 0
+          for: 1h
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeDaemonSetNotScheduled
+          annotations:
+            description: '{{ $value }} Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} are not scheduled.'
+            message: A daemonset does not meet it's expected number of pods.
+          expr: |
+            kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics", namespace=~"oe-.*"}
+              -
+            kube_daemonset_status_current_number_scheduled{job="kube-state-metrics", namespace=~"oe-.*"} > 0
+          for: 10m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeCronJobRunning
+          annotations:
+            description: CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} is taking more than 1h to complete.
+            message: A cronjob is taking a long time to finish.
+          expr: |
+            time() - kube_cronjob_next_schedule_time{job="kube-state-metrics", namespace=~"oe-.*"} > 3600
+          for: 1h
+          labels:
+            severity: P3
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeJobCompletion
+          annotations:
+            description: Job {{ $labels.namespace }}/{{ $labels.job_name }} is taking more than one hour to complete.
+            message: A Kubernetes job is taking a long time to finish.
+          expr: |
+            kube_job_spec_completions{job="kube-state-metrics", namespace=~"oe-.*"} - kube_job_status_succeeded{job="kube-state-metrics", namespace=~"oe-.*"}  > 0
+          for: 1h
+          labels:
+            severity: P3
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeJobFailed
+          annotations:
+            description: Job {{ $labels.namespace }}/{{ $labels.job_name }} failed to complete.
+            message: A Kubernetes job failed to complete.
+          expr: |
+            kube_job_failed{job="kube-state-metrics", namespace=~"oe-.*"}  > 0
+          for: 15m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+            ###### COMMENT
+            # I'm on the fence about this alert. It seems to trigger when a pod fails to start, crashloops or just fails for whatever reason.
+            # As a result of a pod not starting or crashlooping, there's a mismatch between desired and requested for a HPA.
+            # I'm not sure if keeping this alert is worth it considering there's different rules for reporting on failing pods,
+            # as such we'd be catching this at the source pod rather than on the HPA level.
+      ### UPDATE
+      # Did some more digging on this, is seems like in a lot of instances there are remnant HPA's that exist whilst the underlying
+      # deployment/statefulset/replicaset does not exist anymore, e.g. when a tenant was removed.
+      # This is going to trigger the alert in such an instance and the cleanup process should be fixed before we reenable this.
+      # - alert: KubeHpaReplicasMismatch
+      #   annotations:
+      #     message: HPA {{ $labels.namespace }}/{{ $labels.hpa }} has not matched the
+      #       desired number of replicas for longer than 60 minutes.
+      #   expr: |
+      #     (kube_hpa_status_desired_replicas{job="kube-state-metrics"}
+      #       !=
+      #     kube_hpa_status_current_replicas{job="kube-state-metrics"})
+      #       and
+      #     changes(kube_hpa_status_current_replicas[60m]) == 0
+      #   for: 60m
+      #   labels:
+      #     severity: P3
+    - name: kubernetes-storage
+      rules:
+        - alert: KubePersistentVolumeUsageCritical
+          annotations:
+            description: The PersistentVolume claimed by {{ $labels.persistentvolumeclaim }} in Namespace {{ $labels.namespace }} is only {{ $value | humanizePercentage }} free.
+            message: A persistent volume is running out of space.
+          expr: |
+            kubelet_volume_stats_available_bytes{job="kubelet", namespace=~"oe-.*"}
+            / kubelet_volume_stats_capacity_bytes{job="kubelet", namespace=~"oe-.*"} * 100 < 10
+          for: 1m
+          labels:
+            severity: P1
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubePersistentVolumeFullInFourDays
+          annotations:
+            description: Based on recent sampling, the PersistentVolume claimed by {{ $labels.persistentvolumeclaim }} in Namespace {{ $labels.namespace }} is expected to fill up within four days. Currently {{ $value | humanizePercentage }} is available.
+            message: A persistent volume will likely fill up within four days.
+          expr: predict_linear(kubelet_volume_stats_available_bytes{job="kubelet", namespace=~"oe-.*"}[6h:5m], 4 * 24 * 3600) < 0
+          for: 1h
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubePersistentVolumeErrors
+          annotations:
+            description: The persistent volume {{ $labels.persistentvolume }} has status {{ $labels.phase }}.
+            message: A persistent volume has consistently been in an error state.
+          expr: kube_persistentvolume_status_phase{phase=~"Failed|Pending",job="kube-state-metrics", namespace=~"oe-.*"} > 0
+          for: 10m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+    - name: kubernetes-node
+      rules:
+        - alert: KubeNodeMemoryPressure
+          annotations:
+            message: Node memory pressure (instance {{ $labels.instance }})
+            description: "Node {{ $labels.node }} has Memory Pressure condition\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+          expr: |
+            kube_node_status_condition{condition="MemoryPressure", status="true", namespace=~"oe-.*"} == 1
+          for: 5m
+          labels:
+            severity: P1
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeNodeDiskPressure
+          annotations:
+            message: Node disk pressure (instance {{ $labels.instance }})
+            description: "Node {{ $labels.node }} has Disk Pressure condition\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+          expr: kube_node_status_condition{condition="DiskPressure",status="true", namespace=~"oe-.*"} == 1
+          for: 15m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeNodeNetworkUnavailable
+          annotations:
+            message: Node network unavailable (instance {{ $labels.instance }})
+            description: "Node {{ $labels.node }} has Network Unavailable condition\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+          expr: kube_node_status_condition{condition="NetworkUnavailable",status="true", namespace=~"oe-.*"} == 1
+          for: 15m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: KubeNodeOutOfPodCapacity
+          annotations:
+            message: Node out of pod capacity (instance {{ $labels.instance }})
+            description: "Node {{ $labels.node }} is out of pod capacity\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+          expr: sum by (node) ((kube_pod_status_phase{phase="Running"} == 1) + on(uid) group_left(node) (0 * kube_pod_info{pod_template_hash=""})) / sum by (node) (kube_node_status_allocatable{resource="pods"}) * 100 > 90
+          for: 15m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+    - name: kubernetes-utilization
+      rules:
+        - alert: ContainerCriticalMemoryUsage
+          annotations:
+            description: '{{ $value | humanizePercentage }} memory usage for pod {{ $labels.pod }} in namespace {{ $labels.namespace }}, container {{ $labels.container }} for over 15 minutes (90% of limit).'
+            message: A container is using more than 90% of it's memory limit.
+          expr: |
+            (sum(container_memory_working_set_bytes{name!="", namespace=~"oe-.*"}) by (instance, name) / sum(container_spec_memory_limit_bytes{namespace=~"oe-.*"} > 0) by (instance, name) * 100) > 90
+          for: 15m
+          labels:
+            severity: P1
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: ContainerHighMemoryUsage
+          annotations:
+            description: '{{ $value | humanizePercentage }} memory usage for pod {{ $labels.pod }} in namespace {{ $labels.namespace }}, container {{ $labels.container }} for over 15 minutes (90% of limit).'
+            message: A container is using more than 80% of it's memory limit.
+          expr: |
+            (sum(container_memory_working_set_bytes{name!="", namespace=~"oe-.*"}) by (instance, name) / sum(container_spec_memory_limit_bytes{namespace=~"oe-.*"} > 0) by (instance, name) * 100) > 80
+          for: 15m
+          labels:
+            severity: P2
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: CPUThrottlingHigh
+          annotations:
+            description: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}.'
+            message: A container is being consistently being CPU throttled.
+          expr: |
+            sum(increase(container_cpu_cfs_throttled_periods_total{container!="", namespace=~"oe-.*"}[5m])) by (container, pod, namespace)
+              /
+            sum(increase(container_cpu_cfs_periods_total{namespace!="monitoring", namespace=~"oe-.*"}[5m])) by (container, pod, namespace)
+              > ( 25 / 100 )
+          for: 15m
+          labels:
+            severity: P1
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts
+        - alert: PodOutOfMemory
+          annotations:
+            description: Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} was OOM Killed.
+            message: A pod was OOM Killed.
+          expr: |
+            sum_over_time(kube_pod_container_status_terminated_reason{reason="OOMKilled", namespace=~"oe-.*"}[5m]) > 0
+          for: 10s
+          labels:
+            severity: P1
+            system: oe
+            component: kubernetes
+            owner: observability-team
+            namespace: oe-alerts

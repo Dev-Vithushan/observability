@@ -1,0 +1,18 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: apm-server
+  namespace: oe-apm-server
+spec:
+  valuesFrom:
+    - kind: ConfigMap
+      name: helm-values-apm-server-base
+      valuesKey: values.yaml
+    - kind: ConfigMap
+      name: helm-values-apm-server-regional
+      valuesKey: values.yaml
+  upgrade:
+    remediation:
+      strategy: rollback
+      retries: 3

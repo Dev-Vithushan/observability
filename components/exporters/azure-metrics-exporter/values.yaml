@@ -1,0 +1,1868 @@
+# -- String to partially override fullname template (will maintain the release name)
+nameOverride: ""
+# -- String to fully override fullname template
+fullnameOverride: "azure-metrics-exporter"
+namespaceOverride: ""
+image:
+  registry: docker.io
+  repository: webdevops/azure-metrics-exporter
+  tag: ""
+  sha: ""
+  pullPolicy: IfNotPresent
+replicas: 1
+minReadySeconds: 10
+terminationGracePeriodSeconds: 60
+env:
+  AZURE_SERVICEDISCOVERY_SUBSCRIPTION_ID: "29e95c88-c6c8-4b49-a512-6fcdcbb08cb7,0da61dd3-f5d8-4d46-b3c1-9792a409ff12,f98da578-e964-48a2-a1ba-0e4a92be9ae3,d17f22d8-142e-48a7-88de-29be26170465,236ffe6b-ad72-4dfc-8c07-d6a9f82a06dc,04d0539d-87a7-490c-bcca-d7395e71ac78,5e20831c-44e9-4651-827c-44aeb575e821,a16a6aac-4085-4e2f-9e8d-95f448157730,ce128ded-fc5c-4f73-b7e3-8969e546159b,9a4d2d39-1755-4be8-8ea6-b3bf32141bf7,029b06e9-8e59-49b4-8d05-c0c4d952b958,396d35ce-d2b5-46d1-852a-8f7399629032,c80e0f51-02da-44c2-9ded-02c9b156722b,fe3aee1a-d5f7-499c-9aa5-a8a5c81e1e17,b32b9b07-bc68-4036-9846-cdd50a7f82d6,024a31da-98ef-4190-96af-d37d0ffa671f,fe4091c9-d1ea-48af-b949-9c6a9adb8b83,4d6bef84-56e2-47dd-ba2f-ed95cf7d153a,40c284d4-f03a-4ab3-8498-33c61e8e9a0d,0d98e012-939b-4c80-9376-7cfcfa84c8f5,399e45a9-ac53-4f07-95a3-0960519df83f,3b5876ed-6942-49bb-968f-4fec63aa1103,89e4ceff-c128-4f4b-a719-51e1bb55325b,c8cca436-85b4-41fe-89d1-7eaca2ee67d1,00574e6b-fc94-458d-b812-d9dd4268e73f,73c6a071-22f8-457d-ae91-0ed47fc2ad08,9283a064-075b-462a-9843-b6bb92e4bc47,18087fdb-c855-4255-bc95-88eb68140163,c2e05d2f-f754-4fc8-bec1-601e82c71205,de26a9e7-c6cf-4d0a-83a3-ef42c28de691,54a84df5-88e3-46ce-bd85-06677615400a,49ada4f4-8225-4eb2-ad56-d9edf907d27b,0c3e0b25-bcd1-4f79-9a3a-cc0c892d6bfa,8a10c832-e58d-4aec-89e8-687cdc53aaca,b11d8fed-85a2-47b7-bf76-f87d7de14732,737bbe85-3b77-4538-bfa2-e173843cf363,76b94d12-5bce-4b5a-bb23-7ba40afdb23e,f6e94f68-c9cc-413a-ab71-081225a9aad8,973ed585-2224-42d8-b696-7ca80f78c8c7,b51d03b0-cb17-47c3-8066-09d5978f0e15,96136443-53dc-417b-8fcb-3f3e866095ce,0083573b-3fa4-467e-888e-e06497dfc34e,155a7656-acab-4cfb-ad7f-2f695a292943,47c39d9e-872d-4eec-a753-7c81c670ec85,56adcd19-7aab-4c67-88bd-61c9bcfa3191,2bbf6b8b-b05b-4568-904c-8ef5ba625237,6d6f31dd-4e22-41a4-a9f8-c7bc1ecdb209,dda9b1b4-bb57-4f11-8189-47ec4c9e1097,ef2a7822-8cb7-40af-b789-b11fe4eb32bb,d4708e65-7ff9-480b-bdb1-3e9cd6c3edd0,0eb40a97-d5ea-47f2-bdb5-dcca4403b2b8,4dfeadee-5451-4f75-a58c-e368914e5672,81aca676-fa88-46ea-b197-a766d9302853,1c3941e6-6301-4d9a-a069-e803142ade53,8be2a6dc-90dc-42f4-8a7e-c5c9cfe69c5b,e2675a47-6c28-4e2d-88b9-b002eaf643a4,ad4cc6ae-00ad-4994-a25f-25b55ea3580e,c61fc3fc-5b01-4f87-8248-19e6232f4394,03923fae-f46c-4982-911b-20a11fc64e34,64e1df0d-b258-460b-86bb-aa94f145e9cb,f8142979-9df6-4d48-8b89-9e369ff0c1cb,9a9dce45-c33b-46a5-880b-e8097ecc8279,8d6f0ddf-e491-4b60-9671-d7a2f3da2dc1,131e87ce-37b4-4b73-84e4-582cabb81fac,22fdd2b7-18b0-4233-9f1c-fab17335cd15,6adb335d-009b-4126-858a-6067decbe75a,89dddad1-9f5f-428b-8d57-17bbf160db40,b5d17ae1-0f03-46c8-b382-6e634128f9cb,2276fc47-d7f7-47d6-89e0-f8aeac998ca2,c7c8ffdb-7a13-4b10-902b-ffe2d3e8882c,316100bd-52bd-41af-9897-d2a078723982,0dca1ade-3d15-451a-94f0-6b942bfd4ce3,36c17f7e-c92a-48b9-abef-355b7aebaa78,57472634-3e3e-4f00-b73a-b9ad2ce65e33,902635f6-2fa3-4aaa-84fb-0d6de597154b,11aa6a31-d82a-4040-a546-f15cd29910f4,f3e6a2b4-00bd-4d65-8147-51bc93d691a2,58ce27bd-6aa6-4143-9529-ee52829ed7fa,51503b8b-d8f2-4c7f-90c9-adfaaaae9b87,11a6fd40-ab26-4239-9e28-800bd9aa03aa,eb9c0c57-1bd4-43de-96d6-b555fa2e68a0,bcb8197e-b1f4-4688-a093-ae7bf87793bf,a544f089-a7cb-42eb-a41e-4d083a2554ac,f4ddb2c0-fade-4d87-b864-d245c7704d51,708ed4bb-d99f-4f57-9033-1654f09fe2e2,f3b665ae-d46d-4185-b287-1b8de44eeee3,fa90dcdd-663b-4749-b638-3ebba844e072,b8761028-a65c-4e20-9f98-56fddd05d2e0,c3a073e3-f5bd-46cc-ac63-9a643e6cb412,90f3daae-cc21-4979-b72e-1f127dc22927,a8e5a0a6-fb4e-401c-ba82-b35eb745da61,ad980d16-ae7f-47a4-afd7-dae6a0fe0b5e,40844149-3235-454a-b5bd-ebed6af3fbbd,015d6cf0-6e02-4166-8c18-77073c7a1c47,a5154389-cb95-4e4a-b50b-25e9d7547d91,fe0cfbe3-e924-4156-90b9-9f2eee970bb0,924b58cf-541c-4ae5-a0ad-ce9ce27752b8,945b84ac-ad5c-496e-ab72-076ca17d419d,f42c11f3-facf-4856-b550-e97abf62846e,5702a818-4406-48c9-9ddf-6053228e8ffc,5cb9633c-9cd1-4cb7-937c-ef491090b1ca,8f271a66-351d-4ca7-a4c8-cbdd213f134c,90f7487a-d094-4175-a345-7590afcc2630,a47d32b6-018a-44df-9d96-7525a1bd53ed,ece0ab61-acf0-4eb8-a0c7-396b13397c21" # https://github.com/webdevops/go-common/blob/main/azuresdk/README.md#env-vars
+  AZURE_CLIENT_ID: "60f4fc60-0b9a-4911-9dca-04440a1cf8d7" # https://github.com/webdevops/go-common/blob/main/azuresdk/README.md#authentication
+  AZURE_TENANT_ID: "2c03f75f-06e4-46f7-86f5-d8d70bef1cf3" # https://github.com/webdevops/go-common/blob/main/azuresdk/README.md#authentication
+  # LOG_DEBUG: "true"
+  CONCURRENCY_SUBSCRIPTION: "30"
+  CONCURRENCY_SUBSCRIPTION_RESOURCE: "60"
+  SERVER_TIMEOUT_WRITE: "120s"
+  SERVER_TIMEOUT_READ: "120s"
+extraEnv:
+  - name: AZURE_CLIENT_SECRET
+    valueFrom:
+      secretKeyRef:
+        key: azure-metrics-exporter-app-key
+        name: azure-metrics-exporter
+secretsEnableTemplateFunctions: false
+secrets: {}
+# secretName: secretValue
+
+# sql_subscriptions is a YAML array of subscription IDs
+sql_subscriptions: &sql_subscriptions
+  - fe3aee1a-d5f7-499c-9aa5-a8a5c81e1e17 #cs-internal
+  - b32b9b07-bc68-4036-9846-cdd50a7f82d6 #cs-external
+  - 3b5876ed-6942-49bb-968f-4fec63aa1103 #cs-customer-internal
+  - 89e4ceff-c128-4f4b-a719-51e1bb55325b #cs-customer-external
+
+# cosmosdb_external_subscriptions
+cosmosdb_external_subscriptions: &cosmosdb_external_subscriptions
+  - 029b06e9-8e59-49b4-8d05-c0c4d952b958 # ai-external
+  - b32b9b07-bc68-4036-9846-cdd50a7f82d6 # cs-external
+  - 024a31da-98ef-4190-96af-d37d0ffa671f # xmcpub-external
+  - 89e4ceff-c128-4f4b-a719-51e1bb55325b # cs-customer-external
+  - c8cca436-85b4-41fe-89d1-7eaca2ee67d1 # STYLELABS SaaS Shared PRD
+  - 9283a064-075b-462a-9843-b6bb92e4bc47 # identity-external
+  - c2e05d2f-f754-4fc8-bec1-601e82c71205 # mkp-external
+  - 54a84df5-88e3-46ce-bd85-06677615400a # xmapps-external
+  - b51d03b0-cb17-47c3-8066-09d5978f0e15 # co-external
+
+# cosmosdb_ai_subscriptions
+cosmosdb_ai_subscriptions: &cosmosdb_ai_subscriptions
+  - c80e0f51-02da-44c2-9ded-02c9b156722b # ai-tenants-external-00
+  - 4d6bef84-56e2-47dd-ba2f-ed95cf7d153a # ai-tenants-external-01
+  - 40c284d4-f03a-4ab3-8498-33c61e8e9a0d # ai-tenants-external-02
+  - 0d98e012-939b-4c80-9376-7cfcfa84c8f5 # ai-tenants-external-03
+  - 399e45a9-ac53-4f07-95a3-0960519df83f # ai-tenants-external-04
+  - 396d35ce-d2b5-46d1-852a-8f7399629032 # ai-tenants-internal-00
+
+# cosmosdb_internal_subscriptions
+cosmosdb_internal_subscriptions: &cosmosdb_internal_subscriptions
+  - 9a4d2d39-1755-4be8-8ea6-b3bf32141bf7 # ai-internal
+  - fe3aee1a-d5f7-499c-9aa5-a8a5c81e1e17 # cs-internal
+  - fe4091c9-d1ea-48af-b949-9c6a9adb8b83 # xmcpub-internal
+  - 3b5876ed-6942-49bb-968f-4fec63aa1103 # cs-customer-internal
+  - 00574e6b-fc94-458d-b812-d9dd4268e73f # tcs-internal
+  - 73c6a071-22f8-457d-ae91-0ed47fc2ad08 # identity-internal
+  - 18087fdb-c855-4255-bc95-88eb68140163 # mkp-internal
+  - de26a9e7-c6cf-4d0a-83a3-ef42c28de691 # xmapps-internal
+  - 973ed585-2224-42d8-b696-7ca80f78c8c7 # co-internal
+
+# documentdb_subscriptions is a YAML array of subscription IDs
+documentdb_subscriptions: &documentdb_subscriptions
+  - 396d35ce-d2b5-46d1-852a-8f7399629032
+  - c80e0f51-02da-44c2-9ded-02c9b156722b
+
+# amr_subscriptions
+amr_subscriptions: &amr_subscriptions
+  - 49ada4f4-8225-4eb2-ad56-d9edf907d27b # STYLELABS SaaS Shared QA
+  - 737bbe85-3b77-4538-bfa2-e173843cf363 # STYLELABS M Dev MSDN
+  - 0c3e0b25-bcd1-4f79-9a3a-cc0c892d6bfa # Stylelabs Infra DEV
+  - 8a10c832-e58d-4aec-89e8-687cdc53aaca # Sitecore SaaS Automation DEV
+  - b11d8fed-85a2-47b7-bf76-f87d7de14732 # Sandbox Kwinten Guillaume
+  - 96136443-53dc-417b-8fcb-3f3e866095ce # jcb-q-001
+  - 0083573b-3fa4-467e-888e-e06497dfc34e # koml-q-001
+  - 155a7656-acab-4cfb-ad7f-2f695a292943 # rkt-q-001
+  - 47c39d9e-872d-4eec-a753-7c81c670ec85 # tmc-q-001, tmc-q-002
+  - 56adcd19-7aab-4c67-88bd-61c9bcfa3191
+  - 2bbf6b8b-b05b-4568-904c-8ef5ba625237
+  - 6d6f31dd-4e22-41a4-a9f8-c7bc1ecdb209
+  - dda9b1b4-bb57-4f11-8189-47ec4c9e1097
+  - ef2a7822-8cb7-40af-b789-b11fe4eb32bb
+  - d4708e65-7ff9-480b-bdb1-3e9cd6c3edd0
+  - 0eb40a97-d5ea-47f2-bdb5-dcca4403b2b8 # bebl-d-001
+  - 4dfeadee-5451-4f75-a58c-e368914e5672
+  - 81aca676-fa88-46ea-b197-a766d9302853
+  - 1c3941e6-6301-4d9a-a069-e803142ade53
+  - 8be2a6dc-90dc-42f4-8a7e-c5c9cfe69c5b
+  - e2675a47-6c28-4e2d-88b9-b002eaf643a4
+  - ad4cc6ae-00ad-4994-a25f-25b55ea3580e
+  - c61fc3fc-5b01-4f87-8248-19e6232f4394
+  - 03923fae-f46c-4982-911b-20a11fc64e34
+  - 64e1df0d-b258-460b-86bb-aa94f145e9cb # coch-q-001
+  - f8142979-9df6-4d48-8b89-9e369ff0c1cb
+  - 9a9dce45-c33b-46a5-880b-e8097ecc8279
+  - 8d6f0ddf-e491-4b60-9671-d7a2f3da2dc1
+  - 131e87ce-37b4-4b73-84e4-582cabb81fac # dair-q-001
+  - 22fdd2b7-18b0-4233-9f1c-fab17335cd15
+  - 6adb335d-009b-4126-858a-6067decbe75a
+  - 89dddad1-9f5f-428b-8d57-17bbf160db40
+  - b5d17ae1-0f03-46c8-b382-6e634128f9cb
+  - 2276fc47-d7f7-47d6-89e0-f8aeac998ca2
+  - c7c8ffdb-7a13-4b10-902b-ffe2d3e8882c
+  - 316100bd-52bd-41af-9897-d2a078723982 # hap-q-001
+  - 0dca1ade-3d15-451a-94f0-6b942bfd4ce3
+  - 36c17f7e-c92a-48b9-abef-355b7aebaa78
+  - 57472634-3e3e-4f00-b73a-b9ad2ce65e33
+  - 902635f6-2fa3-4aaa-84fb-0d6de597154b # jcb-p-001
+  - 11aa6a31-d82a-4040-a546-f15cd29910f4
+  - f3e6a2b4-00bd-4d65-8147-51bc93d691a2
+  - 58ce27bd-6aa6-4143-9529-ee52829ed7fa
+  - 51503b8b-d8f2-4c7f-90c9-adfaaaae9b87 # jwt-q-001
+  - 11a6fd40-ab26-4239-9e28-800bd9aa03aa
+  - eb9c0c57-1bd4-43de-96d6-b555fa2e68a0 # koml-p-001
+  - bcb8197e-b1f4-4688-a093-ae7bf87793bf # lyz-p-001
+  - a544f089-a7cb-42eb-a41e-4d083a2554ac
+  - f4ddb2c0-fade-4d87-b864-d245c7704d51
+  - 708ed4bb-d99f-4f57-9033-1654f09fe2e2
+  - f3b665ae-d46d-4185-b287-1b8de44eeee3
+  - fa90dcdd-663b-4749-b638-3ebba844e072 # rkt-p-001
+  - b8761028-a65c-4e20-9f98-56fddd05d2e0
+  - c3a073e3-f5bd-46cc-ac63-9a643e6cb412
+  - 90f3daae-cc21-4979-b72e-1f127dc22927 # snc-p-001
+  - a8e5a0a6-fb4e-401c-ba82-b35eb745da61 # syn-d-001
+  - ad980d16-ae7f-47a4-afd7-dae6a0fe0b5e
+  - 40844149-3235-454a-b5bd-ebed6af3fbbd # syn-q-001
+  - 015d6cf0-6e02-4166-8c18-77073c7a1c47 # tmc-p-001
+  - a5154389-cb95-4e4a-b50b-25e9d7547d91
+  - fe0cfbe3-e924-4156-90b9-9f2eee970bb0
+  - 924b58cf-541c-4ae5-a0ad-ce9ce27752b8
+  - 945b84ac-ad5c-496e-ab72-076ca17d419d
+  - f42c11f3-facf-4856-b550-e97abf62846e
+  - 0da61dd3-f5d8-4d46-b3c1-9792a409ff12
+  - 5702a818-4406-48c9-9ddf-6053228e8ffc
+  - 5cb9633c-9cd1-4cb7-937c-ef491090b1ca
+  - 8f271a66-351d-4ca7-a4c8-cbdd213f134c
+  - 90f7487a-d094-4175-a345-7590afcc2630
+  - a47d32b6-018a-44df-9d96-7525a1bd53ed
+  - b32b9b07-bc68-4036-9846-cdd50a7f82d6
+  - ece0ab61-acf0-4eb8-a0c7-396b13397c21
+  - f98da578-e964-48a2-a1ba-0e4a92be9ae3
+  - fe3aee1a-d5f7-499c-9aa5-a8a5c81e1e17
+
+resources:
+  limits:
+    cpu: 2
+    memory: 2Gi
+  requests:
+    cpu: 300m
+    memory: 400Mi
+nodeSelector:
+  kubernetes.io/os: linux
+affinity: {}
+tolerations: []
+restartPolicy: Always
+priorityClassName: ""
+config: ""
+startupProbe:
+  tcpSocket:
+    port: http-metrics
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  failureThreshold: 5
+livenessProbe:
+  tcpSocket:
+    port: http-metrics
+  initialDelaySeconds: 15
+  periodSeconds: 30
+  failureThreshold: 5
+readinessProbe:
+  tcpSocket:
+    port: http-metrics
+  initialDelaySeconds: 15
+  periodSeconds: 30
+  failureThreshold: 5
+serviceAccount:
+  create: true
+  name: azure-metrics-exporter
+  labels: {}
+  annotations: {}
+## Customize the strategy if set
+strategy: {}
+podLabels:
+  sc_system: ${sc_system}
+  sc_domain: ${sc_domain}
+  sc_component: ${sc_system}-azure-metrics-exporter
+  sc_env: ${sc_env}
+  sc_region: ${sc_region}
+  sc_provider: ${sc_provider}
+  sc_createdby: ${sc_createdby}
+  sc_type: ${sc_type}
+  sc_owner: ${sc_owner}
+podAnnotations: {}
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  supplementalGroups: [1000]
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+containerSecurityContext:
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+# -- registry secret names as an array
+imagePullSecrets: []
+# - name: pull-secret-name
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+  appProtocol: http
+  nodePort:
+  portName: http-metrics
+  annotations: {}
+  labels: {}
+netpol:
+  enabled: false
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress: []
+  egress:
+    # DNS
+    - ports:
+        - port: 53
+          protocol: TCP
+    - ports:
+        - port: 53
+          protocol: UDP
+    # HTTPS (Azure REST api)
+    - ports:
+        - port: 443
+          protocol: TCP
+prometheus:
+  monitor:
+    enabled: true
+    jobLabel: "azure-metrics-exporter"
+    additionalAnnotations:
+      release: kube-prometheus-stack
+    additionalLabels: {}
+    scheme: http
+    basicAuth: {}
+    bearerTokenFile:
+    tlsConfig: {}
+    ## proxyUrl: URL of a proxy that should be used for scraping.
+    ##
+    proxyUrl: ""
+    relabelings: []
+    metricRelabelings: []
+    interval: ""
+    scrapeTimeout: ""
+    ## SampleLimit defines per-scrape limit on number of scraped samples that will be accepted.
+    ##
+    sampleLimit: 0
+    ## TargetLimit defines a limit on the number of scraped targets that will be accepted.
+    ##
+    targetLimit: 0
+    ## Per-scrape limit on number of labels that will be accepted for a sample. Only valid in Prometheus versions 2.27.0 and newer.
+    ##
+    labelLimit: 0
+    ## Per-scrape limit on length of labels name that will be accepted for a sample. Only valid in Prometheus versions 2.27.0 and newer.
+    ##
+    labelNameLengthLimit: 0
+    ## Per-scrape limit on length of labels value that will be accepted for a sample. Only valid in Prometheus versions 2.27.0 and newer.
+    ##
+    labelValueLengthLimit: 0
+    namespaceSelector: {}
+  ## azure metrics probe scrapes
+  metricProbes:
+    jobLabel: "azure-metrics-exporter-probes"
+    scheme: http
+    path: /probe/metrics/resourcegraph
+    basicAuth: {}
+    bearerTokenFile:
+    tlsConfig: {}
+    ## proxyUrl: URL of a proxy that should be used for scraping.
+    ##
+    proxyUrl: ""
+    relabelings: []
+    metricRelabelings:
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: backend_code
+        separator: ;
+        regex: azure_metrics_sre_api_management_service_backend;(.*)$
+        replacement: $1
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: gateway_code
+        separator: ;
+        regex: azure_metrics_sre_api_management_service_gateway;(.*)$
+        replacement: $1
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        regex: azure_metrics_sre_wd_storage_account;(.*)$
+        targetLabel: response_type
+        replacement: $1
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_wd_storage_account
+        replacement: ""
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_api_management_service_backend
+        replacement: ""
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_api_management_service_gateway
+        replacement: ""
+      ### CosmosDB MetricRelablings
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: region
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_internal_database_accounts_average;(.*)$
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: region
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_ai_database_accounts_average;(.*)$
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: region
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_external_database_accounts_average;(.*)$
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: region
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_internal_database_accounts_maximum;(.*)$
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: region
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_ai_database_accounts_maximum;(.*)$
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: region
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_external_database_accounts_maximum;(.*)$
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: region
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_internal_database_accounts_total;(.*)$
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: region
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_ai_database_accounts_total;(.*)$
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: region
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_external_database_accounts_total;(.*)$
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: region
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_internal_database_accounts_count;(.*)$
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: region
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_ai_database_accounts_count;(.*)$
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: region
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_external_database_accounts_count;(.*)$
+      ### Relabel Name
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_cosmosdb_internal_database_accounts_average
+        replacement: ""
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_cosmosdb_ai_database_accounts_average
+        replacement: ""
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_cosmosdb_external_database_accounts_average
+        replacement: ""
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_cosmosdb_internal_database_accounts_maximum
+        replacement: ""
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_cosmosdb_ai_database_accounts_maximum
+        replacement: ""
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_cosmosdb_external_database_accounts_maximum
+        replacement: ""
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_cosmosdb_internal_database_accounts_total
+        replacement: ""
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_cosmosdb_ai_database_accounts_total
+        replacement: ""
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_cosmosdb_external_database_accounts_total
+        replacement: ""
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_cosmosdb_internal_database_accounts_count
+        replacement: ""
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_cosmosdb_ai_database_accounts_count
+        replacement: ""
+      - action: replace
+        sourceLabels: [__name__]
+        targetLabel: dimension
+        regex: azure_metrics_sre_cosmosdb_external_database_accounts_count
+        replacement: ""
+      ### Relabel StatusCode
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: status_code
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_internal_database_accounts_totalreq;(.*)$
+        replacement: $1
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: status_code
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_ai_database_accounts_totalreq;(.*)$
+        replacement: $1
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: status_code
+        separator: ;
+        regex: azure_metrics_sre_cosmosdb_external_database_accounts_totalreq;(.*)$
+        replacement: $1
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: sql_error
+        separator: ;
+        regex: azure_metrics_cs_sql_conn_failed_user_error;([^;]*).*
+        replacement: $1
+      - action: replace
+        sourceLabels: [__name__, dimension]
+        targetLabel: sql_driver
+        separator: ;
+        regex: azure_metrics_cs_sql_conn_failed_user_error;[^;]*;(.*)$
+        replacement: $1
+    interval: ""
+    scrapeTimeout: "50s" # Default timeout - must be less than probe interval (most are 1m=60s)
+    ## SampleLimit defines per-scrape limit on number of scraped samples that will be accepted.
+    ##
+    sampleLimit: 0
+    ## TargetLimit defines a limit on the number of scraped targets that will be accepted.
+    ##
+    targetLimit: 0
+    ## Per-scrape limit on number of labels that will be accepted for a sample. Only valid in Prometheus versions 2.27.0 and newer.
+    ##
+    labelLimit: 0
+    ## Per-scrape limit on length of labels name that will be accepted for a sample. Only valid in Prometheus versions 2.27.0 and newer.
+    ##
+    labelNameLengthLimit: 0
+    ## Per-scrape limit on length of labels value that will be accepted for a sample. Only valid in Prometheus versions 2.27.0 and newer.
+    ##
+    labelValueLengthLimit: 0
+    # global probe params (will be merged with probes[].params)
+    # and can act as defaults
+    params: {}
+    probes:
+      - name: cpl-network-firewalls
+        interval: 1m
+        params:
+          name: ["azure_metrics_cpl_network_firewalls"]
+          subscription:
+            - 29e95c88-c6c8-4b49-a512-6fcdcbb08cb7
+          resourceType: ["Microsoft.Network/azureFirewalls"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - ApplicationRuleHit
+            - DataProcessed
+            - FirewallHealth
+            - FirewallLatencyPng
+            - NetworkRuleHit
+            - SNATPortUtilization
+            - Throughput
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [maximum, average, total]
+      - name: cpl-network-dns-resolvers
+        interval: 5m
+        params:
+          name: ["azure_metrics_cpl_network_dns_resolvers"]
+          subscription:
+            - 29e95c88-c6c8-4b49-a512-6fcdcbb08cb7
+          resourceType: ["Microsoft.Network/dnsResolvers"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - QPS
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [minimum, maximum, average, total, count]
+      - name: cpl-network-virtual-hubs
+        interval: 5m
+        params:
+          name: ["azure_metrics_cpl_network_virtual_hubs"]
+          subscription:
+            - 29e95c88-c6c8-4b49-a512-6fcdcbb08cb7
+          resourceType: ["Microsoft.Network/virtualHubs"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - VirtualHubDataProcessed
+            - SpokeVMUtilization
+            - RoutingInfrastructureUnits
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [maximum, total]
+      - name: cpl-network-vpn-gateways
+        interval: 5m
+        params:
+          name: ["azure_metrics_cpl_network_vpn_gateways"]
+          subscription:
+            - 29e95c88-c6c8-4b49-a512-6fcdcbb08cb7
+          resourceType: ["Microsoft.Network/vpngateways"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - AverageBandwidth
+            - TunnelPeakPackets
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [average, maximum]
+      - name: cpl-network-private-endpoints
+        interval: 1m
+        params:
+          name: ["azure_metrics_cpl_network_private_endpoints"]
+          subscription:
+            - 29e95c88-c6c8-4b49-a512-6fcdcbb08cb7
+          resourceType: ["Microsoft.Network/privateEndpoints"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - PEBytesIn
+            - PEBytesOut
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [total]
+      - name: cpl-network-private-dns-zones
+        interval: 1m
+        params:
+          name: ["azure_metrics_cpl_network_private_dns-zones"]
+          subscription:
+            - 29e95c88-c6c8-4b49-a512-6fcdcbb08cb7
+          resourceType: ["Microsoft.Network/privateDnsZones"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - QueryVolume
+            - RecordSetCapacityUtilization
+            - VirtualNetworkWithRegistrationCapacityUtilization
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [minimum, maximum, average, total, count]
+      - name: cpl-network-load-balancers
+        interval: 1m
+        params:
+          name: ["azure_metrics_cpl_network_load_balancers"]
+          subscription:
+            - d17f22d8-142e-48a7-88de-29be26170465
+            - 236ffe6b-ad72-4dfc-8c07-d6a9f82a06dc
+            - 04d0539d-87a7-490c-bcca-d7395e71ac78
+            - 5e20831c-44e9-4651-827c-44aeb575e821
+            - a16a6aac-4085-4e2f-9e8d-95f448157730
+            - ce128ded-fc5c-4f73-b7e3-8969e546159b
+          resourceType: ["Microsoft.Network/loadBalancers"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - AllocatedSnatPorts
+            - SnatConnectionCount
+            - UsedSnatPorts
+            - VipAvailability
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [minimum, maximum, average, total, count]
+      - name: edge-storage-blob-services
+        interval: 1m
+        params:
+          name: ["azure_metrics_edge_storage_blob_services"]
+          subscription:
+            - f98da578-e964-48a2-a1ba-0e4a92be9ae3
+          resourceType: ["Microsoft.Storage/storageAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - Availability
+            - Transactions
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average]
+      - name: azure-storage-account-sre-wd
+        interval: 1m
+        params:
+          name: ["azure_metrics_sre_wd_storage_account"]
+          subscription:
+            - 0da61dd3-f5d8-4d46-b3c1-9792a409ff12
+          resourceType: ["Microsoft.Storage/storageAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - Transactions
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [total]
+          metricFilter: ["Responsetype eq '*'"]
+          metricTop: ["100"]
+      - name: azure-storage-account-sre-wod
+        interval: 1m
+        params:
+          name: ["azure_metrics_sre_wod_storage_account"]
+          subscription:
+            - 0da61dd3-f5d8-4d46-b3c1-9792a409ff12
+          resourceType: ["Microsoft.Storage/storageAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - Availability
+            - UsedCapacity
+            - SuccessE2ELatency
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average]
+      - name: azure-storage-account-sre-wod-uc
+        interval: 5m
+        params:
+          name: ["azure_metrics_sre_wod_uc_storage_account"]
+          subscription:
+            - 0da61dd3-f5d8-4d46-b3c1-9792a409ff12
+          resourceType: ["Microsoft.Storage/storageAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - UsedCapacity
+          interval: [PT1H]
+          timespan: [PT12H]
+          aggregation: [average]
+      - name: edge-documentdb-database-accounts
+        interval: 1m
+        params:
+          name: ["azure_metrics_edge_documentdb_database_accounts"]
+          subscription:
+            - 0da61dd3-f5d8-4d46-b3c1-9792a409ff12
+            - f98da578-e964-48a2-a1ba-0e4a92be9ae3
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - ServerSideLatency
+            - TotalRequests
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average]
+      - name: sre-insights-components
+        interval: 1m
+        params:
+          name: ["azure_metrics_sre_insights_components"]
+          subscription:
+            - 9a4d2d39-1755-4be8-8ea6-b3bf32141bf7
+            - 029b06e9-8e59-49b4-8d05-c0c4d952b958
+          resourceType: ["microsoft.insights/components"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - availabilityResults/availabilityPercentage
+            - availabilityResults/count
+            - availabilityResults/duration
+            - browserTimings/totalDuration
+            - browserTimings/processingDuration
+            - browserTimings/networkDuration
+            - browserTimings/receiveDuration
+            - browserTimings/sendDuration
+            - exceptions/browser
+            - dependencies/failed
+            - exceptions/count
+            - requests/failed
+            - exceptions/server
+            - performanceCounters/memoryAvailableBytes
+            - performanceCounters/exceptionsPerSecond
+            - performanceCounters/requestExecutionTime
+            - performanceCounters/requestsPerSecond
+            - performanceCounters/requestsInQueue
+            - performanceCounters/processCpuPercentage
+            - performanceCounters/processIOBytesPerSecond
+            - performanceCounters/processPrivateBytes
+            - performanceCounters/processorCpuPercentage
+            - dependencies/count
+            - dependencies/duration
+            - requests/count
+            - requests/duration
+            - pageViews/duration
+            - pageViews/count
+            - traces/count
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [Average, Count]
+      - name: sre-insights-custom-components
+        interval: 1m
+        params:
+          name: ["azure_metrics_sre_insights_custom_components"]
+          subscription:
+            - 9a4d2d39-1755-4be8-8ea6-b3bf32141bf7 # ai-internal
+            - 029b06e9-8e59-49b4-8d05-c0c4d952b958 # ai-external
+          resourceType: ["microsoft.insights/components"]
+          metricNamespace: ["azure.applicationinsights"]
+          metric:
+            - "Authentication Tokens Time (in ms)"
+            - "Cache Time (in ms)"
+            - "Client Time (in ms)"
+            - "Request Size"
+            - "Response Size"
+            - "periodic_usage Count"
+            - "periodic_usage Failures"
+            - "periodic_usage Successes"
+            - "usageAggOrchestration Count"
+            - "usageAggOrchestration Failures"
+            - "usageAggOrchestration Successes"
+            - "usageAggregation Count"
+            - "usageAggregation Failures"
+            - "usageAggregation Successes"
+            - "usageSyncOrchestration Count"
+            - "usageSyncOrchestration Failures"
+            - "usageSyncOrchestration Successes"
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average, count, total]
+      - name: sre-api-management-service
+        interval: 1m
+        params:
+          name: ["azure_metrics_sre_api_management_service"]
+          subscription:
+            - 9a4d2d39-1755-4be8-8ea6-b3bf32141bf7 # ai-internal
+            - 029b06e9-8e59-49b4-8d05-c0c4d952b958 # ai-external
+          resourceType: ["microsoft.apimanagement/service"]
+          metric:
+            - BackendDuration
+            - Capacity
+            - ConnectionAttempts
+            - CpuPercent_Gateway
+            - Duration
+            - EventHubDroppedEvents
+            - EventHubRejectedEvents
+            - EventHubSuccessfulEvents
+            - EventHubThrottledEvents
+            - EventHubTimedoutEvents
+            - EventHubTotalBytesSent
+            - EventHubTotalEvents
+            - EventHubTotalFailedEvents
+            - FailedRequests
+            - MemoryPercent_Gateway
+            - NetworkConnectivity
+            - OtherRequests
+            - Requests
+            - SuccessfulRequests
+            - TotalRequests
+            - UnauthorizedRequests
+            - WebSocketMessages
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count, maximum, total, average]
+      - name: sre-api-management-service-backend-respone
+        interval: 1m
+        params:
+          name: ["azure_metrics_sre_api_management_service_backend"]
+          subscription:
+            - 9a4d2d39-1755-4be8-8ea6-b3bf32141bf7 # ai-internal
+            - 029b06e9-8e59-49b4-8d05-c0c4d952b958 # ai-external
+          resourceType: ["microsoft.apimanagement/service"]
+          metric:
+            - Requests
+          metricFilter: ["BackendResponseCode eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count, maximum, total, average]
+      - name: sre-api-management-service-gateway-respone
+        interval: 1m
+        params:
+          name: ["azure_metrics_sre_api_management_service_gateway"]
+          subscription:
+            - 9a4d2d39-1755-4be8-8ea6-b3bf32141bf7 # ai-internal
+            - 029b06e9-8e59-49b4-8d05-c0c4d952b958 # ai-external
+          resourceType: ["microsoft.apimanagement/service"]
+          metric:
+            - Requests
+          metricFilter: ["GatewayResponseCode eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count, maximum, total, average]
+      - name: sre-web-sites
+        interval: 1m
+        params:
+          name: ["azure_metrics_sre_web_sites"]
+          subscription:
+            - 9a4d2d39-1755-4be8-8ea6-b3bf32141bf7 # ai-internal
+            - 029b06e9-8e59-49b4-8d05-c0c4d952b958 # ai-external
+          resourceType: ["microsoft.web/sites"]
+          metric:
+            - AppConnections
+            - AverageMemoryWorkingSet
+            - AverageResponseTime
+            - BytesSent
+            - FileSystemUsage
+            - FunctionExecutionCount
+            - FunctionExecutionUnits
+            - Handles
+            - HealthCheckStatus
+            - Http101
+            - Http2xx
+            - Http3xx
+            - Http401
+            - Http403
+            - Http404
+            - Http406
+            - Http4xx
+            - Http5xx
+            - HttpResponseTime
+            - InstanceCount
+            - IoOtherBytesPerSecond
+            - IoOtherOperationsPerSecond
+            - IoReadBytesPerSecond
+            - IoReadOperationsPerSecond
+            - IoWriteBytesPerSecond
+            - IoWriteOperationsPerSecond
+            - MemoryWorkingSet
+            - PrivateBytes
+            - Requests
+            - RequestsInApplicationQueue
+            - TotalAppDomains
+            - TotalAppDomainsUnloaded
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count, maximum, total, average]
+      - name: sre-documentdb-database-accounts-1m-maximum
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_1m_maximum"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - TotalRequestUnitsPreview
+            - DedicatedGatewayCPUUsage
+            - DedicatedGatewayMemoryUsage
+            - NormalizedRUConsumption
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [maximum]
+      - name: sre-documentdb-database-accounts-1m-minimum
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_1m_minimum"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - DedicatedGatewayCPUUsage
+            - DedicatedGatewayMemoryUsage
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [minimum]
+      - name: sre-documentdb-database-accounts-1m-average
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_1m_average"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - NormalizedRUConsumption
+            - DedicatedGatewayCPUUsage
+            - DedicatedGatewayMemoryUsage
+            - TotalRequestUnitsPreview
+            - ReplicationLatency
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average]
+      - name: sre-documentdb-database-accounts-1m-count
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_1m_count"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - MetadataRequests
+            - DedicatedGatewayRequests
+            - TotalRequestsPreview
+            - TotalRequests
+            - OnlineRegion
+            - OfflineRegion
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count]
+      - name: sre-documentdb-database-accounts-1m-total
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_1m_total"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - TotalRequestUnitsPreview
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [total]
+      - name: sre-documentdb-database-accounts-5m-total
+        interval: 5m
+        scrapeTimeout: 240s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_5m_total"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - DocumentQuota
+            - DocumentCount
+            - AvailableStorage
+            - DataUsage
+            - IndexUsage
+            - ServerSideLatency
+            - ServerSideLatencyGateway
+            - ServerSideLatencyDirect
+          metricTop: ["100"]
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [total]
+      - name: sre-documentdb-database-accounts-5m-average-a
+        interval: 5m
+        scrapeTimeout: 240s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_5m_average-a"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - AvailableStorage
+            - PhysicalPartitionSizeInfo
+            - IntegratedCacheQueryHitRate
+            - IntegratedCacheQueryExpirationCount
+            - IntegratedCacheItemHitRate
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [average]
+      - name: sre-documentdb-database-accounts-5m-average-b
+        interval: 5m
+        scrapeTimeout: 240s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_5m_average_b"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - IntegratedCacheItemExpirationCount
+            - DocumentQuota
+            - DedicatedGatewayMaximumCPUUsage
+            - DedicatedGatewayAverageMemoryUsage
+            - DataUsage
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [average]
+      - name: sre-documentdb-database-accounts-5m-average-c
+        interval: 5m
+        scrapeTimeout: 240s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_5m_average_c"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - IndexUsage
+            - ServerSideLatency
+            - ServerSideLatencyGateway
+            - ServerSideLatencyDirect
+            - IntegratedCacheEvictedEntriesSize
+            - DedicatedGatewayAverageCPUUsage
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [average]
+      - name: sre-documentdb-database-accounts-5m-count-a
+        interval: 5m
+        scrapeTimeout: 240s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_5m_count_a"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - AutoscaledRU
+            - AddRegion
+            - CreateAccount
+          metricTop: ["100"]
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [count]
+      - name: sre-documentdb-database-accounts-5m-count-b
+        interval: 5m
+        scrapeTimeout: 240s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_5m_count_b"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - ContinuousTierUpdate
+            - RegionFailover
+            - DeleteAccount
+            - BackupPolicyUpdate
+          metricTop: ["100"]
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [count]
+      - name: sre-documentdb-database-accounts-5m-count-c
+        interval: 5m
+        scrapeTimeout: 240s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_5m_count_c"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - ContinuousTierUpdate
+            - RegionFailover
+            - BackupModeUpdate
+            - BackupPolicyRedundancyUpdate
+            - BackupPolicyIntervalUpdate
+          metricTop: ["100"]
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [count]
+      - name: sre-documentdb-database-accounts-5m-count-d
+        interval: 5m
+        scrapeTimeout: 240s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_5m_count_d"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - SqlContainerCreate
+            - SqlContainerDelete
+            - SqlContainerThroughputUpdate
+            - SqlContainerUpdate
+            - SqlDatabaseCreate
+            - SqlDatabaseDelete
+            - SqlDatabaseUpdate
+            - SqlDatabaseThroughputUpdate
+          metricTop: ["100"]
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [count]
+      - name: sre-documentdb-database-accounts-5m-count-e
+        interval: 5m
+        scrapeTimeout: 240s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_5m_count_e"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - UpdateAccountReplicationSettings
+            - UpdateDiagnosticsSettings
+            - UpdateAccountNetworkSettings
+            - UpdateAccountKeys
+          metricTop: ["100"]
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [count]
+      - name: sre-documentdb-database-accounts-5m-maximum
+        interval: 5m
+        scrapeTimeout: 240s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_5m_maximum"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - ProvisionedThroughput
+            - PhysicalPartitionThroughputInfo
+            - PhysicalPartitionSizeInfo
+            - PhysicalPartitionCount
+            - DedicatedGatewayMaximumCPUUsage
+            - AutoscaleMaxThroughput
+            - DataUsage
+            - IndexUsage
+            - ServerSideLatency
+            - ServerSideLatencyGateway
+            - ServerSideLatencyDirect
+          metricTop: ["100"]
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [maximum]
+      - name: sre-documentdb-database-accounts-5m-minimum
+        interval: 5m
+        scrapeTimeout: 240s
+        params:
+          name: ["azure_metrics_sre_documentdb_database_accounts_5m_minimum"]
+          subscription: *documentdb_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - DataUsage
+            - IndexUsage
+            - ServerSideLatency
+            - ServerSideLatencyGateway
+            - ServerSideLatencyDirect
+          metricTop: ["100"]
+          interval: [PT5M]
+          timespan: [PT5M]
+          aggregation: [minimum]
+      - name: sre-search-search-services
+        interval: 1m
+        params:
+          name: ["azure_metrics_sre_search_search_services"]
+          subscription:
+            - 396d35ce-d2b5-46d1-852a-8f7399629032 # ai-tenants-internal
+            - c80e0f51-02da-44c2-9ded-02c9b156722b # ai-tenants-external
+          resourceType: ["Microsoft.Search/searchServices"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - DocumentsProcessedCount
+            - SearchLatency
+            - SearchQueriesPerSecond
+            - SkillExecutionCount
+            - ThrottledSearchQueriesPercentage
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count, total, average]
+      - name: sre-datafactory-factories
+        interval: 1m
+        params:
+          name: ["azure_metrics_sre_datafactory_factories"]
+          subscription:
+            - 9a4d2d39-1755-4be8-8ea6-b3bf32141bf7 # ai-internal
+            - 029b06e9-8e59-49b4-8d05-c0c4d952b958 # ai-external
+          resourceType: ["Microsoft.DataFactory/factories"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - ActivityCancelledRuns
+            - ActivityFailedRuns
+            - ActivitySucceededRuns
+            - FactorySizeInGbUnits
+            - IntegrationRuntimeAvailableMemory
+            - IntegrationRuntimeAvailableNodeNumber
+            - IntegrationRuntimeAverageTaskPickupDelay
+            - IntegrationRuntimeCpuPercentage
+            - IntegrationRuntimeQueueLength
+            - MaxAllowedFactorySizeInGbUnits
+            - MaxAllowedResourceCount
+            - PipelineCancelledRuns
+            - PipelineElapsedTimeRuns
+            - PipelineFailedRuns
+            - PipelineSucceededRuns
+            - ResourceCount
+            - TriggerCancelledRuns
+            - TriggerFailedRuns
+            - TriggerSucceededRuns
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count, maximum, total, average]
+      ### Cosmosdb latency Count
+      - name: sre-cosmosdb-internal-database-accounts-count
+        interval: 1m
+        scrapeTimeout: 20s
+        params:
+          name: ["azure_metrics_sre_cosmosdb_internal_database_accounts_count"]
+          subscription: *cosmosdb_internal_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - ServerSideLatency
+            - ServerSideLatencyDirect
+            - ServerSideLatencyGateway
+            - NormalizedRUConsumption
+            - TotalRequestUnits
+            - DataUsage
+            - DocumentCount
+            - IndexUsage
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count]
+      - name: sre-cosmosdb-ai-database-accounts-count
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_sre_cosmosdb_ai_database_accounts_count"]
+          subscription: *cosmosdb_ai_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - ServerSideLatency
+            - ServerSideLatencyDirect
+            - ServerSideLatencyGateway
+            - NormalizedRUConsumption
+            - TotalRequestUnits
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count]
+      - name: sre-cosmosdb-external-database-accounts-count
+        interval: 1m
+        scrapeTimeout: 20s
+        params:
+          name: ["azure_metrics_sre_cosmosdb_external_database_accounts_count"]
+          subscription: *cosmosdb_external_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - ServerSideLatency
+            - ServerSideLatencyDirect
+            - ServerSideLatencyGateway
+            - NormalizedRUConsumption
+            - TotalRequestUnits
+            - DataUsage
+            - DocumentCount
+            - IndexUsage
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count]
+      ### Cosmosdb latency Total
+      - name: sre-cosmosdb-internal-database-accounts-total
+        interval: 1m
+        scrapeTimeout: 20s
+        params:
+          name: ["azure_metrics_sre_cosmosdb_internal_database_accounts_total"]
+          subscription: *cosmosdb_internal_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - ServerSideLatency
+            - ServerSideLatencyDirect
+            - ServerSideLatencyGateway
+            - NormalizedRUConsumption
+            - TotalRequestUnits
+            - DataUsage
+            - DocumentCount
+            - IndexUsage
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [total]
+      - name: sre-cosmosdb-ai-database-accounts-total
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_sre_cosmosdb_ai_database_accounts_total"]
+          subscription: *cosmosdb_ai_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - ServerSideLatency
+            - ServerSideLatencyDirect
+            - ServerSideLatencyGateway
+            - NormalizedRUConsumption
+            - TotalRequestUnits
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [total]
+      - name: sre-cosmosdb-external-database-accounts-total
+        interval: 1m
+        scrapeTimeout: 20s
+        params:
+          name: ["azure_metrics_sre_cosmosdb_external_database_accounts_total"]
+          subscription: *cosmosdb_external_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - ServerSideLatency
+            - ServerSideLatencyDirect
+            - ServerSideLatencyGateway
+            - NormalizedRUConsumption
+            - TotalRequestUnits
+            - DataUsage
+            - DocumentCount
+            - IndexUsage
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [total]
+      ### Cosmosdb Average
+      - name: sre-cosmosdb-internal-database-accounts-average
+        interval: 1m
+        scrapeTimeout: 20s
+        params:
+          name:
+            ["azure_metrics_sre_cosmosdb_internal_database_accounts_average"]
+          subscription: *cosmosdb_internal_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - ServerSideLatency
+            - ServerSideLatencyDirect
+            - ServerSideLatencyGateway
+            - NormalizedRUConsumption
+            - TotalRequestUnits
+            - DataUsage
+            - DocumentCount
+            - IndexUsage
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average]
+      - name: sre-cosmosdb-ai-database-accounts-average
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_sre_cosmosdb_ai_database_accounts_average"]
+          subscription: *cosmosdb_ai_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - ServerSideLatency
+            - ServerSideLatencyDirect
+            - ServerSideLatencyGateway
+            - NormalizedRUConsumption
+            - TotalRequestUnits
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+      - name: sre-cosmosdb-external-database-accounts-average
+        interval: 1m
+        scrapeTimeout: 20s
+        params:
+          name:
+            ["azure_metrics_sre_cosmosdb_external_database_accounts_average"]
+          subscription: *cosmosdb_external_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - ServerSideLatency
+            - ServerSideLatencyDirect
+            - ServerSideLatencyGateway
+            - NormalizedRUConsumption
+            - TotalRequestUnits
+            - DataUsage
+            - DocumentCount
+            - IndexUsage
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average]
+      ### CosmosDB Maximum
+      - name: sre-cosmosdb-internal-database-accounts-maximum
+        scrapeTimeout: 20s
+        interval: 1m
+        params:
+          name:
+            ["azure_metrics_sre_cosmosdb_internal_database_accounts_maximum"]
+          subscription: *cosmosdb_internal_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - ServerSideLatency
+            - ServerSideLatencyDirect
+            - ServerSideLatencyGateway
+            - NormalizedRUConsumption
+            - TotalRequestUnits
+            - DataUsage
+            - DocumentCount
+            - IndexUsage
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [maximum]
+      - name: sre-cosmosdb-ai-database-accounts-maximum
+        scrapeTimeout: 50s
+        interval: 1m
+        params:
+          name: ["azure_metrics_sre_cosmosdb_ai_database_accounts_maximum"]
+          subscription: *cosmosdb_ai_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - ServerSideLatency
+            - ServerSideLatencyDirect
+            - ServerSideLatencyGateway
+            - NormalizedRUConsumption
+            - TotalRequestUnits
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [maximum]
+      - name: sre-cosmosdb-external-database-accounts-maximum
+        scrapeTimeout: 50s
+        interval: 1m
+        params:
+          name:
+            ["azure_metrics_sre_cosmosdb_external_database_accounts_maximum"]
+          subscription: *cosmosdb_external_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          metric:
+            - ServerSideLatency
+            - ServerSideLatencyDirect
+            - ServerSideLatencyGateway
+            - NormalizedRUConsumption
+            - TotalRequestUnits
+            - DataUsage
+            - DocumentCount
+            - IndexUsage
+          metricFilter: ["Region eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [maximum]
+      ### CosmosDB TotalReq
+      - name: sre-cosmosdb-internal-database-accounts-totalreq
+        interval: 1m
+        scrapeTimeout: 20s
+        params:
+          name:
+            ["azure_metrics_sre_cosmosdb_internal_database_accounts_totalreq"]
+          subscription: *cosmosdb_internal_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - TotalRequests
+          metricFilter: ["StatusCode eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count]
+      - name: sre-cosmosdb-ai-database-accounts-totalreq
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_sre_cosmosdb_ai_database_accounts_totalreq"]
+          subscription: *cosmosdb_ai_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - TotalRequests
+          metricFilter: ["StatusCode eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count]
+      - name: sre-cosmosdb-external-database-accounts-totalreq
+        interval: 1m
+        scrapeTimeout: 20s
+        params:
+          name:
+            ["azure_metrics_sre_cosmosdb_external_database_accounts_totalreq"]
+          subscription: *cosmosdb_external_subscriptions
+          resourceType: ["Microsoft.DocumentDB/databaseAccounts"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - TotalRequests
+          metricFilter: ["StatusCode eq '*'"]
+          metricTop: ["100"]
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count]
+      - name: sre-eventhub
+        interval: 1m
+        params:
+          name: ["azure_metrics_sre_eventhub"]
+          subscription:
+            - 9a4d2d39-1755-4be8-8ea6-b3bf32141bf7 # ai-internal
+            - 029b06e9-8e59-49b4-8d05-c0c4d952b958 # ai-external
+          resourceType: ["Microsoft.EventHub/Namespaces"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - ActiveConnections
+            - CaptureBacklog
+            - CapturedBytes
+            - CapturedMessages
+            - IncomingBytes
+            - IncomingMessages
+            - IncomingRequests
+            # - NamespaceCpuUsage
+            # - NamespaceMemoryUsage
+            - OutgoingBytes
+            - OutgoingMessages
+            - QuotaExceededErrors
+            - ServerErrors
+            - SuccessfulRequests
+            - ThrottledRequests
+            - UserErrors
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count, maximum, total, average]
+
+      - name: amr-resources
+        interval: 1m
+        params:
+          name: ["azure_metrics_amr_resources"]
+          subscription: *amr_subscriptions
+          resourceType: ["Microsoft.Cache/redisEnterprise"]
+          ## Supported metrics for Microsoft.Cache/redisEnterprise
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/microsoft-cache-redisenterprise-metrics
+          metric:
+            - cachehits
+            - cacheLatency
+            - cachemisses
+            - cacheRead
+            - cacheWrite
+            - connectedclients
+            - evictedkeys
+            - expiredkeys
+            - geoReplicationHealthy
+            - getcommands
+            - setcommands
+            - operationsPerSecond
+            - percentProcessorTime
+            - serverLoad
+            - totalcommandsprocessed
+            - totalkeys
+            - usedmemory
+            - usedmemorypercentage
+          interval: [PT5M]
+          timespan: [PT1H]
+          aggregation: [total, average, maximum]
+      - name: ch-analytics-namespaces-sum
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_ch_analytics_namespaces_sum"]
+          subscription:
+            - 76b94d12-5bce-4b5a-bb23-7ba40afdb23e # rg-analytics-euw-dev
+            - f6e94f68-c9cc-413a-ab71-081225a9aad8 # rg-analytics-euw-preprod, rg-analytics-euw-prod
+          resourceType: ["Microsoft.EventHub/Namespaces"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - CaptureBacklog
+            - CapturedBytes
+            - CapturedMessages
+            - ConnectionsClosed
+            - ConnectionsOpened
+            - IncomingBytes
+            - IncomingMessages
+            - IncomingRequests
+            - OutgoingBytes
+            - OutgoingMessages
+            - QuotaExceededErrors
+            - ServerErrors
+            - SuccessfulRequests
+            - ThrottledRequests
+            - UserErrors
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [total]
+      - name: ch-analytics-namespaces-average
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_ch_analytics_namespaces_average"]
+          subscription:
+            - 76b94d12-5bce-4b5a-bb23-7ba40afdb23e # rg-analytics-euw-dev
+            - f6e94f68-c9cc-413a-ab71-081225a9aad8 # rg-analytics-euw-preprod, rg-analytics-euw-prod
+          resourceType: ["Microsoft.EventHub/Namespaces"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - ActiveConnections
+            #- ReplicationLagCount
+            #- ReplicationLagDuration
+            - Size
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [maximum, minimum, average]
+      - name: ch-analytics-kusto
+        interval: 1m
+        params:
+          name: ["azure_metrics_ch_analytics_kusto"]
+          subscription:
+            - 76b94d12-5bce-4b5a-bb23-7ba40afdb23e # rg-analytics-euw-dev
+            - f6e94f68-c9cc-413a-ab71-081225a9aad8 # rg-analytics-euw-preprod, rg-analytics-euw-prod
+          resourceType: ["Microsoft.Kusto/clusters"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - CacheUtilizationFactor
+            - CPU
+            - FollowerLatency
+            - IngestionUtilization
+            - InstanceCount
+            - KeepAlive
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average, maximum, minimum]
+      - name: ch-analytics-kusto-number-of-extents
+        interval: 1m
+        params:
+          name: ["azure_metrics_ch_analytics_kusto_number_of_extents"]
+          subscription:
+            - 76b94d12-5bce-4b5a-bb23-7ba40afdb23e # rg-analytics-euw-dev
+            - f6e94f68-c9cc-413a-ab71-081225a9aad8 # rg-analytics-euw-preprod, rg-analytics-euw-prod
+          resourceType: ["Microsoft.Kusto/clusters"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - TotalNumberOfExtents
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average, maximum, minimum]
+      - name: ch-analytics-kusto-export-health
+        interval: 1m
+        params:
+          name: ["azure_metrics_ch_analytics_kusto_export_health"]
+          subscription:
+            - 76b94d12-5bce-4b5a-bb23-7ba40afdb23e # rg-analytics-euw-dev
+            - f6e94f68-c9cc-413a-ab71-081225a9aad8 # rg-analytics-euw-preprod, rg-analytics-euw-prod
+          resourceType: ["Microsoft.Kusto/clusters"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - ContinuousExportMaxLatenessMinutes
+            - ContinuousExportNumOfRecordsExported
+            - ContinuousExportPendingCount
+            - ContinuousExportResult
+            - ExportUtilization
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [total, maximum, count]
+      - name: ch-analytics-kusto-ingestion-health
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_ch_analytics_kusto_ingestion_health"]
+          subscription:
+            - 76b94d12-5bce-4b5a-bb23-7ba40afdb23e # rg-analytics-euw-dev
+            - f6e94f68-c9cc-413a-ab71-081225a9aad8 # rg-analytics-euw-preprod, rg-analytics-euw-prod
+          resourceType: ["Microsoft.Kusto/clusters"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - BatchBlobCount
+            - BatchDuration
+            - BatchesProcessed
+            - BatchSize
+            - BlobsDropped
+            - BlobsProcessed
+            - BlobsReceived
+            - DiscoveryLatency
+            - EventsDropped
+            - EventsProcessed
+            - EventsReceived
+            - IngestionLatencyInSeconds
+            - IngestionResult
+            - IngestionVolumeInMB
+            - QueueLength
+            - QueueOldestMessage
+            - ReceivedDataSizeBytes
+            - StageLatency
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average, maximum, minimum]
+      - name: ch-analytics-kusto-materialized-view-health
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_ch_analytics_kusto_materialized_view_health"]
+          subscription:
+            - 76b94d12-5bce-4b5a-bb23-7ba40afdb23e # rg-analytics-euw-dev
+            - f6e94f68-c9cc-413a-ab71-081225a9aad8 # rg-analytics-euw-preprod, rg-analytics-euw-prod
+          resourceType: ["Microsoft.Kusto/clusters"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - MaterializedViewAgeMinutes
+            - MaterializedViewAgeSeconds
+            - MaterializedViewDataLoss
+            - MaterializedViewExtentsRebuild
+            - MaterializedViewHealth
+            - MaterializedViewRecordsInDelta
+            - MaterializedViewResult
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average, maximum]
+      - name: ch-analytics-kusto-partitioning
+        interval: 1m
+        params:
+          name: ["azure_metrics_ch_analytics_kusto_partitioning"]
+          subscription:
+            - 76b94d12-5bce-4b5a-bb23-7ba40afdb23e # rg-analytics-euw-dev
+            - f6e94f68-c9cc-413a-ab71-081225a9aad8 # rg-analytics-euw-preprod, rg-analytics-euw-prod
+          resourceType: ["Microsoft.Kusto/clusters"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - PartitioningPercentage
+            - PartitioningPercentageHot
+            - ProcessedPartitionedRecords
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average, maximum, minimum]
+      - name: ch-analytics-kusto-query-performance
+        interval: 1m
+        scrapeTimeout: 50s
+        params:
+          name: ["azure_metrics_ch_analytics_kusto_query_performance"]
+          subscription:
+            - 76b94d12-5bce-4b5a-bb23-7ba40afdb23e # rg-analytics-euw-dev
+            - f6e94f68-c9cc-413a-ab71-081225a9aad8 # rg-analytics-euw-preprod, rg-analytics-euw-prod
+          resourceType: ["Microsoft.Kusto/clusters"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index#supported-metrics-and-log-categories-by-resource-type
+          metric:
+            - QueryDuration
+            - QueryResult
+            - TotalNumberOfConcurrentQueries
+            - TotalNumberOfThrottledQueries
+            - WeakConsistencyLatency
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average, maximum, minimum]
+      ## CS Subscriptions Health & Availability check
+      - name: cs-analytics-sql-health-and-availability
+        interval: 1m
+        params:
+          name: ["azure_metrics_cs_analytics_sql_health_and availability"]
+          subscription: *sql_subscriptions
+          resourceType: ["Microsoft.Sql/servers/databases"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/microsoft-sql-servers-databases-metrics
+          metric:
+            - availability
+            - connection_successful
+            - connection_failed
+            - connection_failed_user_error
+            - sessions_count
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average, maximum, minimum, total, count]
+      ## CS Subscriptions Health & Availability check
+      - name: cs-analytics-sql-conn-failed-user-error
+        params:
+          name: ["azure_metrics_cs_sql_conn_failed_user_error"]
+          subscription: *sql_subscriptions
+          resourceType: ["Microsoft.Sql/servers/databases"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/microsoft-sql-servers-databases-metrics
+          metric:
+            - connection_failed_user_error
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [count]
+          dimension: [Error, ValidatedDriverNameAndVersion]
+          metricFilter:
+            - "Error eq '*' and ValidatedDriverNameAndVersion eq '*'"
+          metricTop: ["100"]
+      ## CS Subscriptions Performance check
+      - name: cs-analytics-sql-performance
+        interval: 1m
+        params:
+          name: ["azure_metrics_cs_analytics_sql_performance"]
+          subscription: *sql_subscriptions
+          resourceType: ["Microsoft.Sql/servers/databases"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/microsoft-sql-servers-databases-metrics
+          metric:
+            - cpu_percent
+            - physical_data_read_percent
+            - log_write_percent
+            - workers_percent
+            - deadlock
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average, maximum, minimum]
+      ## CS Subscriptions Storage & Capacity check
+      - name: cs-analytics-sql-storage-capacity
+        interval: 1m
+        params:
+          name: ["azure_metrics_cs_analytics_sql_storage_capacity"]
+          subscription: *sql_subscriptions
+          resourceType: ["Microsoft.Sql/servers/databases"]
+          ## Supported metrics with Azure Monitor by Resource Type
+          ## https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/microsoft-sql-servers-databases-metrics
+          metric:
+            - tempdb_log_used_percent
+            - storage_percent
+            - allocated_data_storage
+            - storage
+          interval: [PT1M]
+          timespan: [PT1M]
+          aggregation: [average, maximum, minimum]
+# Enable vertical pod autoscaler support
+verticalPodAutoscaler:
+  enabled: false
+  # Recommender responsible for generating recommendation for the object.
+  # List should be empty (then the default recommender will generate the recommendation)
+  # or contain exactly one recommender.
+  # recommenders:
+  # - name: custom-recommender-performance
+
+  # List of resources that the vertical pod autoscaler can control. Defaults to cpu and memory
+  controlledResources: []
+  # Specifies which resource values should be controlled: RequestsOnly or RequestsAndLimits.
+  # controlledValues: RequestsAndLimits
+
+  # Define the max allowed resources for the pod
+  maxAllowed: {}
+  # cpu: 200m
+  # memory: 100Mi
+  # Define the min allowed resources for the pod
+  minAllowed: {}
+  # cpu: 200m
+  # memory: 100Mi
+
+  updatePolicy:
+    # Specifies minimal number of replicas which need to be alive for VPA Updater to attempt pod eviction
+    # minReplicas: 1
+    # Specifies whether recommended updates are applied when a Pod is started and whether recommended updates
+    # are applied during the life of a Pod. Possible values are "Off", "Initial", "Recreate", and "Auto".
+    updateMode: Auto
